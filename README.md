@@ -5,7 +5,7 @@ A RESTful API for managing todo lists and tasks built with TypeScript and Expres
 ## 🚀 Quick Start
 
 ### Prerequisites
-- Node.js (v18 or higher)
+- Node.js (v22 or higher)
 - npm or yarn
 
 ### Installation
