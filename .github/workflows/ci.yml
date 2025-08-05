@@ -38,10 +38,28 @@ jobs:
 
       - name: Test health endpoint
         run: |
+          # Start the server in background
           npm run dev &
-          sleep 5
-          curl -f http://localhost:3000/health || exit 1
-          pkill -f "node"
+          SERVER_PID=$!
+          
+          # Wait for server to start
+          echo "Waiting for server to start..."
+          for i in {1..30}; do
+            if curl -f http://localhost:3000/health >/dev/null 2>&1; then
+              echo "Server is ready!"
+              break
+            fi
+            echo "Attempt $i: Server not ready yet, waiting..."
+            sleep 2
+          done
+          
+          # Test the health endpoint
+          echo "Testing health endpoint..."
+          curl -f http://localhost:3000/health || (echo "Health check failed" && exit 1)
+          
+          # Clean up
+          kill $SERVER_PID
+          sleep 2
 
   security:
     runs-on: ubuntu-latest
