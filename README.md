@@ -10,18 +10,32 @@ A RESTful API for managing todo lists and tasks built with TypeScript and Expres
 
 ### Installation
 
+#### Option 1: Quick Setup (Recommended)
+```bash
+git clone <repository-url>
+cd todo-list-api
+./scripts/setup.sh
+```
+
+#### Option 2: Manual Setup
 1. Clone the repository:
 ```bash
 git clone <repository-url>
 cd todo-list-api
 ```
 
-2. Install dependencies:
+2. Install Node.js 22 (using nvm):
+```bash
+nvm install 22
+nvm use 22
+```
+
+3. Install dependencies:
 ```bash
 npm install
 ```
 
-3. Set up environment variables:
+4. Set up environment variables:
 ```bash
 cp .env.example .env
 # Edit .env with your configuration
