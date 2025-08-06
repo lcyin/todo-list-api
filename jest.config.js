@@ -13,4 +13,11 @@ module.exports = {
   testTimeout: 10000,
   forceExit: true,
   clearMocks: true,
+  // Enhanced console output for CI
+  reporters: process.env.CI
+    ? [
+        "default",
+        "github-actions", // Adds GitHub Actions annotations
+      ]
+    : ["default"],
 };
