@@ -15,6 +15,19 @@ export interface GetTodosUseCase {
 }
 
 /**
+ * Inbound port - defines what the domain can do
+ * Use case interface for getting a single todo by ID
+ */
+export interface GetTodoByIdUseCase {
+  /**
+   * Execute the get todo by ID use case
+   * @param id Todo ID
+   * @returns Promise of todo or null if not found
+   */
+  execute(id: string): Promise<Todo | null>;
+}
+
+/**
  * Outbound port - defines what the domain needs
  * Repository interface for todo data access
  */

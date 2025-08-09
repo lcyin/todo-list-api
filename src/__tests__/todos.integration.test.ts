@@ -160,3 +160,60 @@ describe("GET /api/v1/todos", () => {
     });
   });
 });
+
+describe("GET /api/v1/todos/:id", () => {
+  describe("Basic functionality", () => {
+    it("should return 200 and a specific todo when ID exists", async () => {
+      const response = await request(app).get("/api/v1/todos/1").expect(200);
+
+      expect(response.body).toHaveProperty("id", "1");
+      expect(response.body).toHaveProperty("title");
+      expect(response.body).toHaveProperty("description");
+      expect(response.body).toHaveProperty("completed");
+      expect(response.body).toHaveProperty("createdAt");
+      expect(response.body).toHaveProperty("updatedAt");
+
+      expect(typeof response.body.id).toBe("string");
+      expect(typeof response.body.title).toBe("string");
+      expect(typeof response.body.completed).toBe("boolean");
+      expect(typeof response.body.createdAt).toBe("string");
+      expect(typeof response.body.updatedAt).toBe("string");
+    });
+
+    it("should return correct todo content for existing ID", async () => {
+      const response = await request(app).get("/api/v1/todos/1").expect(200);
+
+      expect(response.body.id).toBe("1");
+      expect(response.body.title).toBe("Learn TypeScript");
+      expect(response.body.description).toBe("Study TypeScript fundamentals");
+      expect(response.body.completed).toBe(false);
+    });
+  });
+
+  describe("Error handling", () => {
+    it("should return 404 when todo ID does not exist", async () => {
+      const response = await request(app).get("/api/v1/todos/999").expect(404);
+
+      expect(response.body).toHaveProperty("error");
+      expect(response.body.error).toHaveProperty("code", "TODO_NOT_FOUND");
+      expect(response.body.error).toHaveProperty("message", "Todo with id '999' not found");
+    });
+
+    it("should return 404 for non-numeric IDs that don't exist", async () => {
+      const response = await request(app).get("/api/v1/todos/nonexistent").expect(404);
+
+      expect(response.body).toHaveProperty("error");
+      expect(response.body.error).toHaveProperty("code", "TODO_NOT_FOUND");
+      expect(response.body.error).toHaveProperty("message", "Todo with id 'nonexistent' not found");
+    });
+
+    it("should handle various existing todo IDs correctly", async () => {
+      const todoIds = ["1", "2", "3"];
+
+      for (const id of todoIds) {
+        const response = await request(app).get(`/api/v1/todos/${id}`).expect(200);
+        expect(response.body.id).toBe(id);
+      }
+    });
+  });
+});

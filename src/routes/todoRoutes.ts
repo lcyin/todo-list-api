@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { RestTodoController } from "../adapters/primary/RestTodoController";
 import { GetTodosService } from "../services/GetTodosService";
+import { GetTodoByIdService } from "../services/GetTodoByIdService";
 import { InMemoryTodoRepository } from "../adapters/secondary/InMemoryTodoRepository";
 
 /**
@@ -12,7 +13,8 @@ const todoRoutes = Router();
 // Dependency injection - wire up the hexagonal architecture
 const todoRepository = new InMemoryTodoRepository();
 const getTodosUseCase = new GetTodosService(todoRepository);
-const todoController = new RestTodoController(getTodosUseCase);
+const getTodoByIdUseCase = new GetTodoByIdService(todoRepository);
+const todoController = new RestTodoController(getTodosUseCase, getTodoByIdUseCase);
 
 /**
  * GET /api/v1/todos
@@ -25,5 +27,14 @@ const todoController = new RestTodoController(getTodosUseCase);
  * - search: Search in title and description
  */
 todoRoutes.get("/todos", todoController.getTodos);
+
+/**
+ * GET /api/v1/todos/:id
+ * Get a specific todo by ID
+ *
+ * Path parameters:
+ * - id: Todo ID (string)
+ */
+todoRoutes.get("/todos/:id", todoController.getTodoById);
 
 export { todoRoutes };
