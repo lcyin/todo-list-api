@@ -26,9 +26,7 @@ describe("Health Check Endpoints", () => {
 
   describe("GET /api/v1/health/readiness", () => {
     it("should return 200 for readiness probe", async () => {
-      const response = await request(app)
-        .get("/api/v1/health/readiness")
-        .expect(200);
+      const response = await request(app).get("/api/v1/health/readiness").expect(200);
 
       expect(response.body).toHaveProperty("status", "healthy");
     });
@@ -36,9 +34,7 @@ describe("Health Check Endpoints", () => {
 
   describe("GET /api/v1/health/liveness", () => {
     it("should return 200 for liveness probe", async () => {
-      const response = await request(app)
-        .get("/api/v1/health/liveness")
-        .expect(200);
+      const response = await request(app).get("/api/v1/health/liveness").expect(200);
 
       expect(response.body).toHaveProperty("status", "healthy");
     });
