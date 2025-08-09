@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { healthRoutes } from "./healthRoutes";
+import { todoRoutes } from "./todoRoutes";
 
 /**
  * Central router configuration
@@ -12,5 +13,11 @@ const routes = Router();
  * These are mounted at the root level for easy access by monitoring tools
  */
 routes.use("/", healthRoutes);
+
+/**
+ * Register todo routes
+ * These handle all todo-related operations
+ */
+routes.use("/", todoRoutes);
 
 export { routes };
