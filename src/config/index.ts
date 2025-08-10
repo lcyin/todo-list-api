@@ -25,6 +25,19 @@ export const config = {
   },
 
   /**
+   * Database configuration
+   */
+  database: {
+    host: process.env.DB_HOST || "localhost",
+    port: parseInt(process.env.DB_PORT || "5432", 10),
+    name: process.env.DB_NAME || "todolist",
+    user: process.env.DB_USER || "todouser",
+    password: process.env.DB_PASSWORD || "todopass",
+    ssl: process.env.DB_SSL === "true",
+    maxConnections: parseInt(process.env.DB_MAX_CONNECTIONS || "10", 10),
+  },
+
+  /**
    * Check if running in development mode
    */
   isDevelopment: process.env.NODE_ENV === "development",

@@ -48,6 +48,87 @@ npm run dev
 
 5. Visit http://localhost:3000/health to verify the API is running
 
+## 🗄️ Database Setup
+
+This API supports both in-memory and PostgreSQL storage options.
+
+### In-Memory Storage (Default)
+By default, the API uses an in-memory repository for quick development and testing.
+
+### PostgreSQL Database Setup
+
+#### Using Docker (Recommended)
+The project includes Docker Compose configuration for easy PostgreSQL setup:
+
+1. **Start the database**:
+```bash
+npm run db:start
+# or
+./scripts/db.sh start
+```
+
+2. **Configure the application to use PostgreSQL**:
+Edit `.env` file and set:
+```bash
+REPOSITORY_TYPE=postgres
+```
+
+3. **Restart your application**:
+```bash
+npm run dev
+```
+
+#### Database Management Commands
+
+```bash
+# Start PostgreSQL database
+npm run db:start
+
+# Stop database
+npm run db:stop
+
+# Restart database
+npm run db:restart
+
+# Reset database (removes all data)
+npm run db:reset
+
+# Check database status
+npm run db:status
+
+# Connect to database with psql
+npm run db:connect
+
+# View database logs
+npm run db:logs
+```
+
+#### Manual PostgreSQL Setup
+If you prefer to use your own PostgreSQL instance:
+
+1. Create a database and user:
+```sql
+CREATE DATABASE todolist;
+CREATE USER todouser WITH PASSWORD 'todopass';
+GRANT ALL PRIVILEGES ON DATABASE todolist TO todouser;
+```
+
+2. Update your `.env` file with your database credentials:
+```bash
+REPOSITORY_TYPE=postgres
+DB_HOST=localhost
+DB_PORT=5432
+DB_NAME=todolist
+DB_USER=todouser
+DB_PASSWORD=todopass
+```
+
+#### Database Schema
+The PostgreSQL setup automatically creates the following schema:
+- `todos` table with auto-incrementing ID, title, description, completed status, and timestamps
+- Proper indexes for performance
+- Triggers for automatic timestamp updates
+
 ## 📚 API Documentation
 
 The API includes comprehensive Swagger/OpenAPI documentation:

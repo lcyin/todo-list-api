@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { RestTodoController } from "../adapters/primary/RestTodoController";
-import { InMemoryTodoRepository } from "../adapters/secondary/InMemoryTodoRepository";
+import { TodoRepositoryFactory } from "../adapters/TodoRepositoryFactory";
 import { TodoService } from "../services/TodoService";
 
 /**
@@ -10,7 +10,7 @@ import { TodoService } from "../services/TodoService";
 const todoRoutes = Router();
 
 // Dependency injection - wire up the hexagonal architecture
-const todoRepository = new InMemoryTodoRepository();
+const todoRepository = TodoRepositoryFactory.create();
 const todoService = new TodoService(todoRepository);
 const todoController = new RestTodoController(todoService);
 

@@ -14,7 +14,14 @@
         "lint": "eslint src/**/*.ts && prettier --check src/**/*.ts",
         "lint:fix": "eslint src/**/*.ts --fix && prettier --write src/**/*.ts",
         "format": "prettier --write src/**/*.ts",
-        "format:check": "prettier --check src/**/*.ts"
+        "format:check": "prettier --check src/**/*.ts",
+        "db:start": "./scripts/db.sh start",
+        "db:stop": "./scripts/db.sh stop",
+        "db:restart": "./scripts/db.sh restart",
+        "db:reset": "./scripts/db.sh reset",
+        "db:status": "./scripts/db.sh status",
+        "db:connect": "./scripts/db.sh connect",
+        "db:logs": "./scripts/db.sh logs"
     },
     "keywords": [
         "todo",
@@ -30,11 +37,13 @@
         "npm": ">=10.0.0"
     },
     "dependencies": {
+        "@types/pg": "^8.15.5",
         "cors": "^2.8.5",
         "dotenv": "^16.3.1",
         "express": "^4.18.2",
         "helmet": "^7.0.0",
         "morgan": "^1.10.0",
+        "pg": "^8.16.3",
         "swagger-jsdoc": "^6.2.8",
         "swagger-ui-express": "^5.0.1"
     },
