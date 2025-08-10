@@ -1,25 +1,13 @@
 import { Request, Response } from "express";
-import {
-  GetTodosUseCase,
-  GetTodoByIdUseCase,
-  CreateTodoUseCase,
-  UpdateTodoUseCase,
-  DeleteTodoUseCase,
-} from "../../domain/ports/TodoPorts";
 import { TodoQueryParams } from "../../domain/TodoValueObjects";
+import { TodoService } from "../../services/TodoService";
 
 /**
  * REST Controller for Todo endpoints
  * This is a primary adapter that handles HTTP requests
  */
 export class RestTodoController {
-  constructor(
-    private readonly getTodosUseCase: GetTodosUseCase,
-    private readonly getTodoByIdUseCase: GetTodoByIdUseCase,
-    private readonly createTodoUseCase: CreateTodoUseCase,
-    private readonly updateTodoUseCase: UpdateTodoUseCase,
-    private readonly deleteTodoUseCase: DeleteTodoUseCase
-  ) {}
+  constructor(private readonly todoService: TodoService) {}
 
   /**
    * GET /api/v1/todos - Get all todos with optional filtering and pagination
@@ -30,7 +18,7 @@ export class RestTodoController {
       const queryParams = new TodoQueryParams(req.query);
 
       // Execute use case
-      const result = await this.getTodosUseCase.execute(queryParams);
+      const result = await this.todoService.getTodos(queryParams);
 
       // Return successful response
       res.status(200).json(result.toPlainObject());
@@ -65,7 +53,7 @@ export class RestTodoController {
       const { id } = req.params;
 
       // Execute use case
-      const todo = await this.getTodoByIdUseCase.execute(id);
+      const todo = await this.todoService.getTodoById(id);
 
       // Handle todo not found
       if (!todo) {
@@ -122,7 +110,10 @@ export class RestTodoController {
       }
 
       // Execute use case
-      const todo = await this.createTodoUseCase.execute({ title, description });
+      const todo = await this.todoService.createTodo({
+        title: title.trim(),
+        description: description ? description.trim() : null,
+      });
 
       // Return successful response
       res.status(201).json(todo.toPlainObject());
@@ -161,7 +152,7 @@ export class RestTodoController {
       const { title, description, completed } = req.body;
 
       // Execute use case
-      const todo = await this.updateTodoUseCase.execute(id, { title, description, completed });
+      const todo = await this.todoService.updateTodo(id, { title, description, completed });
 
       // Handle todo not found
       if (!todo) {
@@ -210,7 +201,7 @@ export class RestTodoController {
       const { id } = req.params;
 
       // Execute use case
-      const deleted = await this.deleteTodoUseCase.execute(id);
+      const deleted = await this.todoService.deleteTodo(id);
 
       // Handle todo not found
       if (!deleted) {

@@ -1,11 +1,7 @@
 import { Router } from "express";
 import { RestTodoController } from "../adapters/primary/RestTodoController";
-import { GetTodosService } from "../services/GetTodosService";
-import { GetTodoByIdService } from "../services/GetTodoByIdService";
-import { CreateTodoService } from "../services/CreateTodoService";
-import { UpdateTodoService } from "../services/UpdateTodoService";
-import { DeleteTodoService } from "../services/DeleteTodoService";
 import { InMemoryTodoRepository } from "../adapters/secondary/InMemoryTodoRepository";
+import { TodoService } from "../services/TodoService";
 
 /**
  * Todo routes
@@ -15,18 +11,8 @@ const todoRoutes = Router();
 
 // Dependency injection - wire up the hexagonal architecture
 const todoRepository = new InMemoryTodoRepository();
-const getTodosUseCase = new GetTodosService(todoRepository);
-const getTodoByIdUseCase = new GetTodoByIdService(todoRepository);
-const createTodoUseCase = new CreateTodoService(todoRepository);
-const updateTodoUseCase = new UpdateTodoService(todoRepository);
-const deleteTodoUseCase = new DeleteTodoService(todoRepository);
-const todoController = new RestTodoController(
-  getTodosUseCase,
-  getTodoByIdUseCase,
-  createTodoUseCase,
-  updateTodoUseCase,
-  deleteTodoUseCase
-);
+const todoService = new TodoService(todoRepository);
+const todoController = new RestTodoController(todoService);
 
 /**
  * @swagger
