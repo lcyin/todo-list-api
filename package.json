@@ -10,6 +10,7 @@
         "test": "jest",
         "test:watch": "jest --watch",
         "test:docs": "./scripts/test-docs.sh",
+        "docs:generate": "./scripts/generate-docs.sh",
         "lint": "eslint src/**/*.ts && prettier --check src/**/*.ts",
         "lint:fix": "eslint src/**/*.ts --fix && prettier --write src/**/*.ts",
         "format": "prettier --write src/**/*.ts",

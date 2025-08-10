@@ -70,12 +70,35 @@ The Swagger UI provides:
 - **Todo Operations**: All CRUD operations under `/api/v1/todos`
 - **Documentation**: Multiple formats for API documentation
 
+### GitHub Pages Deployment
+
+You can deploy the Swagger documentation to GitHub Pages:
+
+#### Automatic Deployment (Recommended)
+The repository includes a GitHub Action that automatically builds and deploys documentation to GitHub Pages on every push to main branch.
+
+1. Go to your repository **Settings** → **Pages**
+2. Set **Source** to "GitHub Actions"
+3. Push changes to the main branch
+4. Documentation will be available at: `https://[username].github.io/[repository-name]/`
+
+#### Manual Deployment
+Generate static documentation manually:
+
+```bash
+npm run docs:generate
+```
+
+Then enable GitHub Pages pointing to the `docs/` folder.
+
 ## 📜 Available Scripts
 
 - `npm run dev` - Start development server with hot reload
 - `npm run build` - Build the project for production
 - `npm start` - Start production server
 - `npm test` - Run tests
+- `npm run test:docs` - Test API documentation endpoints
+- `npm run docs:generate` - Generate static documentation for GitHub Pages
 - `npm run lint` - Run ESLint
 - `npm run lint:fix` - Fix ESLint issues
 
