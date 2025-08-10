@@ -45,8 +45,8 @@ graph TB
     end
     
     %% External Infrastructure
-    Database[(🗄️ Database<br/>PostgreSQL/MongoDB<br/>(Future))]
-    ExternalServices[🔗 External Services<br/>Email/Notifications<br/>(Future)]
+    Database[(🗄️ Database<br/>PostgreSQL/MongoDB<br/>Future)]
+    ExternalServices[🔗 External Services<br/>Email/Notifications<br/>Future]
     
     %% Client connections to Primary Adapters
     Client --> RestController
