@@ -75,9 +75,9 @@ src/
 
 When working with GitHub Copilot on this project:
 
-1. **Follow the coding standards** defined in `COPILOT_GUIDELINES.md`
-2. **Follow TypeScript performance best practices** defined in `TYPESCRIPT_PERFORMANCE_GUIDELINES.md`
-3. **Follow REST API architecture standards** defined in `REST_API_ARCHITECTURE_STANDARDS.md`
+1. **Follow the coding standards** defined in `.github/instructions/copilot-instructions.md`
+2. **Follow TypeScript performance best practices** defined in `TYP.github/instructions/typescript.instructions.md`
+3. **Follow REST API architecture standards** defined in `.github/instructions/rest-api-standard.instructions.md`
 4. **Use descriptive comments** to help Copilot understand context
 5. **Write clear function signatures** with proper TypeScript types
 6. **Include JSDoc comments** for complex functions
