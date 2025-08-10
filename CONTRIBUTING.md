@@ -20,7 +20,7 @@ We follow a feature branch workflow:
 
 2. **Make your changes:**
    - Follow the coding guidelines in the project documentation
-   - Write tests for new functionality
+   - Write tests for new functionality following `docs/TESTING.md`
    - Ensure all existing tests pass
 
 3. **Commit your changes:**
@@ -58,9 +58,10 @@ We use conventional commits:
 
 ### Testing
 
-- Write unit tests for new functionality
+- Write unit tests for new functionality following the guidelines in `.github/instructions/jest-testing.instructions.md`
 - Ensure all tests pass before submitting PR
 - Include integration tests for API endpoints
+- Follow the established testing style and patterns
 
 ### Documentation
 

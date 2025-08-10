@@ -142,3 +142,14 @@ Add this to your CI pipeline to ensure code quality:
 ```
 
 This ensures all code follows the established formatting standards before deployment.
+
+## Testing
+
+For comprehensive testing guidelines, patterns, and best practices, see [`TESTING.md`](./TESTING.md).
+
+Key testing resources:
+
+- Testing philosophy and style guide
+- Integration testing strategy
+- Test naming conventions
+- Error testing patterns

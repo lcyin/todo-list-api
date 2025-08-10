@@ -7,6 +7,7 @@ For comprehensive guidelines, also refer to:
 - `rest-api-standard.instructions.md` - Core architectural principles and REST API design standards
 - `typescript.instructions.md` - TypeScript performance optimization best practices
 - `hexagonal-architecture.instructions.md` - Hexagonal architecture (ports and adapters) for TypeScript
+- `jest-testing.instructions.md` - Testing strategies and best practices for TypeScript
 
 ## Coding Standards
 
