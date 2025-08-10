@@ -396,3 +396,251 @@ describe("GET /api/v1/todos/:id", () => {
     });
   });
 });
+
+describe("POST /api/v1/todos", () => {
+  describe("Successful creation", () => {
+    it("should create a new todo with title and description", async () => {
+      const newTodo = {
+        title: "New Test Todo",
+        description: "This is a test todo",
+      };
+
+      const { body } = await request(app).post("/api/v1/todos").send(newTodo).expect(201);
+
+      expect(body).toEqual({
+        id: expect.any(String),
+        title: "New Test Todo",
+        description: "This is a test todo",
+        completed: false,
+        createdAt: expect.any(String),
+        updatedAt: expect.any(String),
+      });
+    });
+
+    it("should create a new todo with only title", async () => {
+      const newTodo = {
+        title: "Simple Todo",
+      };
+
+      const { body } = await request(app).post("/api/v1/todos").send(newTodo).expect(201);
+
+      expect(body).toEqual({
+        id: expect.any(String),
+        title: "Simple Todo",
+        description: null,
+        completed: false,
+        createdAt: expect.any(String),
+        updatedAt: expect.any(String),
+      });
+    });
+  });
+
+  describe("Validation errors", () => {
+    it("should return 400 when title is missing", async () => {
+      const newTodo = {
+        description: "Todo without title",
+      };
+
+      const { body } = await request(app).post("/api/v1/todos").send(newTodo).expect(400);
+
+      expect(body).toEqual({
+        error: {
+          code: "MISSING_REQUIRED_FIELD",
+          message: "Title is required",
+        },
+      });
+    });
+
+    it("should return 400 when title is empty", async () => {
+      const newTodo = {
+        title: "",
+        description: "Empty title",
+      };
+
+      const { body } = await request(app).post("/api/v1/todos").send(newTodo).expect(400);
+
+      expect(body).toEqual({
+        error: {
+          code: "MISSING_REQUIRED_FIELD",
+          message: "Title is required",
+        },
+      });
+    });
+
+    it("should return 400 when title is too long", async () => {
+      const newTodo = {
+        title: "x".repeat(201), // 201 characters
+        description: "Title too long",
+      };
+
+      const { body } = await request(app).post("/api/v1/todos").send(newTodo).expect(400);
+
+      expect(body).toEqual({
+        error: {
+          code: "INVALID_TODO_DATA",
+          message: "Todo title cannot exceed 200 characters",
+        },
+      });
+    });
+  });
+});
+
+describe("PUT /api/v1/todos/:id", () => {
+  describe("Successful updates", () => {
+    it("should update a todo's title", async () => {
+      const updates = {
+        title: "Updated Title",
+      };
+
+      const { body } = await request(app).put("/api/v1/todos/1").send(updates).expect(200);
+
+      expect(body).toEqual({
+        id: "1",
+        title: "Updated Title",
+        description: "Study TypeScript fundamentals",
+        completed: false,
+        createdAt: expect.any(String),
+        updatedAt: expect.any(String),
+      });
+    });
+
+    it("should update a todo's completion status", async () => {
+      const updates = {
+        completed: true,
+      };
+
+      const { body } = await request(app).put("/api/v1/todos/2").send(updates).expect(200);
+
+      expect(body).toEqual({
+        id: "2",
+        title: "Build REST API",
+        description: "Create a todo list API with Express",
+        completed: true,
+        createdAt: expect.any(String),
+        updatedAt: expect.any(String),
+      });
+    });
+
+    it("should update multiple fields", async () => {
+      const updates = {
+        title: "Completely Updated Todo",
+        description: "New description",
+        completed: true,
+      };
+
+      const { body } = await request(app).put("/api/v1/todos/3").send(updates).expect(200);
+
+      expect(body).toEqual({
+        id: "3",
+        title: "Completely Updated Todo",
+        description: "New description",
+        completed: true,
+        createdAt: expect.any(String),
+        updatedAt: expect.any(String),
+      });
+    });
+
+    it("should set description to null", async () => {
+      const updates = {
+        description: null,
+      };
+
+      const { body } = await request(app).put("/api/v1/todos/1").send(updates).expect(200);
+
+      expect(body.description).toBeNull();
+    });
+  });
+
+  describe("Error cases", () => {
+    it("should return 404 for non-existent todo", async () => {
+      const updates = {
+        title: "Updated Title",
+      };
+
+      const { body } = await request(app).put("/api/v1/todos/999").send(updates).expect(404);
+
+      expect(body).toEqual({
+        error: {
+          code: "TODO_NOT_FOUND",
+          message: "Todo with id '999' not found",
+        },
+      });
+    });
+
+    it("should return 400 for invalid title", async () => {
+      const updates = {
+        title: "",
+      };
+
+      const { body } = await request(app).put("/api/v1/todos/1").send(updates).expect(400);
+
+      expect(body).toEqual({
+        error: {
+          code: "INVALID_TODO_DATA",
+          message: "Todo title cannot be empty",
+        },
+      });
+    });
+
+    it("should return 400 for title too long", async () => {
+      const updates = {
+        title: "x".repeat(201),
+      };
+
+      const { body } = await request(app).put("/api/v1/todos/1").send(updates).expect(400);
+
+      expect(body).toEqual({
+        error: {
+          code: "INVALID_TODO_DATA",
+          message: "Todo title cannot exceed 200 characters",
+        },
+      });
+    });
+  });
+});
+
+describe("DELETE /api/v1/todos/:id", () => {
+  describe("Successful deletion", () => {
+    it("should delete an existing todo", async () => {
+      // First verify the todo exists
+      await request(app).get("/api/v1/todos/1").expect(200);
+
+      // Delete the todo
+      await request(app).delete("/api/v1/todos/1").expect(204);
+
+      // Verify it's gone
+      const { body } = await request(app).get("/api/v1/todos/1").expect(404);
+
+      expect(body).toEqual({
+        error: {
+          code: "TODO_NOT_FOUND",
+          message: "Todo with id '1' not found",
+        },
+      });
+    });
+  });
+
+  describe("Error cases", () => {
+    it("should return 404 for non-existent todo", async () => {
+      const { body } = await request(app).delete("/api/v1/todos/999").expect(404);
+
+      expect(body).toEqual({
+        error: {
+          code: "TODO_NOT_FOUND",
+          message: "Todo with id '999' not found",
+        },
+      });
+    });
+
+    it("should return 400 for empty ID", async () => {
+      const { body } = await request(app).delete("/api/v1/todos/").expect(404);
+
+      expect(body).toEqual({
+        error: {
+          code: "ROUTE_NOT_FOUND",
+          message: "Route DELETE /api/v1/todos/ not found",
+        },
+      });
+    });
+  });
+});
