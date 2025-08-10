@@ -28,6 +28,7 @@ graph TB
         end
         
         subgraph Services["⚙️ Application Services"]
+            TodoService[🎯 TodoService<br/>Unified Service Facade]
             GetTodosService[📋 GetTodosService]
             CreateTodoService[➕ CreateTodoService]
             UpdateTodoService[✏️ UpdateTodoService]
@@ -59,7 +60,12 @@ graph TB
     HealthController --> InboundPorts
     
     %% Core internal connections
-    InboundPorts --> Services
+    InboundPorts --> TodoService
+    TodoService --> GetTodosService
+    TodoService --> CreateTodoService
+    TodoService --> UpdateTodoService
+    TodoService --> DeleteTodoService
+    TodoService --> GetTodoByIdService
     Services --> Domain
     Services --> OutboundPorts
     
@@ -132,6 +138,11 @@ Contains core business entities and value objects:
 
 Implement business logic and use cases:
 
+- **TodoService** (`src/services/TodoService.ts`) - **🎯 Unified Service Facade**
+  - Combines all todo use cases into a single interface
+  - Composes individual service classes
+  - Provides simplified API for primary adapters
+
 - **GetTodosService** (`src/services/GetTodosService.ts`)
 - **CreateTodoService** (`src/services/CreateTodoService.ts`)
 - **UpdateTodoService** (`src/services/UpdateTodoService.ts`)
@@ -174,6 +185,11 @@ These adapters are driven by the application core:
    - Core logic is independent of Express, databases, etc.
    - Can switch frameworks without rewriting business logic
 
+6. **🎯 Unified Interface Pattern**
+   - `TodoService` acts as a facade providing a single entry point
+   - Simplifies client code by hiding complexity of individual services
+   - Maintains individual service isolation while providing convenience
+
 ### Layer Responsibilities
 
 - **Primary Adapters**: Handle external requests (HTTP, CLI, tests)
@@ -210,6 +226,7 @@ src/
 │   ├── Todo.ts          # 📦 Domain Entities
 │   └── TodoValueObjects.ts
 ├── services/            # ⚙️ Application Services
+│   ├── TodoService.ts   # 🎯 Unified Service Facade
 │   ├── GetTodosService.ts
 │   ├── CreateTodoService.ts
 │   ├── UpdateTodoService.ts
