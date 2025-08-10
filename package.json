@@ -9,6 +9,7 @@
         "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
         "test": "jest",
         "test:watch": "jest --watch",
+        "test:docs": "./scripts/test-docs.sh",
         "lint": "eslint src/**/*.ts && prettier --check src/**/*.ts",
         "lint:fix": "eslint src/**/*.ts --fix && prettier --write src/**/*.ts",
         "format": "prettier --write src/**/*.ts",
@@ -32,7 +33,9 @@
         "dotenv": "^16.3.1",
         "express": "^4.18.2",
         "helmet": "^7.0.0",
-        "morgan": "^1.10.0"
+        "morgan": "^1.10.0",
+        "swagger-jsdoc": "^6.2.8",
+        "swagger-ui-express": "^5.0.1"
     },
     "devDependencies": {
         "@types/cors": "^2.8.14",
@@ -41,6 +44,8 @@
         "@types/morgan": "^1.9.4",
         "@types/node": "^20.5.0",
         "@types/supertest": "^2.0.12",
+        "@types/swagger-jsdoc": "^6.0.4",
+        "@types/swagger-ui-express": "^4.1.8",
         "@typescript-eslint/eslint-plugin": "^7.18.0",
         "@typescript-eslint/parser": "^7.18.0",
         "eslint": "^8.47.0",

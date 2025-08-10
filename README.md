@@ -48,6 +48,28 @@ npm run dev
 
 5. Visit http://localhost:3000/health to verify the API is running
 
+## 📚 API Documentation
+
+The API includes comprehensive Swagger/OpenAPI documentation:
+
+- **Interactive Documentation**: <http://localhost:3000/api-docs>
+- **JSON Specification**: <http://localhost:3000/api-docs.json>
+- **API Information**: <http://localhost:3000/api/v1/docs>
+
+The Swagger UI provides:
+
+- Complete API endpoint documentation
+- Interactive testing interface
+- Request/response examples
+- Schema definitions
+- Authentication requirements (if applicable)
+
+### Quick API Overview
+
+- **Health Checks**: `GET /health`, `GET /api/v1/health`
+- **Todo Operations**: All CRUD operations under `/api/v1/todos`
+- **Documentation**: Multiple formats for API documentation
+
 ## 📜 Available Scripts
 
 - `npm run dev` - Start development server with hot reload

@@ -1,8 +1,10 @@
-import express, { Application, Request, Response, NextFunction } from "express";
+import express, { Application, Request, Response } from "express";
 import helmet from "helmet";
 import cors from "cors";
 import morgan from "morgan";
+import swaggerUi from "swagger-ui-express";
 import { config } from "./config";
+import { swaggerSpec } from "./config/swagger";
 import { routes } from "./routes";
 
 /**
@@ -49,9 +51,35 @@ class App {
    * Mounts all route modules under the API prefix
    */
   private setupRoutes(): void {
+    // Swagger documentation routes
+    this.app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+
+    // JSON endpoint for swagger spec
+    this.app.get("/api-docs.json", (req: Request, res: Response) => {
+      res.setHeader("Content-Type", "application/json");
+      res.send(swaggerSpec);
+    });
+
     // Mount all routes under API prefix with versioning
     this.app.use(`${config.api.prefix}/${config.api.version}`, routes);
 
+    /**
+     * @swagger
+     * /health:
+     *   get:
+     *     summary: Root level health check
+     *     description: Root level health check endpoint for load balancers and basic monitoring
+     *     tags: [Health]
+     *     responses:
+     *       200:
+     *         description: Application is healthy
+     *         content:
+     *           application/json:
+     *             schema:
+     *               $ref: '#/components/schemas/HealthResponse'
+     *       500:
+     *         $ref: '#/components/responses/InternalServerError'
+     */
     // Root level health check (common pattern for load balancers)
     this.app.get("/health", (req: Request, res: Response) => {
       res.status(200).json({
@@ -77,23 +105,19 @@ class App {
    * Implements consistent error response format
    */
   private setupErrorHandling(): void {
-    this.app.use(
-      (error: Error, req: Request, res: Response, next: NextFunction) => {
-        // Log error for debugging
-        console.error("Error:", error);
+    this.app.use((error: Error, req: Request, res: Response) => {
+      // Log error for debugging
+      console.error("Error:", error);
 
-        // Send consistent error response
-        res.status(500).json({
-          error: {
-            code: "INTERNAL_SERVER_ERROR",
-            message: config.isDevelopment
-              ? error.message
-              : "Something went wrong",
-            ...(config.isDevelopment && { stack: error.stack }),
-          },
-        });
-      }
-    );
+      // Send consistent error response
+      res.status(500).json({
+        error: {
+          code: "INTERNAL_SERVER_ERROR",
+          message: config.isDevelopment ? error.message : "Something went wrong",
+          ...(config.isDevelopment && { stack: error.stack }),
+        },
+      });
+    });
   }
 }
 
