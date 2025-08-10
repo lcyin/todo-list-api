@@ -107,13 +107,20 @@ Then enable GitHub Pages pointing to the `docs/` folder.
 ### Project Structure
 ```
 src/
-├── controllers/     # Request handlers
-├── models/         # Data models and schemas
-├── routes/         # API route definitions
-├── middleware/     # Custom middleware
-├── services/       # Business logic
-├── utils/          # Utility functions
-└── config/         # Configuration files
+├── adapters/           # Hexagonal architecture adapters
+│   ├── primary/        # Driving adapters (REST controllers)
+│   └── secondary/      # Driven adapters (repositories, external services)
+├── controllers/        # HTTP request handlers
+├── domain/            # Core business logic and entities
+│   ├── ports/         # Interfaces for adapters
+│   ├── Todo.ts        # Domain entities
+│   └── TodoValueObjects.ts # Value objects
+├── routes/            # API route definitions
+├── services/          # Application services and use cases
+├── config/            # Configuration files
+├── __tests__/         # Test files
+├── app.ts             # Express application setup
+└── index.ts           # Application entry point
 ```
 
 ### Copilot Usage Guidelines
