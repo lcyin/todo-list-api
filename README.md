@@ -129,6 +129,23 @@ The PostgreSQL setup automatically creates the following schema:
 - Proper indexes for performance
 - Triggers for automatic timestamp updates
 
+#### Database Migrations
+To set up or update the database schema, use the migration command:
+
+```bash
+npm run migrate
+```
+
+This command:
+- Runs all SQL files in `src/db/migrations/` in alphabetical order
+- Requires PostgreSQL client tools (`psql`) to be installed
+- Uses environment variables from `.env` for database connection
+- Executes files like `001-create-tables.sql`, `002-seed-data.sql`, etc.
+
+**Prerequisites:**
+- PostgreSQL client: `sudo apt-get install postgresql-client` (Ubuntu/Debian) or `brew install postgresql` (macOS)
+- Database connection configured in `.env` file
+
 ## 📚 API Documentation
 
 The API includes comprehensive Swagger/OpenAPI documentation:
@@ -182,6 +199,7 @@ Then enable GitHub Pages pointing to the `docs/` folder.
 - `npm run docs:generate` - Generate static documentation for GitHub Pages
 - `npm run lint` - Run ESLint
 - `npm run lint:fix` - Fix ESLint issues
+- `npm run migrate` - Run database migrations from `src/db/migrations/`
 
 ## Development Guidelines
 
