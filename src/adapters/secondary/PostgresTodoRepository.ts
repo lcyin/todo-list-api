@@ -22,19 +22,22 @@ export class PostgresTodoRepository implements TodoRepository {
       max: config.database.maxConnections,
     });
 
-    // Test the connection
-    this.testConnection();
+    // Note: Connection testing is handled when first operation is performed
   }
 
   /**
    * Test database connection
    */
-  private async testConnection(): Promise<void> {
+  async testConnection(): Promise<void> {
     try {
       const client = await this.pool.connect();
       await client.query("SELECT 1");
       client.release();
-      console.log("✅ PostgreSQL connection established successfully");
+
+      // Only log in non-test environments to avoid Jest warnings
+      if (process.env.NODE_ENV !== "test") {
+        console.log("✅ PostgreSQL connection established successfully");
+      }
     } catch (error) {
       console.error("❌ Failed to connect to PostgreSQL:", error);
       throw error;

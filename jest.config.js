@@ -9,7 +9,7 @@ module.exports = {
   collectCoverageFrom: ["src/**/*.ts", "!src/**/*.d.ts", "!src/index.ts"],
   coverageDirectory: "coverage",
   coverageReporters: ["text", "lcov", "html"],
-  setupFilesAfterEnv: [],
+  setupFilesAfterEnv: ["<rootDir>/src/__tests__/setup.ts"],
   testTimeout: 10000,
   forceExit: true,
   clearMocks: true,

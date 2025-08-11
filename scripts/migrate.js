@@ -15,8 +15,8 @@ const dbConfig = {
   host: process.env.DB_HOST || "localhost",
   port: process.env.DB_PORT || "5432",
   database: process.env.DB_NAME || "todolist",
-  user: process.env.DB_USER || "todouser",
-  password: process.env.DB_PASSWORD || "todopass",
+  user: process.env.DB_USER || "postgres",
+  password: process.env.DB_PASSWORD || "password",
 };
 
 // Build PostgreSQL connection string

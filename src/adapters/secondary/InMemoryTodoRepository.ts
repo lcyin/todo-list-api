@@ -112,6 +112,22 @@ export class InMemoryTodoRepository implements TodoRepository {
   }
 
   /**
+   * Test connection (no-op for in-memory repository)
+   */
+  public async testConnection(): Promise<void> {
+    // No connection to test for in-memory repository
+    return Promise.resolve();
+  }
+
+  /**
+   * Close connection (no-op for in-memory repository)
+   */
+  public async close(): Promise<void> {
+    // No connection to close for in-memory repository
+    return Promise.resolve();
+  }
+
+  /**
    * Get the total count of todos (for testing purposes)
    */
   public async count(): Promise<number> {
