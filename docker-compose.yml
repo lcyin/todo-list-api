@@ -6,8 +6,8 @@ services:
     container_name: todo-list-postgres
     environment:
       POSTGRES_DB: todolist
-      POSTGRES_USER: todouser
-      POSTGRES_PASSWORD: todopass
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
     ports:
       - "5432:5432"
     volumes:
