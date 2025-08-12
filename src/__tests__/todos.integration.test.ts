@@ -1,51 +1,35 @@
 import request from "supertest";
 import app from "../app";
+import { Pool } from "pg";
+import { db } from "../db";
+import { Todo } from "../domain/Todo";
 
 describe("@todos.integration.test.ts", () => {
+  beforeAll(async () => {
+    await cleanupTodos(db);
+  });
+
   describe("GET /api/v1/todos", () => {
     describe("Basic functionality", () => {
       it("should return 200 and a list of todos", async () => {
+        await setupTodos(db);
         const { body } = await request(app).get("/api/v1/todos").expect(200);
 
         expect(body).toEqual({
           todos: [
             {
-              id: "1",
-              title: "Learn TypeScript",
-              description: "Study TypeScript fundamentals",
-              completed: false,
-              createdAt: expect.any(String),
-              updatedAt: expect.any(String),
-            },
-            {
-              id: "2",
-              title: "Build REST API",
-              description: "Create a todo list API with Express",
-              completed: false,
-              createdAt: expect.any(String),
-              updatedAt: expect.any(String),
-            },
-            {
-              id: "3",
-              title: "Write tests",
-              description: "Add comprehensive test coverage",
-              completed: false,
-              createdAt: expect.any(String),
-              updatedAt: expect.any(String),
-            },
-            {
-              id: "4",
-              title: "Deploy application",
-              description: "Deploy to production environment",
+              id: expect.any(String),
+              title: "Test Todo 2",
+              description: "Description for test todo 2",
               completed: true,
               createdAt: expect.any(String),
               updatedAt: expect.any(String),
             },
             {
-              id: "5",
-              title: "Update documentation",
-              description: "Keep README and docs up to date",
-              completed: true,
+              id: expect.any(String),
+              title: "Test Todo 1",
+              description: "Description for test todo 1",
+              completed: false,
               createdAt: expect.any(String),
               updatedAt: expect.any(String),
             },
@@ -648,3 +632,31 @@ describe("@todos.integration.test.ts", () => {
     });
   });
 });
+
+async function cleanupTodos(db: Pool) {
+  const client = await db.connect();
+  try {
+    await client.query("DELETE FROM todos");
+  } finally {
+    client.release();
+  }
+}
+
+async function setupTodos(db: Pool) {
+  const client = await db.connect();
+  try {
+    await client.query(`
+      INSERT INTO todos (title, description, completed)
+      VALUES
+        ('Test Todo 1', 'Description for test todo 1', false),
+        ('Test Todo 2', 'Description for test todo 2', true)
+    `);
+    const result = await client.query("SELECT id, title, description, completed FROM todos");
+    const todos = result.rows.map(
+      row => new Todo(row.id.toString(), row.title, row.description, row.completed)
+    );
+    return { todos };
+  } finally {
+    client.release();
+  }
+}

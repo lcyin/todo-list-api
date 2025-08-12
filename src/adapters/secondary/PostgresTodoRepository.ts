@@ -2,7 +2,7 @@ import { Pool } from "pg";
 import { TodoRepository } from "../../domain/ports/TodoPorts";
 import { Todo } from "../../domain/Todo";
 import { TodoFilters } from "../../domain/TodoValueObjects";
-import { config } from "../../config";
+import { db } from "../../db";
 
 /**
  * PostgreSQL implementation of TodoRepository
@@ -12,15 +12,7 @@ export class PostgresTodoRepository implements TodoRepository {
   private pool: Pool;
 
   constructor() {
-    this.pool = new Pool({
-      host: config.database.host,
-      port: config.database.port,
-      database: config.database.name,
-      user: config.database.user,
-      password: config.database.password,
-      ssl: config.database.ssl,
-      max: config.database.maxConnections,
-    });
+    this.pool = db;
 
     // Note: Connection testing is handled when first operation is performed
   }
