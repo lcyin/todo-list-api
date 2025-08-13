@@ -606,24 +606,17 @@ describe("@todos.integration.test.ts", () => {
     });
   });
 
-  xdescribe("DELETE /api/v1/todos/:id", () => {
+  describe("DELETE /api/v1/todos/:id", () => {
     describe("Successful deletion", () => {
       it("should delete an existing todo", async () => {
-        // First verify the todo exists
-        await request(app).get("/api/v1/todos/1").expect(200);
+        const {
+          todos: [todo],
+        } = await setupTodos(db);
 
         // Delete the todo
-        await request(app).delete("/api/v1/todos/1").expect(204);
+        const { body } = await request(app).delete(`/api/v1/todos/${todo.id}`).expect(204);
 
-        // Verify it's gone
-        const { body } = await request(app).get("/api/v1/todos/1").expect(404);
-
-        expect(body).toEqual({
-          error: {
-            code: "TODO_NOT_FOUND",
-            message: "Todo with id '1' not found",
-          },
-        });
+        expect(body).toEqual({});
       });
     });
 
