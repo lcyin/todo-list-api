@@ -51,7 +51,7 @@ export class TodoRepository implements ITodoRepository {
       const result = await client.query(query, values);
 
       const row = result.rows[0];
-      return new Todo(row.id.toString(), row.title, row.description, row.completed);
+      return this.castRawDataToTodo(row);
     } finally {
       client.release();
     }
@@ -145,10 +145,7 @@ export class TodoRepository implements ITodoRepository {
 
       const result = await client.query(queryWithConditions, values);
 
-      const todos = result.rows.map(
-        ({ id, title, description, completed }) =>
-          new Todo(id.toString(), title, description, completed)
-      );
+      const todos = result.rows.map(this.castRawDataToTodo);
 
       // Get total count for pagination
       const total = await this.count(filters);
@@ -180,7 +177,7 @@ export class TodoRepository implements ITodoRepository {
       }
 
       const row = result.rows[0];
-      return new Todo(row.id.toString(), row.title, row.description, row.completed);
+      return this.castRawDataToTodo(row);
     } finally {
       client.release();
     }
