@@ -83,42 +83,62 @@ export class TodoRepository implements ITodoRepository {
   async findAll(filters: TodoFilters): Promise<{ todos: Todo[]; total: number }> {
     const client = await this.pool.connect();
     try {
-      let query = "SELECT id, title, description, completed FROM todos";
-      const values: (string | number | boolean)[] = [];
-      const conditions: string[] = [];
+      const query = "SELECT id, title, description, completed FROM todos";
 
-      // Apply filters
-      if (filters?.completed !== undefined) {
-        conditions.push(`completed = $${values.length + 1}`);
-        values.push(filters.completed);
-      }
+      // Build query conditions dynamically based on filters
 
-      if (filters?.search) {
-        conditions.push(
-          `(title ILIKE $${values.length + 1} OR description ILIKE $${values.length + 2})`
-        );
-        values.push(`%${filters.search}%`, `%${filters.search}%`);
-      }
+      const applySearchFilters = (filters: TodoFilters) => {
+        const values: (string | number | boolean)[] = [];
+        const conditions: string[] = [];
+        // Apply filters
+        if (filters?.completed !== undefined) {
+          conditions.push(`completed = $${values.length + 1}`);
+          values.push(filters.completed);
+        }
 
-      if (conditions.length > 0) {
-        query += " WHERE " + conditions.join(" AND ");
-      }
+        if (filters?.search) {
+          conditions.push(
+            `(title ILIKE $${values.length + 1} OR description ILIKE $${values.length + 2})`
+          );
+          values.push(`%${filters.search}%`, `%${filters.search}%`);
+        }
 
-      // Apply sorting
-      query += " ORDER BY created_at DESC";
+        return {
+          conditions,
+          values,
+        };
+      };
 
-      // Apply pagination
-      if (filters?.limit) {
-        query += ` LIMIT $${values.length + 1}`;
-        values.push(filters.limit);
-      }
+      const { conditions, values } = applySearchFilters(filters);
 
-      if (filters?.offset) {
-        query += ` OFFSET $${values.length + 1}`;
-        values.push(filters.offset);
-      }
+      const buildQueryWithConditions = (
+        query: string,
+        conditions: string[],
+        values: (string | number | boolean)[]
+      ) => {
+        if (conditions.length > 0) {
+          query += " WHERE " + conditions.join(" AND ");
+        }
 
-      const result = await client.query(query, values);
+        // Apply sorting
+        query += " ORDER BY created_at DESC";
+
+        // Apply pagination
+        if (filters?.limit) {
+          query += ` LIMIT $${values.length + 1}`;
+          values.push(filters.limit);
+        }
+
+        if (filters?.offset) {
+          query += ` OFFSET $${values.length + 1}`;
+          values.push(filters.offset);
+        }
+        return query;
+      };
+
+      const queryWithConditions = buildQueryWithConditions(query, conditions, values);
+
+      const result = await client.query(queryWithConditions, values);
 
       const todos = result.rows.map(
         row => new Todo(row.id.toString(), row.title, row.description, row.completed)
