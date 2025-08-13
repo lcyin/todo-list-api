@@ -8,6 +8,7 @@ import {
 } from "../domain/ports/TodoPorts";
 import { Todo } from "../domain/Todo";
 import { TodoQueryParams, PaginatedTodosResponse } from "../domain/TodoValueObjects";
+import { getTodosWithQueryParams } from "./components/get-todos.component";
 import { CreateTodoService } from "./CreateTodoService";
 import { DeleteTodoService } from "./DeleteTodoService";
 import { GetTodoByIdService } from "./GetTodoByIdService";
@@ -49,7 +50,7 @@ export class TodoService {
    * @returns Promise of paginated todos response
    */
   public async getTodos(queryParams: TodoQueryParams): Promise<PaginatedTodosResponse> {
-    return await this.getTodosUseCase.execute(queryParams);
+    return await getTodosWithQueryParams(this.todoRepository, queryParams);
   }
 
   /**
