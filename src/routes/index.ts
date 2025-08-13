@@ -1,19 +1,12 @@
 import { Router } from "express";
 import { healthRoutes } from "./healthRoutes";
 import { todoRoutes } from "./todoRoutes";
-import { docsRoutes } from "./docsRoutes";
 
 /**
  * Central router configuration
  * Combines all route modules
  */
 const routes = Router();
-
-/**
- * Register documentation routes
- * Provides API information and usage examples
- */
-routes.use("/", docsRoutes);
 
 /**
  * Register health check routes
