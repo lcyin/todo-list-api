@@ -373,7 +373,7 @@ describe("@todos.integration.test.ts", () => {
     });
   });
 
-  xdescribe("POST /api/v1/todos", () => {
+  describe("POST /api/v1/todos", () => {
     describe("Successful creation", () => {
       it("should create a new todo with title and description", async () => {
         const newTodo = {
@@ -461,19 +461,25 @@ describe("@todos.integration.test.ts", () => {
     });
   });
 
-  xdescribe("PUT /api/v1/todos/:id", () => {
+  describe("PUT /api/v1/todos/:id", () => {
     describe("Successful updates", () => {
       it("should update a todo's title", async () => {
+        const {
+          todos: [todo],
+        } = await setupTodos(db);
         const updates = {
           title: "Updated Title",
         };
 
-        const { body } = await request(app).put("/api/v1/todos/1").send(updates).expect(200);
+        const { body } = await request(app)
+          .put(`/api/v1/todos/${todo.id}`)
+          .send(updates)
+          .expect(200);
 
         expect(body).toEqual({
-          id: "1",
+          id: expect.any(String),
           title: "Updated Title",
-          description: "Study TypeScript fundamentals",
+          description: "Description for test todo 1",
           completed: false,
           createdAt: expect.any(String),
           updatedAt: expect.any(String),
@@ -481,16 +487,22 @@ describe("@todos.integration.test.ts", () => {
       });
 
       it("should update a todo's completion status", async () => {
+        const {
+          todos: [todo],
+        } = await setupTodos(db);
         const updates = {
           completed: true,
         };
 
-        const { body } = await request(app).put("/api/v1/todos/2").send(updates).expect(200);
+        const { body } = await request(app)
+          .put(`/api/v1/todos/${todo.id}`)
+          .send(updates)
+          .expect(200);
 
         expect(body).toEqual({
-          id: "2",
-          title: "Build REST API",
-          description: "Create a todo list API with Express",
+          id: expect.any(String),
+          title: expect.any(String),
+          description: expect.any(String),
           completed: true,
           createdAt: expect.any(String),
           updatedAt: expect.any(String),
@@ -498,16 +510,22 @@ describe("@todos.integration.test.ts", () => {
       });
 
       it("should update multiple fields", async () => {
+        const {
+          todos: [todo],
+        } = await setupTodos(db);
         const updates = {
           title: "Completely Updated Todo",
           description: "New description",
           completed: true,
         };
 
-        const { body } = await request(app).put("/api/v1/todos/3").send(updates).expect(200);
+        const { body } = await request(app)
+          .put(`/api/v1/todos/${todo.id}`)
+          .send(updates)
+          .expect(200);
 
         expect(body).toEqual({
-          id: "3",
+          id: expect.any(String),
           title: "Completely Updated Todo",
           description: "New description",
           completed: true,
@@ -517,13 +535,26 @@ describe("@todos.integration.test.ts", () => {
       });
 
       it("should set description to null", async () => {
+        const {
+          todos: [todo],
+        } = await setupTodos(db);
         const updates = {
           description: null,
         };
 
-        const { body } = await request(app).put("/api/v1/todos/1").send(updates).expect(200);
+        const { body } = await request(app)
+          .put(`/api/v1/todos/${todo.id}`)
+          .send(updates)
+          .expect(200);
 
-        expect(body.description).toBeNull();
+        expect(body).toEqual({
+          id: expect.any(String),
+          title: expect.any(String),
+          description: null,
+          completed: expect.any(Boolean),
+          createdAt: expect.any(String),
+          updatedAt: expect.any(String),
+        });
       });
     });
 
