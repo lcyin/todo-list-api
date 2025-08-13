@@ -8,6 +8,7 @@ import {
 } from "../domain/ports/TodoPorts";
 import { Todo } from "../domain/Todo";
 import { TodoQueryParams, PaginatedTodosResponse } from "../domain/TodoValueObjects";
+import { getTodoById } from "./components/get-todo-by-id.component";
 import { getTodosWithQueryParams } from "./components/get-todos.component";
 import { CreateTodoService } from "./CreateTodoService";
 import { DeleteTodoService } from "./DeleteTodoService";
@@ -59,7 +60,7 @@ export class TodoService {
    * @returns Promise of todo or null if not found
    */
   public async getTodoById(id: string): Promise<Todo | null> {
-    return await this.getTodoByIdUseCase.execute(id);
+    return getTodoById(this.todoRepository, id);
   }
 
   /**
