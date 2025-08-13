@@ -5,7 +5,7 @@ import { db } from "../db";
 import { Todo } from "../domain/Todo";
 
 describe("@todos.integration.test.ts", () => {
-  beforeAll(async () => {
+  beforeEach(async () => {
     await cleanupTodos(db);
   });
 
@@ -46,6 +46,8 @@ describe("@todos.integration.test.ts", () => {
       });
 
       it("should return todos with correct structure and pagination", async () => {
+        await setupTodos(db);
+
         const { body } = await request(app).get("/api/v1/todos").expect(200);
 
         expect(body).toEqual({
