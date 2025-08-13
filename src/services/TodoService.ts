@@ -9,6 +9,7 @@ import {
 import { Todo } from "../domain/Todo";
 import { TodoQueryParams, PaginatedTodosResponse } from "../domain/TodoValueObjects";
 import { createTodos } from "./components/create-todos.component";
+import { deleteTodo } from "./components/delete-todo.component";
 import { getTodoById } from "./components/get-todo-by-id.component";
 import { getTodosWithQueryParams } from "./components/get-todos.component";
 import { updateTodos } from "./components/update-todos.component";
@@ -84,6 +85,6 @@ export class TodoService {
    * @returns Promise of boolean indicating success
    */
   public async deleteTodo(id: string): Promise<boolean> {
-    return await this.deleteTodoUseCase.execute(id);
+    return deleteTodo(this.todoRepository, id);
   }
 }
