@@ -73,8 +73,9 @@ describe("@todos.integration.test.ts", () => {
       });
     });
 
-    xdescribe("Query parameters", () => {
+    describe("Query parameters", () => {
       it("should handle page parameter and return correct pagination", async () => {
+        await setupTodos(db);
         const { body } = await request(app).get("/api/v1/todos?page=1").expect(200);
 
         expect(body).toEqual({
@@ -91,6 +92,7 @@ describe("@todos.integration.test.ts", () => {
       });
 
       it("should handle limit parameter and return limited todos", async () => {
+        await setupTodos(db);
         const { body } = await request(app).get("/api/v1/todos?limit=2").expect(200);
 
         expect(body).toEqual({
@@ -117,6 +119,7 @@ describe("@todos.integration.test.ts", () => {
       });
 
       it("should handle completed filter and return filtered todos", async () => {
+        await setupTodos(db);
         const { body: bodyTrue } = await request(app)
           .get("/api/v1/todos?completed=true")
           .expect(200);
@@ -169,14 +172,17 @@ describe("@todos.integration.test.ts", () => {
       });
 
       it("should handle search parameter and return matching todos", async () => {
-        const { body } = await request(app).get("/api/v1/todos?search=TypeScript").expect(200);
+        await setupTodos(db);
+        const { body } = await request(app)
+          .get("/api/v1/todos?search=Description for test todo 1")
+          .expect(200);
 
         expect(body).toEqual({
           todos: expect.arrayContaining([
             expect.objectContaining({
-              id: "1",
-              title: "Learn TypeScript",
-              description: "Study TypeScript fundamentals",
+              id: expect.any(String),
+              title: "Test Todo 1",
+              description: "Description for test todo 1",
               completed: false,
               createdAt: expect.any(String),
               updatedAt: expect.any(String),
@@ -194,6 +200,7 @@ describe("@todos.integration.test.ts", () => {
       });
 
       it("should handle multiple query parameters correctly", async () => {
+        await setupTodos(db);
         const { body } = await request(app)
           .get("/api/v1/todos?page=1&limit=10&completed=false&search=todo")
           .expect(200);
@@ -650,7 +657,11 @@ async function setupTodos(db: Pool) {
     await client.query(`
       INSERT INTO todos (title, description, completed)
       VALUES
-        ('Test Todo 1', 'Description for test todo 1', false),
+        ('Test Todo 1', 'Description for test todo 1', false)
+    `);
+    await client.query(`
+      INSERT INTO todos (title, description, completed)
+      VALUES
         ('Test Todo 2', 'Description for test todo 2', true)
     `);
     const result = await client.query("SELECT id, title, description, completed FROM todos");
