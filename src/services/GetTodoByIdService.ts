@@ -1,4 +1,4 @@
-import { GetTodoByIdUseCase, TodoRepository } from "../domain/ports/TodoPorts";
+import { GetTodoByIdUseCase, ITodoRepository } from "../domain/ports/TodoPorts";
 import { Todo } from "../domain/Todo";
 
 /**
@@ -6,7 +6,7 @@ import { Todo } from "../domain/Todo";
  * Implements the business logic for retrieving a single todo by its ID
  */
 export class GetTodoByIdService implements GetTodoByIdUseCase {
-  constructor(private readonly todoRepository: TodoRepository) {}
+  constructor(private readonly todoRepository: ITodoRepository) {}
 
   /**
    * Execute the get todo by ID use case

@@ -1,11 +1,11 @@
-import { DeleteTodoUseCase, TodoRepository } from "../domain/ports/TodoPorts";
+import { DeleteTodoUseCase, ITodoRepository } from "../domain/ports/TodoPorts";
 
 /**
  * Use case service for deleting a todo
  * This implements the business logic for todo deletion
  */
 export class DeleteTodoService implements DeleteTodoUseCase {
-  constructor(private readonly todoRepository: TodoRepository) {}
+  constructor(private readonly todoRepository: ITodoRepository) {}
 
   /**
    * Execute the delete todo use case

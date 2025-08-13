@@ -1,4 +1,4 @@
-import { CreateTodoUseCase, TodoRepository } from "../domain/ports/TodoPorts";
+import { CreateTodoUseCase, ITodoRepository } from "../domain/ports/TodoPorts";
 import { Todo } from "../domain/Todo";
 
 /**
@@ -6,7 +6,7 @@ import { Todo } from "../domain/Todo";
  * This implements the business logic for todo creation
  */
 export class CreateTodoService implements CreateTodoUseCase {
-  constructor(private readonly todoRepository: TodoRepository) {}
+  constructor(private readonly todoRepository: ITodoRepository) {}
 
   /**
    * Execute the create todo use case

@@ -148,7 +148,7 @@ export class TodoService {
   private readonly updateTodoUseCase: UpdateTodoUseCase;
   private readonly deleteTodoUseCase: DeleteTodoUseCase;
 
-  constructor(private readonly todoRepository: TodoRepository) {
+  constructor(private readonly todoRepository: ITodoRepository) {
     // Compose individual services
     this.createTodoUseCase = new CreateTodoService(this.todoRepository);
     this.getTodosUseCase = new GetTodosService(this.todoRepository);
@@ -234,7 +234,7 @@ export class Todo {
 
 ```typescript
 export class GetTodosService implements GetTodosUseCase {
-  constructor(private readonly todoRepository: TodoRepository) {}
+  constructor(private readonly todoRepository: ITodoRepository) {}
 
   async execute(queryParams: TodoQueryParams): Promise<PaginatedTodosResponse> {
     // Pure business logic, no framework dependencies
@@ -319,7 +319,7 @@ export class GetTodosService implements GetTodosUseCase {
 
 // Unified service facade for convenience
 export class TodoService {
-  constructor(private readonly todoRepository: TodoRepository) {
+  constructor(private readonly todoRepository: ITodoRepository) {
     // Compose individual services
   }
 

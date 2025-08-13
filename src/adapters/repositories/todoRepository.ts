@@ -1,5 +1,5 @@
 import { Pool } from "pg";
-import { TodoRepository } from "../../domain/ports/TodoPorts";
+import { ITodoRepository } from "../../domain/ports/TodoPorts";
 import { Todo } from "../../domain/Todo";
 import { TodoFilters } from "../../domain/TodoValueObjects";
 import { db } from "../../db";
@@ -8,7 +8,7 @@ import { db } from "../../db";
  * PostgreSQL implementation of TodoRepository
  * This is a secondary adapter that implements the outbound port
  */
-export class PostgresTodoRepository implements TodoRepository {
+export class TodoRepository implements ITodoRepository {
   private pool: Pool;
 
   constructor() {

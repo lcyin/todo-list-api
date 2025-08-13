@@ -1,4 +1,4 @@
-import { UpdateTodoUseCase, TodoRepository } from "../domain/ports/TodoPorts";
+import { UpdateTodoUseCase, ITodoRepository } from "../domain/ports/TodoPorts";
 import { Todo } from "../domain/Todo";
 
 /**
@@ -6,7 +6,7 @@ import { Todo } from "../domain/Todo";
  * This implements the business logic for todo updates
  */
 export class UpdateTodoService implements UpdateTodoUseCase {
-  constructor(private readonly todoRepository: TodoRepository) {}
+  constructor(private readonly todoRepository: ITodoRepository) {}
 
   /**
    * Execute the update todo use case

@@ -74,7 +74,7 @@ export interface DeleteTodoUseCase {
  * Outbound port - defines what the domain needs
  * Repository interface for todo data access
  */
-export interface TodoRepository {
+export interface ITodoRepository {
   /**
    * Find all todos with optional filters and pagination
    * @param filters Filters and pagination parameters

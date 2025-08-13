@@ -1,4 +1,4 @@
-import { GetTodosUseCase, TodoRepository } from "../domain/ports/TodoPorts";
+import { GetTodosUseCase, ITodoRepository } from "../domain/ports/TodoPorts";
 import { TodoQueryParams, PaginatedTodosResponse, TodoFilters } from "../domain/TodoValueObjects";
 
 /**
@@ -6,7 +6,7 @@ import { TodoQueryParams, PaginatedTodosResponse, TodoFilters } from "../domain/
  * Implements the business logic for retrieving todos with filtering and pagination
  */
 export class GetTodosService implements GetTodosUseCase {
-  constructor(private readonly todoRepository: TodoRepository) {}
+  constructor(private readonly todoRepository: ITodoRepository) {}
 
   /**
    * Execute the get todos use case

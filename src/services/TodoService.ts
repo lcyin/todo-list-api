@@ -3,7 +3,7 @@ import {
   DeleteTodoUseCase,
   GetTodoByIdUseCase,
   GetTodosUseCase,
-  TodoRepository,
+  ITodoRepository,
   UpdateTodoUseCase,
 } from "../domain/ports/TodoPorts";
 import { Todo } from "../domain/Todo";
@@ -26,7 +26,7 @@ export class TodoService {
   private readonly updateTodoUseCase: UpdateTodoUseCase;
   private readonly deleteTodoUseCase: DeleteTodoUseCase;
 
-  constructor(private readonly todoRepository: TodoRepository) {
+  constructor(private readonly todoRepository: ITodoRepository) {
     this.createTodoUseCase = new CreateTodoService(this.todoRepository);
     this.getTodosUseCase = new GetTodosService(this.todoRepository);
     this.getTodoByIdUseCase = new GetTodoByIdService(this.todoRepository);
