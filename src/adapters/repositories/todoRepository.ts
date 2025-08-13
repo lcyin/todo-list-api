@@ -70,8 +70,8 @@ export class TodoRepository implements ITodoRepository {
         return null;
       }
 
-      const row = result.rows[0];
-      return new Todo(row.id.toString(), row.title, row.description, row.completed);
+      const { id: todoId, title, description, completed } = result.rows[0];
+      return new Todo(todoId.toString(), title, description, completed);
     } finally {
       client.release();
     }
