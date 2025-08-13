@@ -19,6 +19,11 @@ export class GetTodoByIdService implements GetTodoByIdUseCase {
       throw new Error("Todo ID cannot be empty");
     }
 
+    // Validate ID is number
+    if (isNaN(Number(id))) {
+      throw new Error("Todo ID must be a number");
+    }
+
     // Fetch todo from repository
     return await this.todoRepository.findById(id);
   }
