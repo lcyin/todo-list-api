@@ -11,6 +11,7 @@ import { TodoQueryParams, PaginatedTodosResponse } from "../domain/TodoValueObje
 import { createTodos } from "./components/create-todos.component";
 import { getTodoById } from "./components/get-todo-by-id.component";
 import { getTodosWithQueryParams } from "./components/get-todos.component";
+import { updateTodos } from "./components/update-todos.component";
 import { CreateTodoService } from "./CreateTodoService";
 import { DeleteTodoService } from "./DeleteTodoService";
 import { GetTodoByIdService } from "./GetTodoByIdService";
@@ -74,7 +75,7 @@ export class TodoService {
     id: string,
     updates: { title?: string; description?: string | null; completed?: boolean }
   ): Promise<Todo | null> {
-    return await this.updateTodoUseCase.execute(id, updates);
+    return updateTodos(this.todoRepository, id, updates);
   }
 
   /**
