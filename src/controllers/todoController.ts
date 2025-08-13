@@ -1,12 +1,12 @@
 import { Request, Response } from "express";
-import { TodoQueryParams } from "../../domain/TodoValueObjects";
-import { TodoService } from "../../services/TodoService";
+import { TodoQueryParams } from "../domain/TodoValueObjects";
+import { TodoService } from "../services/TodoService";
 
 /**
  * REST Controller for Todo endpoints
  * This is a primary adapter that handles HTTP requests
  */
-export class RestTodoController {
+export class TodoController {
   constructor(private readonly todoService: TodoService) {}
 
   /**

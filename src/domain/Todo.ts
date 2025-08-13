@@ -28,20 +28,6 @@ export class Todo {
   }
 
   /**
-   * Marks the todo as completed
-   */
-  public markAsCompleted(): Todo {
-    return new Todo(this.id, this.title, this.description, true, this.createdAt, new Date());
-  }
-
-  /**
-   * Marks the todo as incomplete
-   */
-  public markAsIncomplete(): Todo {
-    return new Todo(this.id, this.title, this.description, false, this.createdAt, new Date());
-  }
-
-  /**
    * Updates the todo with new information
    */
   public update(updates: {

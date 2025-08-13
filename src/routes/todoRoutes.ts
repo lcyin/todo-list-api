@@ -1,7 +1,7 @@
 import { Router } from "express";
-import { RestTodoController } from "../adapters/primary/RestTodoController";
-import { TodoRepositoryFactory } from "../adapters/TodoRepositoryFactory";
+import { TodoController } from "../controllers/todoController";
 import { TodoService } from "../services/TodoService";
+import { PostgresTodoRepository } from "../adapters/secondary/PostgresTodoRepository";
 
 /**
  * Todo routes
@@ -10,9 +10,9 @@ import { TodoService } from "../services/TodoService";
 const todoRoutes = Router();
 
 // Dependency injection - wire up the hexagonal architecture
-const todoRepository = TodoRepositoryFactory.create();
+const todoRepository = new PostgresTodoRepository();
 const todoService = new TodoService(todoRepository);
-const todoController = new RestTodoController(todoService);
+const todoController = new TodoController(todoService);
 
 /**
  * @swagger
