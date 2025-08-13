@@ -141,7 +141,8 @@ export class TodoRepository implements ITodoRepository {
       const result = await client.query(queryWithConditions, values);
 
       const todos = result.rows.map(
-        row => new Todo(row.id.toString(), row.title, row.description, row.completed)
+        ({ id, title, description, completed }) =>
+          new Todo(id.toString(), title, description, completed)
       );
 
       // Get total count for pagination
