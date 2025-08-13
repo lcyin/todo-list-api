@@ -266,8 +266,9 @@ describe("@todos.integration.test.ts", () => {
       });
     });
 
-    xdescribe("Edge cases", () => {
+    describe("Edge cases", () => {
       it("should handle empty search results correctly", async () => {
+        await setupTodos(db);
         const { body } = await request(app)
           .get("/api/v1/todos?search=nonexistentterm12345")
           .expect(200);
@@ -285,33 +286,44 @@ describe("@todos.integration.test.ts", () => {
         });
       });
 
-      it("should handle invalid page numbers with defaults", async () => {
-        const { body: bodyNegative } = await request(app).get("/api/v1/todos?page=-1").expect(200);
+      describe("should handle invalid page numbers with defaults", () => {
+        describe("page=-1", () => {
+          it("should default to 1", async () => {
+            await setupTodos(db);
+            const { body: bodyNegative } = await request(app)
+              .get("/api/v1/todos?page=-1")
+              .expect(200);
 
-        expect(bodyNegative).toEqual({
-          todos: expect.any(Array),
-          pagination: expect.objectContaining({
-            page: 1, // Should default to 1
-            limit: expect.any(Number),
-            total: expect.any(Number),
-            totalPages: expect.any(Number),
-            hasNext: expect.any(Boolean),
-            hasPrevious: expect.any(Boolean),
-          }),
+            expect(bodyNegative).toEqual({
+              todos: expect.any(Array),
+              pagination: expect.objectContaining({
+                page: 1, // Should default to 1
+                limit: expect.any(Number),
+                total: expect.any(Number),
+                totalPages: expect.any(Number),
+                hasNext: expect.any(Boolean),
+                hasPrevious: expect.any(Boolean),
+              }),
+            });
+          });
         });
+        describe("page=0", () => {
+          it("should default to 1", async () => {
+            await setupTodos(db);
+            const { body: bodyZero } = await request(app).get("/api/v1/todos?page=0").expect(200);
 
-        const { body: bodyZero } = await request(app).get("/api/v1/todos?page=0").expect(200);
-
-        expect(bodyZero).toEqual({
-          todos: expect.any(Array),
-          pagination: expect.objectContaining({
-            page: 1, // Should default to 1
-            limit: expect.any(Number),
-            total: expect.any(Number),
-            totalPages: expect.any(Number),
-            hasNext: expect.any(Boolean),
-            hasPrevious: expect.any(Boolean),
-          }),
+            expect(bodyZero).toEqual({
+              todos: expect.any(Array),
+              pagination: expect.objectContaining({
+                page: 1, // Should default to 1
+                limit: expect.any(Number),
+                total: expect.any(Number),
+                totalPages: expect.any(Number),
+                hasNext: expect.any(Boolean),
+                hasPrevious: expect.any(Boolean),
+              }),
+            });
+          });
         });
       });
     });
