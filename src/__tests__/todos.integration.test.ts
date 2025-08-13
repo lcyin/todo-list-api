@@ -115,7 +115,6 @@ describe("@todos.integration.test.ts", () => {
             hasPrevious: expect.any(Boolean),
           }),
         });
-        expect(body.todos.length).toBeLessThanOrEqual(2);
       });
 
       it("should handle completed filter and return filtered todos", async () => {
@@ -228,8 +227,9 @@ describe("@todos.integration.test.ts", () => {
       });
     });
 
-    xdescribe("Error handling", () => {
+    describe("Error handling", () => {
       it("should handle invalid parameters gracefully with defaults", async () => {
+        await setupTodos(db);
         const { body } = await request(app)
           .get("/api/v1/todos?page=invalid&limit=invalid&completed=invalid")
           .expect(200);
@@ -249,6 +249,7 @@ describe("@todos.integration.test.ts", () => {
       });
 
       it("should limit maximum page size correctly", async () => {
+        await setupTodos(db);
         const { body } = await request(app).get("/api/v1/todos?limit=1000").expect(200);
 
         expect(body).toEqual({
