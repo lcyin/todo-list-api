@@ -15,6 +15,8 @@ const startServer = (): void => {
 🌐 Host: 0.0.0.0 (all interfaces)
 📡 Health Check: http://localhost:${config.server.port}/health
 📚 API Base: http://localhost:${config.server.port}${config.api.prefix}/${config.api.version}
+🌟 Swagger UI: http://localhost:${config.server.port}/api-docs
+📄 Swagger JSON: http://localhost:${config.server.port}/api-docs.json
       `);
     });
 
@@ -27,28 +29,6 @@ const startServer = (): void => {
       }
       process.exit(1);
     });
-
-    // Graceful shutdown handling
-    const gracefulShutdown = (signal: string) => {
-      console.log(`\n🛑 Received ${signal}. Starting graceful shutdown...`);
-
-      server.close(() => {
-        console.log("✅ HTTP server closed");
-        process.exit(0);
-      });
-
-      // Force close after 10 seconds
-      setTimeout(() => {
-        console.error(
-          "❌ Could not close connections in time, forcefully shutting down"
-        );
-        process.exit(1);
-      }, 10000);
-    };
-
-    // Listen for termination signals
-    process.on("SIGTERM", () => gracefulShutdown("SIGTERM"));
-    process.on("SIGINT", () => gracefulShutdown("SIGINT"));
   } catch (error) {
     console.error("❌ Failed to start server:", error);
     process.exit(1);
