@@ -57,6 +57,11 @@ export class TodoRepository implements ITodoRepository {
     }
   }
 
+  castRawDataToTodo(row: any): Todo {
+    const { id, title, description, completed } = row;
+    return new Todo(id.toString(), title, description, completed);
+  }
+
   /**
    * Find a todo by ID
    */
@@ -70,8 +75,8 @@ export class TodoRepository implements ITodoRepository {
         return null;
       }
 
-      const { id: todoId, title, description, completed } = result.rows[0];
-      return new Todo(todoId.toString(), title, description, completed);
+      const row = result.rows[0];
+      return this.castRawDataToTodo(row);
     } finally {
       client.release();
     }
