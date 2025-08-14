@@ -12,84 +12,75 @@ graph TB
     
     %% Primary Adapters (Driving Side)
     subgraph Primary["🔵 Primary Adapters (Driving)"]
-        RestController[📡 RestTodoController<br/>HTTP/REST Interface]
+        TodoController[📡 TodoController<br/>HTTP/REST Interface]
         HealthController[💓 HealthController<br/>Health Check Interface]
     end
     
     %% Application Core (Hexagon Center)
     subgraph Core["⬢ Application Core"]
         subgraph Ports["🔌 Ports (Interfaces)"]
-            InboundPorts[📥 Inbound Ports<br/>• GetTodosUseCase<br/>• CreateTodoUseCase<br/>• UpdateTodoUseCase<br/>• DeleteTodoUseCase<br/>• GetTodoByIdUseCase]
-            OutboundPorts[📤 Outbound Ports<br/>• TodoRepository]
+            InboundPorts[📥 Inbound Ports<br/>• ITodoService Interface]
+            OutboundPorts[📤 Outbound Ports<br/>• ITodoRepository Interface]
         end
         
         subgraph Domain["🏛️ Domain Layer"]
-            Entities[📦 Domain Entities<br/>• Todo<br/>• TodoValueObjects<br/>• TodoQueryParams<br/>• PaginatedTodosResponse]
+            Entities[📦 Domain Entities<br/>• Todo<br/>• TodoValueObjects<br/>• TodoQueryParams<br/>• PaginatedTodosResponse<br/>• TodoFilters]
         end
         
         subgraph Services["⚙️ Application Services"]
             TodoService[🎯 TodoService<br/>Unified Service Facade]
-            GetTodosService[📋 GetTodosService]
-            CreateTodoService[➕ CreateTodoService]
-            UpdateTodoService[✏️ UpdateTodoService]
-            DeleteTodoService[🗑️ DeleteTodoService]
-            GetTodoByIdService[🔍 GetTodoByIdService]
+            subgraph Components["🔧 Service Components"]
+                CreateComponent[➕ create-todos.component]
+                GetComponent[📋 get-todos.component]
+                GetByIdComponent[🔍 get-todo-by-id.component]
+                UpdateComponent[✏️ update-todos.component]
+                DeleteComponent[🗑️ delete-todo.component]
+            end
         end
     end
     
     %% Secondary Adapters (Driven Side)
     subgraph Secondary["🟡 Secondary Adapters (Driven)"]
-        InMemoryRepo[💾 InMemoryTodoRepository<br/>Data Persistence]
-        %% Future adapters (commented for reference)
-        %% DatabaseRepo[🗃️ DatabaseTodoRepository<br/>PostgreSQL/MongoDB]
-        %% ExternalAPI[🌐 ExternalAPIAdapter<br/>Third-party Services]
+        PostgresRepo[🗃️ TodoRepository<br/>PostgreSQL Implementation]
     end
     
     %% External Infrastructure
-    Database[(🗄️ Database<br/>PostgreSQL/MongoDB<br/>Future)]
-    ExternalServices[🔗 External Services<br/>Email/Notifications<br/>Future]
+    Database[(🗄️ PostgreSQL Database<br/>Docker Container)]
     
     %% Client connections to Primary Adapters
-    Client --> RestController
-    TestRunner --> RestController
+    Client --> TodoController
+    TestRunner --> TodoController
     Client --> HealthController
     TestRunner --> HealthController
     
     %% Primary Adapters to Core
-    RestController --> InboundPorts
+    TodoController --> InboundPorts
     HealthController --> InboundPorts
     
     %% Core internal connections
     InboundPorts --> TodoService
-    TodoService --> GetTodosService
-    TodoService --> CreateTodoService
-    TodoService --> UpdateTodoService
-    TodoService --> DeleteTodoService
-    TodoService --> GetTodoByIdService
-    Services --> Domain
-    Services --> OutboundPorts
+    TodoService --> Components
+    Components --> Domain
+    TodoService --> OutboundPorts
     
     %% Core to Secondary Adapters
-    OutboundPorts --> InMemoryRepo
-    %% OutboundPorts --> DatabaseRepo
-    %% OutboundPorts --> ExternalAPI
+    OutboundPorts --> PostgresRepo
     
     %% Secondary Adapters to External Infrastructure
-    InMemoryRepo -.-> Database
-    %% DatabaseRepo --> Database
-    %% ExternalAPI --> ExternalServices
+    PostgresRepo --> Database
     
     %% Styling
     classDef primaryAdapter fill:#e1f5fe,stroke:#01579b,stroke-width:2px
     classDef secondaryAdapter fill:#fff3e0,stroke:#e65100,stroke-width:2px
     classDef core fill:#f3e5f5,stroke:#4a148c,stroke-width:3px
     classDef external fill:#e8f5e8,stroke:#2e7d32,stroke-width:2px
-    classDef future fill:#fafafa,stroke:#9e9e9e,stroke-width:1px,stroke-dasharray: 5 5
+    classDef components fill:#fff9c4,stroke:#f57f17,stroke-width:2px
     
-    class RestController,HealthController primaryAdapter
-    class InMemoryRepo secondaryAdapter
+    class TodoController,HealthController primaryAdapter
+    class PostgresRepo secondaryAdapter
     class Core,Ports,Domain,Services core
-    class Client,TestRunner,Database,ExternalServices external
+    class Components,CreateComponent,GetComponent,GetByIdComponent,UpdateComponent,DeleteComponent components
+    class Client,TestRunner,Database external
 ```
 
 ## Architecture Components
@@ -98,14 +89,16 @@ graph TB
 
 These adapters drive the application and handle incoming requests:
 
-- **RestTodoController** (`src/adapters/primary/RestTodoController.ts`)
-  - Handles HTTP/REST API requests
+- **TodoController** (`src/controllers/todoController.ts`)
+  - Handles HTTP/REST API requests for todo operations
   - Converts HTTP requests to domain operations
-  - Returns HTTP responses
+  - Returns HTTP responses with proper status codes
+  - Implements error handling and input validation
 
 - **HealthController** (`src/controllers/healthController.ts`)
   - Provides health check endpoints
   - Monitors application status
+  - Returns system health information
 
 ### ⬢ Application Core (The Hexagon)
 
@@ -115,48 +108,60 @@ Define contracts between the core and adapters:
 
 **Inbound Ports** (`src/domain/ports/TodoPorts.ts`):
 
-- `GetTodosUseCase` - Retrieve todos with filtering/pagination
-- `CreateTodoUseCase` - Create new todos
-- `UpdateTodoUseCase` - Update existing todos
-- `DeleteTodoUseCase` - Delete todos
-- `GetTodoByIdUseCase` - Retrieve single todo by ID
+- `ITodoService` - Main service interface defining all todo operations:
+  - `createTodo(todoData)` - Create new todos
+  - `getTodos(queryParams)` - Retrieve todos with filtering/pagination
+  - `getTodoById(id)` - Retrieve single todo by ID
+  - `updateTodo(id, updates)` - Update existing todos
+  - `deleteTodo(id)` - Delete todos
 
 **Outbound Ports** (`src/domain/ports/TodoPorts.ts`):
 
-- `TodoRepository` - Data persistence interface
+- `ITodoRepository` - Data persistence interface with methods:
+  - `findAll(filters)` - Query todos with filters and pagination
+  - `findById(id)` - Find single todo by ID
+  - `save(todo)` - Persist new todo
+  - `update(todo)` - Update existing todo
+  - `delete(id)` - Remove todo from storage
 
 #### 🏛️ Domain Layer
 
 Contains core business entities and value objects:
 
-- **Todo** (`src/domain/Todo.ts`) - Core todo entity
-- **TodoValueObjects** (`src/domain/TodoValueObjects.ts`) - Value objects for data transfer
-- **TodoQueryParams** - Query parameter handling
-- **PaginatedTodosResponse** - Paginated response structure
+- **Todo** (`src/domain/Todo.ts`) - Core todo entity with business logic
+- **TodoValueObjects** (`src/domain/TodoValueObjects.ts`) - Value objects for data transfer:
+  - `TodoQueryParams` - Query parameter handling and validation
+  - `PaginatedTodosResponse` - Paginated response structure
+  - `TodoFilters` - Filtering criteria for database queries
 
 #### ⚙️ Application Services
 
 Implement business logic and use cases:
 
 - **TodoService** (`src/services/TodoService.ts`) - **🎯 Unified Service Facade**
-  - Combines all todo use cases into a single interface
-  - Composes individual service classes
+  - Implements `ITodoService` interface
+  - Composes individual service components
   - Provides simplified API for primary adapters
+  - Handles dependency injection to components
 
-- **GetTodosService** (`src/services/GetTodosService.ts`)
-- **CreateTodoService** (`src/services/CreateTodoService.ts`)
-- **UpdateTodoService** (`src/services/UpdateTodoService.ts`)
-- **DeleteTodoService** (`src/services/DeleteTodoService.ts`)
-- **GetTodoByIdService** (`src/services/GetTodoByIdService.ts`)
+- **Service Components** (`src/services/components/`):
+  - `create-todos.component.ts` - Todo creation logic
+  - `get-todos.component.ts` - Todo retrieval with filtering/pagination
+  - `get-todo-by-id.component.ts` - Single todo retrieval
+  - `update-todos.component.ts` - Todo update operations
+  - `delete-todo.component.ts` - Todo deletion logic
 
 ### 🟡 Secondary Adapters (Driven Side)
 
 These adapters are driven by the application core:
 
-- **InMemoryTodoRepository** (`src/adapters/secondary/InMemoryTodoRepository.ts`)
-  - Implements `TodoRepository` interface
-  - Provides in-memory data persistence
-  - Can be easily replaced with database implementations
+- **TodoRepository** (`src/adapters/repositories/todoRepository.ts`)
+  - Implements `ITodoRepository` interface
+  - Provides PostgreSQL data persistence
+  - Handles database connections using connection pooling
+  - Converts between domain entities and database rows
+  - Implements complex queries for filtering and pagination
+  - Uses parameterized queries for security
 
 ## Architecture Principles
 
@@ -165,15 +170,17 @@ These adapters are driven by the application core:
 1. **🔄 Dependency Inversion**
    - Core domain doesn't depend on external frameworks
    - Dependencies point inward toward the domain
+   - PostgreSQL repository can be swapped without changing business logic
 
 2. **🧪 Testability**
    - Business logic can be tested in isolation
    - Easy to mock external dependencies
    - Fast unit tests without infrastructure
+   - Integration tests can use test databases
 
 3. **🔌 Pluggability**
    - Easy to swap adapter implementations
-   - Switch from in-memory to database without changing core logic
+   - Can switch from PostgreSQL to other databases
    - Add new adapters (GraphQL, gRPC, etc.) without core changes
 
 4. **📦 Separation of Concerns**
@@ -185,53 +192,114 @@ These adapters are driven by the application core:
    - Core logic is independent of Express, databases, etc.
    - Can switch frameworks without rewriting business logic
 
-6. **🎯 Unified Interface Pattern**
+6. **🎯 Component-Based Services**
    - `TodoService` acts as a facade providing a single entry point
-   - Simplifies client code by hiding complexity of individual services
-   - Maintains individual service isolation while providing convenience
+   - Individual service components handle specific operations
+   - Maintains service isolation while providing convenience
+   - Easy to extend with new operations
 
 ### Layer Responsibilities
 
-- **Primary Adapters**: Handle external requests (HTTP, CLI, tests)
-- **Core Domain**: Contains business logic, entities, and use cases
-- **Secondary Adapters**: Implement infrastructure concerns (persistence, external APIs)
-- **Ports**: Define interfaces/contracts between layers
+- **Primary Adapters** (`controllers/`): Handle external HTTP requests and route management
+- **Core Domain** (`domain/`, `services/`): Contains business logic, entities, and use cases
+- **Secondary Adapters** (`adapters/repositories/`): Implement data persistence with PostgreSQL
+- **Ports** (`domain/ports/`): Define interfaces/contracts between layers
 
 ### Data Flow
 
-1. **Inbound Flow**: Client → Primary Adapter → Inbound Port → Service → Domain
-2. **Outbound Flow**: Service → Outbound Port → Secondary Adapter → External System
+1. **Inbound Flow**: HTTP Client → TodoController → ITodoService → TodoService → Service Components → Domain
+2. **Outbound Flow**: Service Components → ITodoRepository → TodoRepository → PostgreSQL Database
+
+### Dependency Injection Pattern
+
+The application uses constructor-based dependency injection:
+
+```typescript
+// Wiring in todoRoutes.ts
+const todoRepository = new TodoRepository();           // Secondary adapter
+const todoService = new TodoService(todoRepository);   // Core service
+const todoController = new TodoController(todoService); // Primary adapter
+```
+
+This ensures:
+- **Loose Coupling**: Components depend on interfaces, not implementations
+- **Easy Testing**: Dependencies can be mocked for unit tests
+- **Flexible Configuration**: Different implementations based on environment
 
 ### Future Extensions
 
 The architecture supports easy extension with:
 
-- **Database Adapters**: PostgreSQL, MongoDB, etc.
-- **External Service Adapters**: Email services, notification systems
-- **Additional Primary Adapters**: GraphQL, gRPC, CLI interfaces
-- **Event-driven Components**: Message queues, event stores
+- **Alternative Database Adapters**: MongoDB, Redis, or other databases
+- **External Service Adapters**: Email services, notification systems, caching layers
+- **Additional Primary Adapters**: GraphQL, gRPC, CLI interfaces, WebSocket connections
+- **Event-driven Components**: Message queues, event stores, pub/sub systems
+- **Authentication/Authorization**: JWT handlers, OAuth adapters
+- **Monitoring and Observability**: Logging adapters, metrics collectors
 
 ## File Structure Mapping
 
 ```text
 src/
 ├── adapters/
-│   ├── primary/          # 🔵 Primary Adapters
-│   │   └── RestTodoController.ts
-│   └── secondary/        # 🟡 Secondary Adapters
-│       └── InMemoryTodoRepository.ts
-├── domain/               # ⬢ Core Domain
-│   ├── ports/           # 🔌 Ports (Interfaces)
-│   │   └── TodoPorts.ts
-│   ├── Todo.ts          # 📦 Domain Entities
-│   └── TodoValueObjects.ts
-├── services/            # ⚙️ Application Services
-│   ├── TodoService.ts   # 🎯 Unified Service Facade
-│   ├── GetTodosService.ts
-│   ├── CreateTodoService.ts
-│   ├── UpdateTodoService.ts
-│   ├── DeleteTodoService.ts
-│   └── GetTodoByIdService.ts
-└── controllers/         # Additional Controllers
-    └── healthController.ts
+│   └── repositories/        # � Secondary Adapters
+│       └── todoRepository.ts # PostgreSQL implementation
+├── controllers/             # � Primary Adapters
+│   ├── todoController.ts    # REST API controller
+│   └── healthController.ts  # Health check controller
+├── domain/                  # ⬢ Core Domain
+│   ├── ports/              # 🔌 Ports (Interfaces)
+│   │   └── TodoPorts.ts    # Service & Repository interfaces
+│   ├── Todo.ts             # 📦 Domain Entity
+│   └── TodoValueObjects.ts # Value objects and DTOs
+├── services/               # ⚙️ Application Services
+│   ├── TodoService.ts      # 🎯 Unified Service Facade
+│   └── components/         # 🔧 Service Components
+│       ├── create-todos.component.ts
+│       ├── get-todos.component.ts
+│       ├── get-todo-by-id.component.ts
+│       ├── update-todos.component.ts
+│       └── delete-todo.component.ts
+├── routes/                 # Route Configuration
+│   ├── index.ts           # Route aggregation
+│   ├── todoRoutes.ts      # Todo route definitions & DI
+│   └── healthRoutes.ts    # Health route definitions
+├── config/                 # Configuration
+│   ├── index.ts           # Environment configuration
+│   └── swagger.ts         # API documentation config
+├── db/                     # Database Setup
+│   ├── index.ts           # PostgreSQL connection
+│   └── migrations/        # SQL migration files
+├── __tests__/             # Test Files
+│   ├── todos.integration.test.ts
+│   └── health.test.ts
+├── app.ts                  # Express application setup
+├── index.ts                # Application entry point
+└── test-setup.ts          # Test configuration
 ```
+
+## Implementation Highlights
+
+### Component-Based Service Architecture
+
+The current implementation uses a **component-based approach** where:
+
+1. **TodoService** acts as a **Facade Pattern** implementation
+2. Individual **service components** handle specific operations
+3. **Single Responsibility Principle** is maintained at the component level
+4. **Composition over Inheritance** is used for building complex operations
+
+### Database Integration
+
+- **PostgreSQL** as the primary database with Docker support
+- **Connection pooling** for performance and resource management
+- **SQL migrations** for schema versioning
+- **Parameterized queries** for security
+- **Transaction support** for data consistency
+
+### Error Handling Strategy
+
+- **Consistent error response format** across all endpoints
+- **Domain-specific error codes** for client-side handling
+- **Proper HTTP status codes** mapping
+- **Development vs Production error details** configuration
