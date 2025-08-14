@@ -52,25 +52,9 @@ jobs:
         run: |
           # Run migrations
           npm run migrate
-        env:
-          NODE_ENV: test
-          DB_HOST: localhost
-          DB_PORT: 5432
-          DB_NAME: todolist
-          DB_USER: postgres
-          DB_PASSWORD: password
-          REPOSITORY_TYPE: postgres
 
       - name: Run tests
         run: npm test
-        env:
-          NODE_ENV: test
-          DB_HOST: localhost
-          DB_PORT: 5432
-          DB_NAME: todolist
-          DB_USER: postgres
-          DB_PASSWORD: password
-          REPOSITORY_TYPE: postgres
 
       - name: Test health endpoint
         run: |
