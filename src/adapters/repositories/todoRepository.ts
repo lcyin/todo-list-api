@@ -29,9 +29,9 @@ export class TodoRepository implements ITodoRepository {
         RETURNING id, title, description, completed, created_at, updated_at
       `;
       const values = [todo.title, todo.description, todo.completed];
-      const result = await client.query(query, values);
+      const { rows } = await client.query(query, values);
 
-      const row = result.rows[0];
+      const [row] = rows;
       return this.castRawDataToTodo(row);
     } finally {
       client.release();
