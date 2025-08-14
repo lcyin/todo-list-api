@@ -14,11 +14,11 @@ jobs:
       postgres:
         image: postgres:15-alpine
         env:
-          POSTGRES_DB: todolist
+          POSTGRES_DB: todolist_test
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: password
         ports:
-          - 5432:5432
+          - 25434:5432
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
