@@ -171,8 +171,8 @@ export class TodoRepository implements ITodoRepository {
     const client = await this.pool.connect();
     try {
       const query = "DELETE FROM todos WHERE id = $1";
-      const result = await client.query(query, [parseInt(id)]);
-      return result.rowCount !== null && result.rowCount > 0;
+      const { rowCount } = await client.query(query, [parseInt(id)]);
+      return rowCount !== null && rowCount > 0;
     } finally {
       client.release();
     }
