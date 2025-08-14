@@ -13,8 +13,8 @@ require("dotenv").config();
 // Database configuration from environment variables
 const dbConfig = {
   host: process.env.DB_HOST || "localhost",
-  port: process.env.DB_PORT || "5432",
-  database: process.env.DB_NAME || "todolist",
+  port: process.env.DB_PORT || "25434",
+  database: process.env.DB_NAME || "todolist_test",
   user: process.env.DB_USER || "postgres",
   password: process.env.DB_PASSWORD || "password",
 };

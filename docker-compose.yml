@@ -5,11 +5,11 @@ services:
     image: postgres:15-alpine
     container_name: todo-list-postgres
     environment:
-      POSTGRES_DB: todolist
+      POSTGRES_DB: todolist_test
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: password
     ports:
-      - "5432:5432"
+      - "25432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
