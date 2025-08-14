@@ -73,56 +73,15 @@ export class TodoRepository implements ITodoRepository {
 
       // Build query conditions dynamically based on filters
 
-      const applySearchFilters = (filters: TodoFilters) => {
-        const values: (string | number | boolean)[] = [];
-        const conditions: string[] = [];
-        // Apply filters
-        if (filters?.completed !== undefined) {
-          conditions.push(`completed = $${values.length + 1}`);
-          values.push(filters.completed);
-        }
-
-        if (filters?.search) {
-          conditions.push(
-            `(title ILIKE $${values.length + 1} OR description ILIKE $${values.length + 2})`
-          );
-          values.push(`%${filters.search}%`, `%${filters.search}%`);
-        }
-
-        return {
-          conditions,
-          values,
-        };
-      };
-
       const { conditions, values } = applySearchFilters(filters);
-
-      const buildQueryWithConditions = (
-        query: string,
-        conditions: string[],
-        values: (string | number | boolean)[]
-      ) => {
-        if (conditions.length > 0) {
-          query += " WHERE " + conditions.join(" AND ");
-        }
-
-        // Apply sorting
-        query += " ORDER BY created_at DESC";
-
-        // Apply pagination
-        if (filters?.limit) {
-          query += ` LIMIT $${values.length + 1}`;
-          values.push(filters.limit);
-        }
-
-        if (filters?.offset) {
-          query += ` OFFSET $${values.length + 1}`;
-          values.push(filters.offset);
-        }
-        return query;
-      };
-
-      const queryWithConditions = buildQueryWithConditions(query, conditions, values);
+      const { limit, offset } = filters;
+      const queryWithConditions = buildQueryWithConditions(
+        query,
+        limit,
+        offset,
+        conditions,
+        values
+      );
 
       const { rows } = await client.query(queryWithConditions, values);
 
@@ -220,3 +179,52 @@ export class TodoRepository implements ITodoRepository {
     await this.pool.end();
   }
 }
+
+const applySearchFilters = (filters: TodoFilters) => {
+  const values: (string | number | boolean)[] = [];
+  const conditions: string[] = [];
+  // Apply filters
+  if (filters?.completed !== undefined) {
+    conditions.push(`completed = $${values.length + 1}`);
+    values.push(filters.completed);
+  }
+
+  if (filters?.search) {
+    conditions.push(
+      `(title ILIKE $${values.length + 1} OR description ILIKE $${values.length + 2})`
+    );
+    values.push(`%${filters.search}%`, `%${filters.search}%`);
+  }
+
+  return {
+    conditions,
+    values,
+  };
+};
+
+const buildQueryWithConditions = (
+  query: string,
+  limit: number,
+  offset: number,
+  conditions: string[],
+  values: (string | number | boolean)[]
+) => {
+  if (conditions.length > 0) {
+    query += " WHERE " + conditions.join(" AND ");
+  }
+
+  // Apply sorting
+  query += " ORDER BY created_at DESC";
+
+  // Apply pagination
+  if (limit) {
+    query += ` LIMIT $${values.length + 1}`;
+    values.push(limit);
+  }
+
+  if (offset) {
+    query += ` OFFSET $${values.length + 1}`;
+    values.push(offset);
+  }
+  return query;
+};
