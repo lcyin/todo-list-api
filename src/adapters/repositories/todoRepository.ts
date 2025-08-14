@@ -18,25 +18,6 @@ export class TodoRepository implements ITodoRepository {
   }
 
   /**
-   * Test database connection
-   */
-  async testConnection(): Promise<void> {
-    try {
-      const client = await this.pool.connect();
-      await client.query("SELECT 1");
-      client.release();
-
-      // Only log in non-test environments to avoid Jest warnings
-      if (process.env.NODE_ENV !== "test") {
-        console.log("✅ PostgreSQL connection established successfully");
-      }
-    } catch (error) {
-      console.error("❌ Failed to connect to PostgreSQL:", error);
-      throw error;
-    }
-  }
-
-  /**
    * Save a new todo
    */
   async save(todo: Todo): Promise<Todo> {

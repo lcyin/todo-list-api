@@ -56,12 +56,6 @@ export interface ITodoRepository {
   delete(id: string): Promise<boolean>;
 
   /**
-   * Test the repository connection (if applicable)
-   * @returns Promise that resolves when connection is verified
-   */
-  testConnection?(): Promise<void>;
-
-  /**
    * Close the repository connection (if applicable)
    * @returns Promise that resolves when connection is closed
    */
