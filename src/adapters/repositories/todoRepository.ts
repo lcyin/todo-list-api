@@ -151,13 +151,13 @@ export class TodoRepository implements ITodoRepository {
       `;
 
       const values = [parseInt(todo.id), todo.title, todo.description, todo.completed];
-      const result = await client.query(query, values);
+      const { rows } = await client.query(query, values);
 
-      if (result.rows.length === 0) {
+      if (rows.length === 0) {
         throw new Error(`Todo with id ${todo.id} not found`);
       }
 
-      const row = result.rows[0];
+      const [row] = rows;
       return this.castRawDataToTodo(row);
     } finally {
       client.release();
