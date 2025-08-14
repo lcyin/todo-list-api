@@ -205,8 +205,9 @@ export class TodoRepository implements ITodoRepository {
         query += " WHERE " + conditions.join(" AND ");
       }
 
-      const result = await client.query(query, values);
-      return parseInt(result.rows[0].count);
+      const { rows } = await client.query(query, values);
+      const [result] = rows;
+      return parseInt(result.count);
     } finally {
       client.release();
     }
