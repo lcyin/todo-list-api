@@ -75,7 +75,7 @@ export class TodoRepository implements ITodoRepository {
 
       const { conditions, values } = applySearchFilters(filters);
       const { limit, offset } = filters;
-      const queryWithConditions = buildQueryWithConditions(
+      const queryWithConditions = buildFindAllQueryWithConditions(
         query,
         limit,
         offset,
@@ -143,28 +143,15 @@ export class TodoRepository implements ITodoRepository {
   private async count(filters?: TodoFilters): Promise<number> {
     const client = await this.pool.connect();
     try {
-      let query = "SELECT COUNT(*) as count FROM todos";
-      const values: (string | number | boolean)[] = [];
-      const conditions: string[] = [];
+      const query = "SELECT COUNT(*) as count FROM todos";
 
-      // Apply filters (same logic as findAll)
-      if (filters?.completed !== undefined) {
-        conditions.push(`completed = $${values.length + 1}`);
-        values.push(filters.completed);
-      }
+      const { conditions, values } = filters
+        ? applySearchFilters(filters)
+        : { conditions: [], values: [] };
 
-      if (filters?.search) {
-        conditions.push(
-          `(title ILIKE $${values.length + 1} OR description ILIKE $${values.length + 2})`
-        );
-        values.push(`%${filters.search}%`, `%${filters.search}%`);
-      }
+      const queryWithConditions = buildCountQueryWithConditions(query, conditions);
 
-      if (conditions.length > 0) {
-        query += " WHERE " + conditions.join(" AND ");
-      }
-
-      const { rows } = await client.query(query, values);
+      const { rows } = await client.query(queryWithConditions, values);
       const [result] = rows;
       return parseInt(result.count);
     } finally {
@@ -202,7 +189,7 @@ const applySearchFilters = (filters: TodoFilters) => {
   };
 };
 
-const buildQueryWithConditions = (
+const buildFindAllQueryWithConditions = (
   query: string,
   limit: number,
   offset: number,
@@ -225,6 +212,13 @@ const buildQueryWithConditions = (
   if (offset) {
     query += ` OFFSET $${values.length + 1}`;
     values.push(offset);
+  }
+  return query;
+};
+
+const buildCountQueryWithConditions = (query: string, conditions: string[]) => {
+  if (conditions.length > 0) {
+    query += " WHERE " + conditions.join(" AND ");
   }
   return query;
 };
