@@ -124,9 +124,9 @@ export class TodoRepository implements ITodoRepository {
 
       const queryWithConditions = buildQueryWithConditions(query, conditions, values);
 
-      const result = await client.query(queryWithConditions, values);
+      const { rows } = await client.query(queryWithConditions, values);
 
-      const todos = result.rows.map(this.castRawDataToTodo);
+      const todos = rows.map(this.castRawDataToTodo);
 
       // Get total count for pagination
       const total = await this.count(filters);
