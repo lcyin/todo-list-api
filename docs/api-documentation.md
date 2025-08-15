@@ -42,25 +42,9 @@ The API uses consistent error response format across all endpoints:
 ```
 
 Common error codes:
+
 - `ROUTE_NOT_FOUND` - Invalid endpoint
 - `TODO_NOT_FOUND` - Todo with specified ID doesn't exist
 - `INVALID_TODO_DATA` - Invalid request body
 - `INVALID_QUERY_PARAMETERS` - Invalid query parameters
 - `INTERNAL_SERVER_ERROR` - Unexpected server error
-
-## GitHub Pages Documentation Deployment
-
-The Swagger documentation can be deployed to GitHub Pages for easy access:
-
-### Automatic Deployment (Recommended)
-
-Set up GitHub Actions to automatically deploy documentation:
-
-1. Go to your repository **Settings** → **Pages**
-2. Set **Source** to "GitHub Actions"
-3. Push changes to the main branch
-4. Documentation will be available at: `https://[username].github.io/[repository-name]/`
-
-### Manual Deployment
-
-You can manually generate and deploy documentation by setting up GitHub Pages to serve from the `docs/` folder and creating static HTML files from your Swagger specification.
