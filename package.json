@@ -13,7 +13,8 @@
         "lint:fix": "eslint src/**/*.ts --fix && prettier --write src/**/*.ts",
         "format": "prettier --write src/**/*.ts",
         "format:check": "prettier --check src/**/*.ts",
-        "migrate": "node scripts/migrate.js"
+        "migrate": "node scripts/migrate.js",
+        "test:migrate": "NODE_ENV=test node scripts/migrate.js"
     },
     "keywords": [
         "todo",

@@ -3,7 +3,10 @@
 const fs = require("fs");
 const path = require("path");
 const { execSync } = require("child_process");
-require("dotenv").config();
+const envFile = process.env.NODE_ENV === "test" ? ".env.test" : ".env";
+require("dotenv").config({
+  path: envFile,
+});
 
 /**
  * Migration script to run SQL files in the migrations folder
