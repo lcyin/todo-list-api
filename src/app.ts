@@ -4,7 +4,7 @@ import cors from "cors";
 import morgan from "morgan";
 import swaggerUi from "swagger-ui-express";
 import { config } from "./config";
-import { swaggerSpec } from "./config/swagger";
+import { swaggerSpec } from "./config/swagger-autogen";
 import { routes } from "./routes";
 
 /**
