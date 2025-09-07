@@ -10,6 +10,7 @@ A RESTful API for managing todos built with Express.js and TypeScript following 
 - 🌐 CORS enabled
 - 📝 Request logging with Morgan
 - 🛡️ Error handling middleware
+- ✨ **Input validation with Zod**
 - 📊 TypeScript for type safety
 - 🚀 Hot reload with Nodemon
 - 🔄 Dependency injection pattern
@@ -91,9 +92,12 @@ src/
 ├── repositories/              # Data access layer
 │   └── todo-repository.ts
 ├── middleware/                # Custom middleware
-│   └── errorHandler.ts
+│   ├── errorHandler.ts
+│   └── validation.ts          # Zod validation middleware
 ├── routes/                    # Route definitions
 │   └── todos.ts
+├── schemas/                   # Zod validation schemas
+│   └── todo.schema.ts
 ├── types/                     # TypeScript type definitions
 │   └── todo-route.ts
 └── interfaces/                # TypeScript interfaces (empty)
@@ -101,12 +105,14 @@ src/
 
 ### Architecture
 
-This project follows a **layered architecture** pattern:
+This project follows a **layered architecture** pattern with **input validation**:
 
 1. **Controllers** - Handle HTTP requests and responses
-2. **Services** - Contain business logic and validation
+2. **Services** - Contain business logic
 3. **Repositories** - Manage data access and storage
-4. **Types/Interfaces** - Define TypeScript contracts
+4. **Middleware** - Handle validation, error handling, and security
+5. **Schemas** - Define input validation rules with Zod
+6. **Types/Interfaces** - Define TypeScript contracts
 
 ## Sample Data
 
@@ -120,10 +126,47 @@ The application comes with pre-loaded sample todos for testing:
 When adding new features:
 
 1. **Create types** in `src/types/` for any new data structures
-2. **Add repository methods** in `src/repositories/` for data access
-3. **Implement business logic** in `src/services/`
-4. **Create controller methods** in `src/controllers/` for HTTP handling
-5. **Define routes** in `src/routes/` and wire up dependencies
+2. **Define validation schemas** in `src/schemas/` using Zod
+3. **Add repository methods** in `src/repositories/` for data access
+4. **Implement business logic** in `src/services/`
+5. **Create controller methods** in `src/controllers/` for HTTP handling
+6. **Define routes** in `src/routes/` with validation middleware and wire up dependencies
+
+## Input Validation with Zod
+
+This project uses **Zod** for runtime type checking and input validation:
+
+### Validation Features:
+- **Type-safe schemas** with TypeScript integration
+- **Request validation** for body, parameters, and query strings
+- **Custom error messages** with detailed validation feedback
+- **Data transformation** (trimming, optional field handling)
+- **Consistent error responses** following API format
+
+### Schema Structure:
+```typescript
+// Example schema for creating a todo
+export const createTodoSchema = z.object({
+  body: z.object({
+    title: z.string().trim().min(1, 'Title is required').max(200),
+    description: z.string().max(1000).optional()
+  })
+});
+```
+
+### Validation Rules:
+- **Title**: Required, 1-200 characters, automatically trimmed
+- **Description**: Optional, max 1000 characters
+- **ID Parameters**: Must be valid UUID format
+- **Updates**: At least one field required for update operations
+
+### Error Response Format:
+```json
+{
+  "success": false,
+  "error": "Validation failed: body.title: Title is required"
+}
+```
 
 ## Testing
 
@@ -140,11 +183,16 @@ Currently, the project has placeholder tests. To add proper testing:
 - `npm run build` - Build TypeScript to JavaScript
 - `npm start` - Start production server
 - `npm test` - Run tests (placeholder)
+- `./test-validation.sh` - Test Zod validation scenarios (ensure server is running)
 
 ## Next Steps & Roadmap
 
+### ✅ Completed Features
+- [x] **Input validation with Zod** - Comprehensive request validation with schemas
+- [x] Type-safe validation middleware with proper error handling
+- [x] Request body, parameters, and query validation
+
 ### Immediate Improvements
-- [ ] Add input validation using libraries like Joi or class-validator
 - [ ] Implement proper error types and custom exceptions
 - [ ] Add request/response logging middleware
 - [ ] Set up automated testing (Jest/Mocha)
