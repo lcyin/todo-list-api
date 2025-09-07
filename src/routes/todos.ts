@@ -2,6 +2,16 @@ import { Router } from "express";
 import { TodoService } from "../services/todo-service";
 import { TodoController } from "../controllers/todo-controller";
 import { TodoRepository } from "../repositories/todo-repository";
+import {
+  validate,
+  validateBody,
+  validateParams,
+} from "../middleware/validation";
+import {
+  createTodoSchema,
+  updateTodoSchema,
+  todoParamsSchema,
+} from "../schemas/todo.schema";
 
 const router = Router();
 const todoRepository = new TodoRepository();
@@ -20,27 +30,35 @@ router.get("/", todoController.getAllTodos);
  * @desc    Get todo by ID
  * @access  Public
  */
-router.get("/:id", todoController.getTodoById);
+router.get(
+  "/:id",
+  validateParams(todoParamsSchema),
+  todoController.getTodoById
+);
 
 /**
  * @route   POST /api/todos
  * @desc    Create new todo
  * @access  Public
  */
-router.post("/", todoController.createTodo);
+router.post("/", validate(createTodoSchema), todoController.createTodo);
 
 /**
  * @route   PUT /api/todos/:id
  * @desc    Update todo
  * @access  Public
  */
-router.put("/:id", todoController.updateTodo);
+router.put("/:id", validate(updateTodoSchema), todoController.updateTodo);
 
 /**
  * @route   DELETE /api/todos/:id
  * @desc    Delete todo
  * @access  Public
  */
-router.delete("/:id", todoController.deleteTodo);
+router.delete(
+  "/:id",
+  validateParams(todoParamsSchema),
+  todoController.deleteTodo
+);
 
 export default router;

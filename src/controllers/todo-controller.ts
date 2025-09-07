@@ -48,13 +48,7 @@ export class TodoController {
   ): Response<ApiResponse<Todo>> => {
     const { title, description } = req.body;
 
-    if (!title || title.trim() === "") {
-      return res.status(400).json({
-        success: false,
-        error: "Title is required",
-      });
-    }
-
+    // Validation is now handled by Zod middleware
     const newTodo = this.todoService.createTodo({ title, description });
 
     return res.status(201).json({
