@@ -9,7 +9,9 @@ A RESTful API for managing todos built with Express.js and TypeScript following 
 - 🔒 Security middleware (Helmet)
 - 🌐 CORS enabled
 - 📝 Request logging with Morgan
-- 🛡️ Error handling middleware
+- 🛡️ **Comprehensive error handling system**
+- ⚠️ **Structured error types with ErrorCode enum**
+- 🎯 **Custom error interfaces and detailed error responses**
 - ✨ **Input validation with Zod**
 - 📊 TypeScript for type safety
 - 🚀 Hot reload with Nodemon
@@ -92,8 +94,13 @@ src/
 ├── repositories/              # Data access layer
 │   └── todo-repository.ts
 ├── middleware/                # Custom middleware
-│   ├── errorHandler.ts
-│   └── validation.ts          # Zod validation middleware
+│   ├── errorHandler.ts        # Centralized error handling middleware
+│   ├── validation.ts          # Zod validation middleware
+│   ├── enums/                 # Error classification enums
+│   │   └── error-code.enum.ts # Centralized error codes
+│   ├── exceptions/            # Custom exception classes (empty)
+│   └── interfaces/            # Error-related interfaces
+│       └── errore-interface.ts # Error details interface
 ├── routes/                    # Route definitions
 │   └── todos.ts
 ├── schemas/                   # Zod validation schemas
@@ -105,14 +112,15 @@ src/
 
 ### Architecture
 
-This project follows a **layered architecture** pattern with **input validation**:
+This project follows a **layered architecture** pattern with **input validation** and **structured error handling**:
 
-1. **Controllers** - Handle HTTP requests and responses
-2. **Services** - Contain business logic
+1. **Controllers** - Handle HTTP requests and responses, throw structured errors
+2. **Services** - Contain business logic, validate business rules
 3. **Repositories** - Manage data access and storage
-4. **Middleware** - Handle validation, error handling, and security
+4. **Middleware** - Handle validation, centralized error handling, and security
 5. **Schemas** - Define input validation rules with Zod
 6. **Types/Interfaces** - Define TypeScript contracts
+7. **Error Management** - Centralized error codes, custom error interfaces, and structured error responses
 
 ## Sample Data
 
@@ -168,6 +176,104 @@ export const createTodoSchema = z.object({
 }
 ```
 
+## Error Handling System
+
+The application implements a comprehensive error handling system with structured error management:
+
+### Error Architecture
+
+#### 1. **Custom Error Interface**
+```typescript
+export interface CustomError extends Error {
+  statusCode?: number;
+  type: ErrorCode;
+  details?: ErrorDetails[];
+}
+```
+
+#### 2. **Error Codes Enum**
+Centralized error classification system:
+- `VALIDATION_ERROR` - Input validation failures
+- `TODO_NOT_FOUND` - Resource not found errors
+- `INVALID_TODO_STATE` - Business logic violations
+- `DATABASE_ERROR` - Data persistence issues
+- `INTERNAL_SERVER_ERROR` - Unexpected system errors
+
+#### 3. **Error Details Interface**
+Provides structured error information:
+```typescript
+export interface ErrorDetails {
+  field?: string;
+  value?: any;
+  constraint?: string;
+  code?: string;
+}
+```
+
+### Error Handling Flow
+
+1. **Error Generation**: Controllers and services throw structured errors with specific ErrorCode types
+2. **Error Middleware**: Centralized error handler processes all errors
+3. **Response Mapping**: Each error type maps to appropriate HTTP status codes
+4. **Logging**: Comprehensive error logging with context information
+5. **Client Response**: Consistent error response format
+
+### Error Response Examples
+
+#### Validation Error (400)
+```json
+{
+  "success": false,
+  "error": "Validation failed: body.title: Title is required"
+}
+```
+
+#### Resource Not Found (404)
+```json
+{
+  "success": false,
+  "error": "Todo not found, id: 123e4567-e89b-12d3-a456-426614174000"
+}
+```
+
+#### Business Logic Error (400)
+```json
+{
+  "success": false,
+  "error": "Cannot update completed todo"
+}
+```
+
+#### Database Error (500)
+```json
+{
+  "success": false,
+  "error": "Database error occurred"
+}
+```
+
+### Development Error Features
+
+In development mode, error responses include stack traces for debugging:
+```json
+{
+  "success": false,
+  "error": "Todo not found",
+  "stack": "Error: Todo not found\n    at TodoController.getTodo..."
+}
+```
+
+### Error Logging
+
+The error handler logs detailed error information:
+- Error type and message
+- Request URL and HTTP method
+- Timestamp
+- Stack trace
+- Additional error details
+
+This information helps with debugging and monitoring application health.
+
 ## Testing
 
 Currently, the project has placeholder tests. To add proper testing:
@@ -193,7 +299,7 @@ Currently, the project has placeholder tests. To add proper testing:
 - [x] Request body, parameters, and query validation
 
 ### Immediate Improvements
-- [ ] Implement proper error types and custom exceptions
+- [x] **Implement proper error types and custom exceptions** - Structured error handling with ErrorCode enum and CustomError interface
 - [ ] Add request/response logging middleware
 - [ ] Set up automated testing (Jest/Mocha)
 
