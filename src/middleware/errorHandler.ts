@@ -1,6 +1,11 @@
 import { Request, Response, NextFunction } from "express";
 import { ErrorCode } from "./enums/error-code.enum";
 import { ErrorDetails } from "./interfaces/errore-interface";
+import logger from "../config/logger";
+
+interface LoggingRequest extends Request {
+  requestId?: string;
+}
 
 export interface CustomError extends Error {
   statusCode?: number;
@@ -10,7 +15,7 @@ export interface CustomError extends Error {
 
 export const errorHandler = (
   err: CustomError,
-  req: Request,
+  req: LoggingRequest,
   res: Response,
   next: NextFunction
 ): Response | void => {
@@ -20,41 +25,50 @@ export const errorHandler = (
     stack: err.stack,
   };
 
-  console.error("Error:", {
-    type: err.type,
-    message: err.message,
-    stack: err.stack,
-    url: req.url,
-    method: req.method,
-    timestamp: new Date().toISOString(),
-    details: err.details || undefined,
-  });
+  // Determine status code and error message based on error type
+  let statusCode = defaultStatusCode;
+  let errorMessage = defaultMessage;
 
   switch (err.type) {
     case ErrorCode.VALIDATION_ERROR:
     case ErrorCode.INVALID_TODO_STATE:
-      return res.status(400).json({
-        success: false,
-        error: err.message,
-        ...errorResponse,
-      });
+      statusCode = 400;
+      errorMessage = err.message;
+      break;
     case ErrorCode.TODO_NOT_FOUND:
-      return res.status(404).json({
-        success: false,
-        error: err.message,
-        ...errorResponse,
-      });
+      statusCode = 404;
+      errorMessage = err.message;
+      break;
     case ErrorCode.DATABASE_ERROR:
-      return res.status(500).json({
-        success: false,
-        error: "Database error occurred",
-        ...errorResponse,
-      });
+      statusCode = 500;
+      errorMessage = "Database error occurred";
+      break;
     default:
-      return res.status(defaultStatusCode).json({
-        success: false,
-        error: defaultMessage,
-        ...errorResponse,
-      });
+      statusCode = err.statusCode || defaultStatusCode;
+      errorMessage = err.message || defaultMessage;
   }
+
+  // Log error with context
+  const errorLog = {
+    requestId: req.requestId,
+    method: req.method,
+    url: req.url,
+    statusCode,
+    errorType: err.type || "UNKNOWN",
+    errorMessage: err.message,
+    stack: err.stack,
+    details: err.details,
+  };
+
+  if (statusCode >= 500) {
+    logger.error("Server Error", errorLog);
+  } else {
+    logger.warn("Client Error", errorLog);
+  }
+
+  return res.status(statusCode).json({
+    success: false,
+    error: errorMessage,
+    ...errorResponse,
+  });
 };

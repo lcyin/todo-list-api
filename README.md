@@ -289,6 +289,9 @@ Currently, the project has placeholder tests. To add proper testing:
 - `npm run build` - Build TypeScript to JavaScript
 - `npm start` - Start production server
 - `npm test` - Run tests (placeholder)
+- `npm run logs` - View today's application logs in real-time
+- `npm run logs:error` - View error logs (exceptions and rejections)
+- `npm run logs:all` - View all log files in real-time
 - `./test-validation.sh` - Test Zod validation scenarios (ensure server is running)
 
 ## Next Steps & Roadmap
@@ -300,7 +303,7 @@ Currently, the project has placeholder tests. To add proper testing:
 
 ### Immediate Improvements
 - [x] **Implement proper error types and custom exceptions** - Structured error handling with ErrorCode enum and CustomError interface
-- [ ] Add request/response logging middleware
+- [x] **Add request/response logging middleware** - Comprehensive logging with Winston, request tracking, and structured logs
 - [ ] Set up automated testing (Jest/Mocha)
 
 ### Database Integration

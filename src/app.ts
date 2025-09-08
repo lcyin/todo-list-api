@@ -4,6 +4,8 @@ import helmet from "helmet";
 import morgan from "morgan";
 import todoRoutes from "./routes/todos";
 import { errorHandler } from "./middleware/errorHandler";
+import { requestLogger, addRequestId } from "./middleware/requestLogger";
+import logger from "./config/logger";
 
 const app: Application = express();
 const PORT = process.env.PORT || 3000;
@@ -11,7 +13,22 @@ const PORT = process.env.PORT || 3000;
 // Middleware
 app.use(helmet()); // Security headers
 app.use(cors()); // Enable CORS
-app.use(morgan("combined")); // Logging
+
+// Request logging middleware (before Morgan)
+app.use(addRequestId);
+app.use(requestLogger);
+
+// Morgan HTTP logging (simplified since we have custom logging)
+app.use(
+  morgan("combined", {
+    stream: {
+      write: (message: string) => {
+        logger.http(message.trim());
+      },
+    },
+  })
+);
+
 app.use(express.json()); // Parse JSON bodies
 app.use(express.urlencoded({ extended: true })); // Parse URL-encoded bodies
 
@@ -52,9 +69,13 @@ app.use(errorHandler);
 
 // Start server
 app.listen(PORT, () => {
-  console.log(`🚀 Server is running on port ${PORT}`);
-  console.log(`📚 API Documentation: http://localhost:${PORT}`);
-  console.log(`🏥 Health Check: http://localhost:${PORT}/health`);
+  logger.info(`🚀 Server running on port ${PORT}`, {
+    port: PORT,
+    environment: process.env.NODE_ENV || "development",
+    timestamp: new Date().toISOString(),
+  });
+  logger.info(`📚 API Documentation: http://localhost:${PORT}`);
+  logger.info(`🏥 Health Check: http://localhost:${PORT}/health`);
 });
 
 export default app;
