@@ -32,6 +32,7 @@ export const errorHandler = (
 
   switch (err.type) {
     case ErrorCode.VALIDATION_ERROR:
+    case ErrorCode.INVALID_TODO_STATE:
       return res.status(400).json({
         success: false,
         error: err.message,

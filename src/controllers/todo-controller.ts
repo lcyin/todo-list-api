@@ -69,19 +69,40 @@ export class TodoController {
     const { id } = req.params;
     const { title, description, completed } = req.body;
 
-    const updatedTodo = this.todoService.updateTodo(id, {
-      title,
-      description,
-      completed,
-    });
+    const foundTodo = this.todoService.getTodoById(id);
 
-    if (!updatedTodo) {
+    if (!foundTodo) {
       next({
         type: ErrorCode.TODO_NOT_FOUND,
         message: `Todo not found, id: ${id}`,
       });
       return;
     }
+
+    if (foundTodo.completed && completed === false) {
+      next({
+        type: ErrorCode.INVALID_TODO_STATE,
+        message: "Cannot mark a completed todo as incomplete",
+      });
+      return;
+    }
+
+    if (
+      foundTodo.completed &&
+      (description !== undefined || title !== undefined)
+    ) {
+      next({
+        type: ErrorCode.INVALID_TODO_STATE,
+        message: "Cannot update a completed todo",
+      });
+      return;
+    }
+
+    const updatedTodo = this.todoService.updateTodo(id, {
+      title,
+      description,
+      completed,
+    });
 
     return res.json({
       success: true,
