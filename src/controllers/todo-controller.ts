@@ -27,7 +27,7 @@ export class TodoController {
     req: Request,
     res: Response,
     next: Function
-  ): Response<ApiResponse<Todo>> | void => {
+  ): Response<ApiResponse<Todo>> | undefined => {
     const { id } = req.params; // Extract ID from request parameters
     const todo = this.todoService.getTodoById(id); // Use service to get todo by ID
 
@@ -63,8 +63,9 @@ export class TodoController {
 
   public updateTodo = (
     req: Request<{ id: string }, {}, UpdateTodoRequest>,
-    res: Response
-  ): Response<ApiResponse<Todo>> => {
+    res: Response,
+    next: Function
+  ): Response<ApiResponse<Todo>> | undefined => {
     const { id } = req.params;
     const { title, description, completed } = req.body;
 
@@ -75,10 +76,11 @@ export class TodoController {
     });
 
     if (!updatedTodo) {
-      return res.status(404).json({
-        success: false,
-        error: "Todo not found",
+      next({
+        type: ErrorCode.TODO_NOT_FOUND,
+        message: `Todo not found, id: ${id}`,
       });
+      return;
     }
 
     return res.json({
@@ -90,16 +92,18 @@ export class TodoController {
 
   public deleteTodo = (
     req: Request,
-    res: Response
-  ): Response<ApiResponse<null>> => {
+    res: Response,
+    next: Function
+  ): Response<ApiResponse<null>> | undefined => {
     const { id } = req.params;
     const deleted = this.todoService.deleteTodo(id);
 
     if (!deleted) {
-      return res.status(404).json({
-        success: false,
-        error: "Todo not found",
+      next({
+        type: ErrorCode.TODO_NOT_FOUND,
+        message: `Todo not found, id: ${id}`,
       });
+      return;
     }
 
     return res.json({
