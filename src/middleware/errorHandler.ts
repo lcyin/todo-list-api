@@ -1,7 +1,11 @@
 import { Request, Response, NextFunction } from "express";
+import { ErrorCode } from "./enums/error-code.enum";
+import { ErrorDetails } from "./interfaces/errore-interface";
 
 export interface CustomError extends Error {
   statusCode?: number;
+  type: ErrorCode;
+  details?: ErrorDetails[];
 }
 
 export const errorHandler = (
@@ -10,20 +14,40 @@ export const errorHandler = (
   res: Response,
   next: NextFunction
 ): Response | void => {
-  const statusCode = err.statusCode || 500;
-  const message = err.message || "Internal Server Error";
+  const defaultStatusCode = 500;
+  const defaultMessage = "Internal Server Error";
+  const errorResponse = process.env.NODE_ENV === "development" && {
+    stack: err.stack,
+  };
 
   console.error("Error:", {
+    type: err.type,
     message: err.message,
     stack: err.stack,
     url: req.url,
     method: req.method,
     timestamp: new Date().toISOString(),
+    details: err.details || undefined,
   });
 
-  return res.status(statusCode).json({
-    success: false,
-    error: message,
-    ...(process.env.NODE_ENV === "development" && { stack: err.stack }),
-  });
+  switch (err.type) {
+    case ErrorCode.VALIDATION_ERROR:
+      return res.status(400).json({
+        success: false,
+        error: err.message,
+        ...errorResponse,
+      });
+    case ErrorCode.DATABASE_ERROR:
+      return res.status(500).json({
+        success: false,
+        error: "Database error occurred",
+        ...errorResponse,
+      });
+    default:
+      return res.status(defaultStatusCode).json({
+        success: false,
+        error: defaultMessage,
+        ...errorResponse,
+      });
+  }
 };

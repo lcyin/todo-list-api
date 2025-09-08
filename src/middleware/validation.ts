@@ -1,6 +1,27 @@
 import { Request, Response, NextFunction } from "express";
 import { z, ZodError } from "zod";
 import { ApiResponse } from "../types/todo-route";
+import { ErrorDetails } from "./interfaces/errore-interface";
+import { ErrorCode } from "./enums/error-code.enum";
+
+function handleZodError(error: ZodError) {
+  const details: ErrorDetails[] = error.issues.map((issue) => ({
+    field: issue.path.join("."),
+    value: issue.input,
+    constraint: issue.code,
+    code: issue.message,
+  }));
+
+  const message = error.issues
+    .map((issue) => `${issue.path.join(".")}: ${issue.message}`)
+    .join(", ");
+  return {
+    message: `Validation failed: ${message}`,
+    details,
+    type: ErrorCode.VALIDATION_ERROR,
+    stack: error.stack,
+  };
+}
 
 // Generic validation middleware factory
 export const validate = (schema: z.ZodSchema) => {
@@ -16,27 +37,14 @@ export const validate = (schema: z.ZodSchema) => {
       next();
     } catch (error) {
       if (error instanceof ZodError) {
-        const errorMessages = error.issues.map((err: any) => {
-          const path = err.path.join(".");
-          return `${path}: ${err.message}`;
-        });
-
-        const response: ApiResponse<null> = {
-          success: false,
-          error: `Validation failed: ${errorMessages.join(", ")}`,
-        };
-
-        res.status(400).json(response);
+        const zodErrorDetails = handleZodError(error);
+        next(zodErrorDetails);
+        // res.status(400).json(response);
         return;
       }
 
-      // Handle unexpected errors
-      const response: ApiResponse<null> = {
-        success: false,
-        error: "Internal validation error",
-      };
-
-      res.status(500).json(response);
+      next(error);
+      return;
     }
   };
 };
@@ -49,26 +57,13 @@ export const validateBody = (schema: z.ZodSchema) => {
       next();
     } catch (error) {
       if (error instanceof ZodError) {
-        const errorMessages = error.issues.map((err: any) => {
-          const path = err.path.join(".");
-          return `${path}: ${err.message}`;
-        });
-
-        const response: ApiResponse<null> = {
-          success: false,
-          error: `Validation failed: ${errorMessages.join(", ")}`,
-        };
-
-        res.status(400).json(response);
+        const zodErrorDetails = handleZodError(error);
+        next(zodErrorDetails);
         return;
       }
 
-      const response: ApiResponse<null> = {
-        success: false,
-        error: "Internal validation error",
-      };
-
-      res.status(500).json(response);
+      next(error);
+      return;
     }
   };
 };
@@ -80,26 +75,13 @@ export const validateParams = (schema: z.ZodSchema) => {
       next();
     } catch (error) {
       if (error instanceof ZodError) {
-        const errorMessages = error.issues.map((err: any) => {
-          const path = err.path.join(".");
-          return `${path}: ${err.message}`;
-        });
-
-        const response: ApiResponse<null> = {
-          success: false,
-          error: `Validation failed: ${errorMessages.join(", ")}`,
-        };
-
-        res.status(400).json(response);
+        const zodErrorDetails = handleZodError(error);
+        next(zodErrorDetails);
         return;
       }
 
-      const response: ApiResponse<null> = {
-        success: false,
-        error: "Internal validation error",
-      };
-
-      res.status(500).json(response);
+      next(error);
+      return;
     }
   };
 };

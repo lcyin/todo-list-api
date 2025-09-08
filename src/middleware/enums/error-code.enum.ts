@@ -1,0 +1,20 @@
+export enum ErrorCode {
+  // Validation Errors
+  VALIDATION_ERROR = "VALIDATION_ERROR",
+
+  // Resource Errors
+  TODO_NOT_FOUND = "TODO_NOT_FOUND",
+  TODO_ALREADY_EXISTS = "TODO_ALREADY_EXISTS",
+
+  // Business Logic Errors
+  INVALID_TODO_STATE = "INVALID_TODO_STATE",
+  TODO_LIMIT_EXCEEDED = "TODO_LIMIT_EXCEEDED",
+
+  // System Errors
+  DATABASE_ERROR = "DATABASE_ERROR",
+  INTERNAL_SERVER_ERROR = "INTERNAL_SERVER_ERROR",
+
+  // Authentication/Authorization (for future use)
+  UNAUTHORIZED = "UNAUTHORIZED",
+  FORBIDDEN = "FORBIDDEN",
+}
