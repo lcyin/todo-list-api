@@ -1,6 +1,5 @@
 import { Request, Response, NextFunction } from "express";
 import { z, ZodError } from "zod";
-import { ApiResponse } from "../types/todo-route";
 import { ErrorDetails } from "./interfaces/errore-interface";
 import { ErrorCode } from "./enums/error-code.enum";
 
