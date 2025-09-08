@@ -6,6 +6,7 @@ import {
   ApiResponse,
 } from "../types/todo-route";
 import { TodoService } from "../services/todo-service";
+import { ErrorCode } from "../middleware/enums/error-code.enum";
 
 export class TodoController {
   constructor(private todoService: TodoService) {
@@ -24,16 +25,18 @@ export class TodoController {
   };
   public getTodoById = (
     req: Request,
-    res: Response
-  ): Response<ApiResponse<Todo>> => {
+    res: Response,
+    next: Function
+  ): Response<ApiResponse<Todo>> | void => {
     const { id } = req.params; // Extract ID from request parameters
     const todo = this.todoService.getTodoById(id); // Use service to get todo by ID
 
     if (!todo) {
-      return res.status(404).json({
-        success: false,
-        error: "Todo not found",
+      next({
+        type: ErrorCode.TODO_NOT_FOUND,
+        message: `Todo not found, id: ${id}`,
       });
+      return;
     }
 
     return res.json({

@@ -37,6 +37,12 @@ export const errorHandler = (
         error: err.message,
         ...errorResponse,
       });
+    case ErrorCode.TODO_NOT_FOUND:
+      return res.status(404).json({
+        success: false,
+        error: err.message,
+        ...errorResponse,
+      });
     case ErrorCode.DATABASE_ERROR:
       return res.status(500).json({
         success: false,
