@@ -21,20 +21,36 @@ const logColors = {
 
 winston.addColors(logColors);
 
-// Custom format for logs
-const logFormat = winston.format.combine(
-  winston.format.timestamp({ format: "YYYY-MM-DD HH:mm:ss:ms" }),
-  winston.format.colorize({ all: true }),
-  winston.format.printf(
-    (info) => `${info.timestamp} ${info.level}: ${info.message}`
-  )
-);
-
 // Environment-specific configuration
 const isProduction = process.env.NODE_ENV === "production";
 const isTest = process.env.NODE_ENV === "test";
 const isDevelopment =
   process.env.NODE_ENV === "development" || !process.env.NODE_ENV;
+console.log("Logger initialized in", process.env.NODE_ENV, "mode", {
+  isDevelopment,
+  isProduction,
+  isTest,
+});
+
+// Custom format for logs
+const logFormat = winston.format.combine(
+  winston.format.timestamp({ format: "YYYY-MM-DD HH:mm:ss:ms" }),
+  winston.format.colorize({ all: true }),
+  isDevelopment
+    ? winston.format.printf((info) => {
+        const { timestamp, level, message, ...meta } = info;
+        let output = `${timestamp} ${level}: ${message}`;
+
+        if (Object.keys(meta).length > 0) {
+          output += "\n" + JSON.stringify(meta, null, 2);
+        }
+
+        return output;
+      })
+    : winston.format.printf(
+        (info) => `${info.timestamp} ${info.level}: ${info.message}`
+      )
+);
 
 // Configure transports based on environment
 const getTransports = () => {
