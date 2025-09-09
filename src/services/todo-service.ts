@@ -3,7 +3,7 @@ import {
   CreateTodoRequest,
   Todo,
   UpdateTodoRequest,
-} from "../types/todo-route";
+} from "../interfaces/todo.interface";
 
 export class TodoService {
   constructor(private todoRepository: TodoRepository) {}

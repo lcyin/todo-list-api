@@ -2,7 +2,7 @@ import {
   Todo,
   CreateTodoRequest,
   UpdateTodoRequest,
-} from "../types/todo-route";
+} from "../interfaces/todo.interface";
 import { v4 as uuidv4 } from "uuid";
 export class TodoRepository {
   private todos: Todo[] = [

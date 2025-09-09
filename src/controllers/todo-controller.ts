@@ -4,7 +4,7 @@ import {
   CreateTodoRequest,
   UpdateTodoRequest,
   ApiResponse,
-} from "../types/todo-route";
+} from "../interfaces/todo.interface";
 import { TodoService } from "../services/todo-service";
 import { ErrorCode } from "../middleware/enums/error-code.enum";
 
