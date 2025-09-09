@@ -6,6 +6,7 @@ import todoRoutes from "./routes/todos";
 import { errorHandler } from "./middleware/errorHandler";
 import { requestLogger, addRequestId } from "./middleware/requestLogger";
 import logger from "./config/logger";
+import { transports } from "winston";
 
 const app: Application = express();
 const PORT = process.env.PORT || 3000;
@@ -28,7 +29,11 @@ app.use(
     },
   })
 );
-
+logger.info(
+  `Morgan HTTP request logging initialized, format: combined, transports: ${logger.transports
+    .map((t) => t.constructor.name)
+    .join(", ")}`
+);
 app.use(express.json()); // Parse JSON bodies
 app.use(express.urlencoded({ extended: true })); // Parse URL-encoded bodies
 

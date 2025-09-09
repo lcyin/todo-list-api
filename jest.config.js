@@ -20,5 +20,4 @@ module.exports = {
   forceExit: true,              // Fix the hanging issue
   detectOpenHandles: true,      // Help debug open handles
   maxWorkers: 1,                // Run tests sequentially to avoid port conflicts
-  verbose: true,                // Show individual test results
 };

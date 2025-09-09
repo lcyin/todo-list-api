@@ -30,41 +30,78 @@ const logFormat = winston.format.combine(
   )
 );
 
-// Daily rotate file transport for production logs
-const fileRotateTransport = new DailyRotateFile({
-  filename: "logs/app-%DATE%.log",
-  datePattern: "YYYY-MM-DD",
-  maxFiles: "14d",
-  maxSize: "20m",
-});
+// Environment-specific configuration
+const isProduction = process.env.NODE_ENV === "production";
+const isTest = process.env.NODE_ENV === "test";
+const isDevelopment =
+  process.env.NODE_ENV === "development" || !process.env.NODE_ENV;
 
-// Console transport
-const consoleTransport = new winston.transports.Console({
-  format: logFormat,
-});
+// Configure transports based on environment
+const getTransports = () => {
+  const transports: winston.transport[] = [];
+  if (isTest) {
+    // In test environment, only log errors and only to console (optional)
+    transports.push(
+      new winston.transports.Console({
+        format: winston.format.simple(),
+        level: "error", // Only show errors in tests
+      })
+    );
+    // Don't add file transports in test environment
+  } else {
+    // Console transport for development
+    if (isDevelopment) {
+      transports.push(
+        new winston.transports.Console({
+          format: logFormat,
+        })
+      );
+    }
 
+    // File transport for production and development
+    transports.push(
+      new DailyRotateFile({
+        filename: "logs/app-%DATE%.log",
+        datePattern: "YYYY-MM-DD",
+        maxFiles: "14d",
+        maxSize: "20m",
+      })
+    );
+  }
+
+  return transports;
+};
+
+// Get log level based on environment
+const getLogLevel = () => {
+  if (isTest) return "error"; // Only log errors in tests
+  if (isProduction) return "http";
+  return "debug"; // Development
+};
+const transports = getTransports();
 // Create logger instance
 const logger = winston.createLogger({
-  level: process.env.NODE_ENV === "production" ? "http" : "debug",
+  level: getLogLevel(),
   levels: logLevels,
   format: winston.format.combine(
     winston.format.timestamp(),
     winston.format.errors({ stack: true }),
-    winston.format.json()
+    isTest ? winston.format.simple() : winston.format.json()
   ),
   defaultMeta: { service: "todo-api" },
-  transports: [
-    // Always log to console in development
-    ...(process.env.NODE_ENV !== "production" ? [consoleTransport] : []),
-    // Always log to file
-    fileRotateTransport,
-  ],
-  exceptionHandlers: [
-    new winston.transports.File({ filename: "logs/exceptions.log" }),
-  ],
-  rejectionHandlers: [
-    new winston.transports.File({ filename: "logs/rejections.log" }),
-  ],
+  transports: getTransports(),
+  // Only add exception/rejection handlers in non-test environments
+  ...(isTest
+    ? {}
+    : {
+        exceptionHandlers: [
+          new winston.transports.File({ filename: "logs/exceptions.log" }),
+        ],
+        rejectionHandlers: [
+          new winston.transports.File({ filename: "logs/rejections.log" }),
+        ],
+      }),
+  silent: isTest && process.env.JEST_VERBOSE !== "true", // Silent in tests unless verbose
 });
 
 export default logger;
