@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { TodoService } from "../services/todo-service";
-import { TodoController } from "../controllers/todo-controller";
+import { TodoController } from "../controllers/todo.controller";
 import { TodoRepository } from "../repositories/todo-repository";
 import {
   validate,
