@@ -12,16 +12,21 @@ export class TodoController {
   constructor(private todoService: TodoService) {
     this.todoService = todoService;
   }
-  public getAllTodos = (
+  public getAllTodos = async (
     req: Request,
-    res: Response
-  ): Response<ApiResponse<Todo[]>> => {
-    const todos = this.todoService.getAllTodos();
-    return res.json({
-      success: true,
-      data: todos,
-      message: "Todos retrieved successfully",
-    });
+    res: Response,
+    next: Function
+  ): Promise<void> => {
+    try {
+      const todos = await this.todoService.getAllTodos();
+      res.json({
+        success: true,
+        data: todos,
+        message: "Todos retrieved successfully",
+      });
+    } catch (error) {
+      next(error);
+    }
   };
   public getTodoById = (
     req: Request,

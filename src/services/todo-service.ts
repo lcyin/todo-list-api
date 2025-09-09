@@ -1,4 +1,4 @@
-import { TodoRepository } from "../repositories/todo-repository";
+import { TodoRepository } from "../repositories/todo.repository";
 import {
   CreateTodoRequest,
   Todo,
@@ -8,8 +8,8 @@ import {
 export class TodoService {
   constructor(private todoRepository: TodoRepository) {}
 
-  public getAllTodos(): Todo[] {
-    return this.todoRepository.getAllTodos();
+  public async getAllTodos(): Promise<Todo[]> {
+    return await this.todoRepository.getAllTodos();
   }
 
   public getTodoById(id: string): Todo | undefined {
