@@ -13,6 +13,7 @@ A RESTful API for managing todos built with Express.js and TypeScript following 
 - ⚠️ **Structured error types with ErrorCode enum**
 - 🎯 **Custom error interfaces and detailed error responses**
 - ✨ **Input validation with Zod**
+- 🧪 **Automated testing with Jest and Supertest**
 - 📊 TypeScript for type safety
 - 🚀 Hot reload with Nodemon
 - 🔄 Dependency injection pattern
@@ -276,19 +277,94 @@ This information helps with debugging and monitoring application health.
 
 ## Testing
 
-Currently, the project has placeholder tests. To add proper testing:
+The project includes comprehensive automated testing using **Jest** and **Supertest** for API response shape validation and integration testing.
 
-1. Install testing framework: `npm install --save-dev jest @types/jest supertest @types/supertest`
-2. Create `__tests__` directories in each layer
-3. Write unit tests for services and repositories
-4. Write integration tests for controllers and routes
+### Testing Strategy
+
+- **Integration Tests**: Full API endpoint testing with Supertest
+- **Response Shape Validation**: Ensures consistent API response structures
+- **API Contract Testing**: Validates that all endpoints return expected data formats
+- **Environment Isolation**: Tests run in isolated test environment with proper setup/teardown
+
+### Test Configuration
+
+- **Jest with TypeScript**: Uses `ts-jest` preset for TypeScript support
+- **Test Environment**: Node.js environment for backend API testing
+- **Test Pattern**: `*.int-spec.ts` files for integration tests
+- **Test Timeout**: 15 seconds for API calls
+- **Sequential Execution**: Tests run one at a time to avoid port conflicts
+- **Force Exit**: Properly handles async operations and server cleanup
+
+### Test Scripts
+
+```bash
+# Run all tests with minimal output (default)
+npm test
+
+# Run tests in watch mode for development
+npm run test:watch
+
+# Run tests with coverage report
+npm run test:coverage
+
+# Run tests with detailed output
+npm run test:verbose
+```
+
+### Current Test Coverage
+
+The integration tests comprehensively cover all API endpoints:
+
+- **GET /api/todos** - List all todos with response shape validation
+- **GET /api/todos/:id** - Get specific todo by ID with proper error handling
+- **POST /api/todos** - Create new todo with validation and response verification
+- **PUT /api/todos/:id** - Update existing todo with state transition testing
+- **DELETE /api/todos/:id** - Delete todo with proper cleanup verification
+
+### Test File Structure
+
+```
+src/
+└── controllers/
+    └── todo-controller.int-spec.ts  # Integration tests for all API endpoints
+```
+
+### Example Test Output
+
+```
+TodoController API Response Shape Tests
+  GET /api/todos
+    ✓ should return correct response shape for getAllTodos
+  GET /api/todos/:id
+    ✓ should return correct response shape for getTodoById
+  POST /api/todos
+    ✓ should return correct response shape for createTodo
+  PUT /api/todos/:id
+    ✓ should return correct response shape for updateTodo
+  DELETE /api/todos/:id
+    ✓ should return correct response shape for deleteTodo
+
+Test Suites: 1 passed, 1 total
+Tests:       5 passed, 5 total
+```
+
+### Testing Features
+
+- **Exact Response Matching**: Tests validate precise API response structures
+- **Dynamic Test Data**: Creates and uses real todo items for testing
+- **Error Scenario Testing**: Validates error responses and HTTP status codes
+- **Business Logic Validation**: Tests todo state transitions and constraints
+- **Type Safety**: Full TypeScript integration ensures type-safe test code
 
 ## Scripts
 
 - `npm run dev` - Start development server with hot reload
 - `npm run build` - Build TypeScript to JavaScript
 - `npm start` - Start production server
-- `npm test` - Run tests (placeholder)
+- `npm test` - Run automated tests with Jest (silent mode)
+- `npm run test:watch` - Run tests in watch mode for development
+- `npm run test:coverage` - Run tests with coverage report
+- `npm run test:verbose` - Run tests with detailed output
 - `npm run logs` - View today's application logs in real-time
 - `npm run logs:error` - View error logs (exceptions and rejections)
 - `npm run logs:all` - View all log files in real-time
@@ -297,21 +373,25 @@ Currently, the project has placeholder tests. To add proper testing:
 ## Next Steps & Roadmap
 
 ### ✅ Completed Features
+
 - [x] **Input validation with Zod** - Comprehensive request validation with schemas
 - [x] Type-safe validation middleware with proper error handling
 - [x] Request body, parameters, and query validation
 
 ### Immediate Improvements
+
 - [x] **Implement proper error types and custom exceptions** - Structured error handling with ErrorCode enum and CustomError interface
 - [x] **Add request/response logging middleware** - Comprehensive logging with Winston, request tracking, and structured logs
-- [ ] Set up automated testing (Jest/Mocha)
+- [x] **Set up automated testing with Jest and Supertest** - Integration tests for API response shape validation and endpoint testing
 
 ### Database Integration
+
 - [ ] Replace in-memory storage with MongoDB or PostgreSQL
 - [ ] Add database migrations and seeding
 - [ ] Implement connection pooling and error handling
 
 ### Advanced Features
+
 - [ ] Add authentication and authorization (JWT)
 - [ ] Implement pagination for large datasets
 - [ ] Add filtering and sorting capabilities
@@ -320,6 +400,7 @@ Currently, the project has placeholder tests. To add proper testing:
 - [ ] Implement caching strategy (Redis)
 
 ### DevOps & Production
+
 - [ ] Add Docker containerization
 - [ ] Set up CI/CD pipeline
 - [ ] Add monitoring and logging (Winston, Morgan)
