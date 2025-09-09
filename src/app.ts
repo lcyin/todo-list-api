@@ -67,15 +67,17 @@ app.use((req: Request, res: Response) => {
 // Global error handler
 app.use(errorHandler);
 
-// Start server
-app.listen(PORT, () => {
-  logger.info(`🚀 Server running on port ${PORT}`, {
-    port: PORT,
-    environment: process.env.NODE_ENV || "development",
-    timestamp: new Date().toISOString(),
+if (process.env.NODE_ENV !== "test") {
+  // Start server
+  app.listen(PORT, () => {
+    logger.info(`🚀 Server running on port ${PORT}`, {
+      port: PORT,
+      environment: process.env.NODE_ENV || "development",
+      timestamp: new Date().toISOString(),
+    });
+    logger.info(`📚 API Documentation: http://localhost:${PORT}`);
+    logger.info(`🏥 Health Check: http://localhost:${PORT}/health`);
   });
-  logger.info(`📚 API Documentation: http://localhost:${PORT}`);
-  logger.info(`🏥 Health Check: http://localhost:${PORT}/health`);
-});
+}
 
 export default app;
