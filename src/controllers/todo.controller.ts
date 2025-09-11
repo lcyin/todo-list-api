@@ -7,7 +7,11 @@ import {
 } from "../interfaces/todo.interface";
 import { TodoService } from "../services/todo-service";
 import { ErrorCode } from "../middleware/enums/error-code.enum";
-import { TodoSchema, TodosResponseSchema } from "../schemas/todo.schema";
+import {
+  TodoResponseSchema,
+  TodoSchema,
+  TodosResponseSchema,
+} from "../schemas/todo.schema";
 import z from "zod";
 
 export class TodoController {
@@ -52,11 +56,12 @@ export class TodoController {
       return;
     }
     const todo = todoOrString;
-    return res.json({
+    const response = TodoResponseSchema.parse({
       success: true,
-      data: todo,
+      data: TodoSchema.parse(todo),
       message: "Todo retrieved successfully",
     });
+    return res.json(response);
   };
   public createTodo = async (
     req: Request<{}, {}, CreateTodoRequest>,
