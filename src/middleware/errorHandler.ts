@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from "express";
 import { ErrorCode } from "./enums/error-code.enum";
 import { ErrorDetails } from "./interfaces/errore-interface";
 import logger from "../config/logger";
+import { ErrorResponseSchema } from "../schemas/todo.schema";
 
 interface LoggingRequest extends Request {
   requestId?: string;
@@ -66,9 +67,11 @@ export const errorHandler = (
     logger.warn("Client Error", errorLog);
   }
 
-  return res.status(statusCode).json({
+  const response = ErrorResponseSchema.parse({
     success: false,
     error: errorMessage,
-    ...errorResponse,
+    stack: err.stack,
   });
+
+  return res.status(statusCode).json(response);
 };

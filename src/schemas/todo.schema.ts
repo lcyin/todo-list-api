@@ -1,5 +1,13 @@
 import { z } from "zod";
-
+// Base Todo schema
+export const TodoSchema = z.object({
+  id: z.uuid(),
+  title: z.string().min(1).max(255),
+  description: z.string().optional(),
+  completed: z.boolean(),
+  createdAt: z.date(),
+  updatedAt: z.date(),
+});
 // Schema for creating a new todo
 export const createTodoSchema = z.object({
   body: z.object({
@@ -36,16 +44,38 @@ export const updateTodoSchema = z.object({
       message: "At least one field must be provided for update",
     }),
   params: z.object({
-    id: z.string().uuid("Invalid todo ID format"),
+    id: z.uuid("Invalid todo ID format"),
   }),
 });
 
 // Schema for validating todo ID parameter
 export const todoParamsSchema = z.object({
-  id: z.string().uuid("Invalid todo ID format"),
+  id: z.uuid("Invalid todo ID format"),
 });
 
-// Export types inferred from schemas
-export type CreateTodoInput = z.infer<typeof createTodoSchema>;
-export type UpdateTodoInput = z.infer<typeof updateTodoSchema>;
-export type TodoParamsInput = z.infer<typeof todoParamsSchema>;
+// Response schemas
+export const TodoResponseSchema = z.object({
+  success: z.boolean(),
+  data: TodoSchema,
+  message: z.string(),
+});
+
+export const TodosResponseSchema = z.object({
+  success: z.boolean(),
+  data: z.array(TodoSchema),
+  message: z.string(),
+});
+
+export const ErrorResponseSchema = z.object({
+  success: z.boolean().default(false),
+  error: z.string(),
+  stack: z.string().optional(),
+});
+
+// Type inference
+export type Todo = z.infer<typeof TodoSchema>;
+export type CreateTodoRequest = z.infer<typeof createTodoSchema>;
+export type UpdateTodoRequest = z.infer<typeof updateTodoSchema>;
+export type TodoResponse = z.infer<typeof TodoResponseSchema>;
+export type TodosResponse = z.infer<typeof TodosResponseSchema>;
+export type ErrorResponse = z.infer<typeof ErrorResponseSchema>;

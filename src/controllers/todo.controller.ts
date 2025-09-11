@@ -7,6 +7,8 @@ import {
 } from "../interfaces/todo.interface";
 import { TodoService } from "../services/todo-service";
 import { ErrorCode } from "../middleware/enums/error-code.enum";
+import { TodoSchema, TodosResponseSchema } from "../schemas/todo.schema";
+import z from "zod";
 
 export class TodoController {
   constructor(private todoService: TodoService) {
@@ -18,12 +20,18 @@ export class TodoController {
     next: Function
   ): Promise<void> => {
     try {
-      const todos = await this.todoService.getAllTodos();
-      res.json({
+      const todoRaws = await this.todoService.getAllTodos();
+      const todos: Todo[] = z
+        .array(TodoSchema)
+        .parse(todoRaws.map((todo) => TodoSchema.parse(todo)));
+
+      const response = TodosResponseSchema.parse({
         success: true,
         data: todos,
         message: "Todos retrieved successfully",
       });
+
+      res.json(response);
     } catch (error) {
       next(error);
     }
