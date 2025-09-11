@@ -70,10 +70,7 @@ export class TodoRepository {
       return result.rows.map(this.mapRowToTodo);
     } catch (error) {
       logger.error("Error fetching all todos", { error });
-      const dbError = new Error("Failed to retrieve todos");
-      (dbError as any).type = ErrorCode.DATABASE_ERROR;
-      (dbError as any).originalError = error;
-      throw dbError;
+      throw mapDBErrorToAppError(error);
     }
   }
 
@@ -91,10 +88,7 @@ export class TodoRepository {
       return undefined;
     } catch (error) {
       logger.error("Error fetching todo by ID", { error });
-      const dbError = new Error("Failed to retrieve todo");
-      (dbError as any).type = ErrorCode.DATABASE_ERROR;
-      (dbError as any).originalError = error;
-      throw dbError;
+      throw mapDBErrorToAppError(error);
     }
   }
 
@@ -115,10 +109,7 @@ export class TodoRepository {
       return this.mapRowToTodo(result.rows[0]);
     } catch (error) {
       logger.error("Error creating new todo", { error });
-      const dbError = new Error("Failed to create todo");
-      (dbError as any).type = ErrorCode.DATABASE_ERROR;
-      (dbError as any).originalError = error;
-      throw dbError;
+      throw mapDBErrorToAppError(error);
     }
   }
 
@@ -151,12 +142,24 @@ export class TodoRepository {
     }
   }
 
-  public deleteTodo(id: string): boolean {
-    const index = this.todos.findIndex((todo) => todo.id === id);
-    if (index !== -1) {
-      this.todos.splice(index, 1);
+  public async deleteTodo(id: string): Promise<boolean> {
+    try {
+      const deleteQuery = `
+        DELETE FROM todos
+        WHERE id = $1;
+      `;
+      pool.query(deleteQuery, [id]);
       return true;
+    } catch (error) {
+      logger.error("Error deleting todo", { error });
+      throw mapDBErrorToAppError(error);
     }
-    return false;
   }
+}
+
+function mapDBErrorToAppError(error: any): Error {
+  const appError = new Error("Database operation failed");
+  (appError as any).type = ErrorCode.DATABASE_ERROR;
+  (appError as any).originalError = error;
+  return appError;
 }

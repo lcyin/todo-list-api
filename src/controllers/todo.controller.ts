@@ -103,15 +103,15 @@ export class TodoController {
     });
   };
 
-  public deleteTodo = (
+  public deleteTodo = async (
     req: Request,
     res: Response,
     next: Function
-  ): Response<ApiResponse<null>> | undefined => {
+  ): Promise<Response<ApiResponse<null>> | undefined> => {
     const { id } = req.params;
-    const deleted = this.todoService.deleteTodo(id);
+    const deletedOrError = await this.todoService.deleteTodo(id);
 
-    if (!deleted) {
+    if (!deletedOrError) {
       next({
         type: ErrorCode.TODO_NOT_FOUND,
         message: `Todo not found, id: ${id}`,

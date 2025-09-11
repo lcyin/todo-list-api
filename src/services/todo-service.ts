@@ -40,7 +40,12 @@ export class TodoService {
     return this.todoRepository.updateTodo(id, updatedData);
   }
 
-  public deleteTodo(id: string): boolean {
-    return this.todoRepository.deleteTodo(id);
+  public async deleteTodo(id: string): Promise<boolean | string> {
+    const foundTodo = await this.todoRepository.getTodoById(id);
+    if (!foundTodo) {
+      return `Todo not found, id: ${id}`;
+    }
+    const result = await this.todoRepository.deleteTodo(id);
+    return result;
   }
 }

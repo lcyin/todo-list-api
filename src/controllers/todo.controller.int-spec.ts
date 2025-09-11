@@ -70,15 +70,10 @@ describe("TodoController API Response Shape Tests", () => {
 
   describe("GET /api/todos/:id", () => {
     it("should return correct response shape for getTodoById", async () => {
-      const testTodo = {
-        description: "Study Node.js fundamentals",
-        title: "Learn Node.js",
-      };
-
       const {
         rows: [todo1],
       } = await setupTodos(pool);
-      console.log('todo1:', todo1);
+
       const { body, status } = await request(appInstance).get(
         "/api/todos/:id".replace(":id", todo1.id)
       );
@@ -138,17 +133,9 @@ describe("TodoController API Response Shape Tests", () => {
 
   describe("PUT /api/todos/:id", () => {
     it("should return correct response shape for updateTodo", async () => {
-      const testTodo = {
-        description: "Study Node.js fundamentals",
-        title: "Learn Node.js",
-      };
-      const { body: createdTodo } = await request(appInstance)
-        .post("/api/todos")
-        .send({
-          title: testTodo.title,
-          description: testTodo.description,
-        });
-
+     const {
+        rows: [todo1],
+      } = await setupTodos(pool);
       const updates = {
         title: "Updated Todo",
         description: "This todo has been updated",
@@ -156,12 +143,12 @@ describe("TodoController API Response Shape Tests", () => {
       };
 
       const response = await request(appInstance)
-        .put("/api/todos/:id".replace(":id", createdTodo.data.id))
+        .put("/api/todos/:id".replace(":id", todo1.id))
         .send(updates);
 
       expect(response.body).toEqual({
         data: {
-          id: createdTodo.data.id,
+          id: todo1.id,
           title: updates.title,
           description: updates.description,
           completed: updates.completed,
@@ -174,20 +161,13 @@ describe("TodoController API Response Shape Tests", () => {
     });
   });
 
-  xdescribe("DELETE /api/todos/:id", () => {
+  describe("DELETE /api/todos/:id", () => {
     it("should return correct response shape for deleteTodo", async () => {
-      const testTodo = {
-        description: "Study Node.js fundamentals",
-        title: "Learn Node.js",
-      };
-      const { body: createdTodo } = await request(appInstance)
-        .post("/api/todos")
-        .send({
-          title: testTodo.title,
-          description: testTodo.description,
-        });
+      const {
+        rows: [todo1],
+      } = await setupTodos(pool);
       const response = await request(appInstance)
-        .delete("/api/todos/:id".replace(":id", createdTodo.data.id))
+        .delete("/api/todos/:id".replace(":id", todo1.id))
         .expect(200);
 
       expect(response.body).toEqual({
