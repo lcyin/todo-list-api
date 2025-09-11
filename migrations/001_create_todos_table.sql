@@ -1,6 +1,9 @@
 -- Initial migration for todos table
 -- File: 001_create_todos_table.sql
 
+-- Enable the pgcrypto extension for gen_random_uuid()
+CREATE EXTENSION IF NOT EXISTS pgcrypto;
+
 -- Create the todos table
 CREATE TABLE IF NOT EXISTS todos (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
