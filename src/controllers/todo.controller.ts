@@ -110,11 +110,12 @@ export class TodoController {
       return;
     }
     const updatedTodo = updatedTodoOrError;
-    return res.json({
+    const response = TodoResponseSchema.parse({
       success: true,
-      data: updatedTodo,
+      data: TodoSchema.parse(updatedTodo),
       message: "Todo updated successfully",
     });
+    return res.json(response);
   };
 
   public deleteTodo = async (
