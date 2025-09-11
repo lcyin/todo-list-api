@@ -83,16 +83,15 @@ export class TodoRepository {
   public async createTodo(data: CreateTodoRequest): Promise<Todo> {
     try {
       const query = `
-        INSERT INTO todos (id, title, description)
-        VALUES ($1, $2, $3, $4, $5, $6)
-        RETURNING id, title, description
+        INSERT INTO todos (title, description)
+        VALUES ($1, $2)
+        RETURNING id, title, description, completed, created_at, updated_at
       `;
-      const newTodo: Pick<Todo, "id" | "title" | "description"> = {
-        id: uuidv4(),
+      const newTodo: Pick<Todo, "title" | "description"> = {
         title: data.title,
         description: data.description,
       };
-      const values = [newTodo.id, newTodo.title, newTodo.description];
+      const values = [newTodo.title, newTodo.description];
 
       const result = await pool.query(query, values);
       return this.mapRowToTodo(result.rows[0]);

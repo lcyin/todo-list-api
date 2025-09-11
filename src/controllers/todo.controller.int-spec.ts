@@ -106,7 +106,7 @@ describe("TodoController API Response Shape Tests", () => {
     });
   });
 
-  xdescribe("POST /api/todos", () => {
+  describe("POST /api/todos", () => {
     it("should return correct response shape for createTodo", async () => {
       const newTodo = {
         title: "New Todo",
