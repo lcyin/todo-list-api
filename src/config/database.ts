@@ -1,9 +1,6 @@
 import { Pool, PoolConfig } from "pg";
 import logger from "./logger";
-import dotenv from "dotenv";
-
-// Load environment variables from .env file
-dotenv.config();
+import { config as envConfig } from "./environment";
 
 interface DatabaseConfig {
   host: string;
@@ -11,36 +8,49 @@ interface DatabaseConfig {
   database: string;
   user: string;
   password: string;
-  ssl?: boolean;
+  ssl: boolean;
 }
 
 const getDatabaseConfig = (): DatabaseConfig => {
   return {
-    host: process.env.DB_HOST || "localhost",
-    port: parseInt(process.env.DB_PORT || "5432"),
-    database: process.env.DB_NAME || "todo_list",
-    user: process.env.DB_USER || "postgres",
-    password: process.env.DB_PASSWORD || "",
-    ssl: process.env.DB_SSL === "true",
+    host: envConfig.database.host,
+    port: envConfig.database.port,
+    database: envConfig.database.name,
+    user: envConfig.database.user,
+    password: envConfig.database.password,
+    ssl: envConfig.database.ssl,
   };
 };
 
 const config = getDatabaseConfig();
+const isTest = envConfig.nodeEnv === "test";
 
-logger.info("Database configuration", {
-  host: config.host,
-  port: config.port,
-  database: config.database,
-  user: config.user,
-  ssl: config.ssl,
-  password: config.password ? "✅ Yes" : "❌ No",
-});
+// Only log database config in non-test environments
+if (!isTest) {
+  logger.info("Database configuration", {
+    environment: envConfig.nodeEnv,
+    host: config.host,
+    port: config.port,
+    database: config.database,
+    user: config.user,
+    ssl: config.ssl,
+    password: config.password ? "✅ Yes" : "❌ No",
+  });
+}
+
+// Determine pool size based on environment
+const getPoolSize = () => {
+  if (isTest) return 5;
+  if (envConfig.nodeEnv === "production") return 50;
+  return 20;
+};
 
 const poolConfig: PoolConfig = {
   ...config,
-  max: 20, // Maximum number of clients in the pool
-  idleTimeoutMillis: 30000, // Close idle clients after 30 seconds
-  connectionTimeoutMillis: 2000, // Return an error after 2 seconds if connection could not be established
+  // Environment-specific pool settings
+  max: getPoolSize(),
+  idleTimeoutMillis: isTest ? 1000 : 30000,
+  connectionTimeoutMillis: isTest ? 1000 : 2000,
 };
 
 export const pool = new Pool(poolConfig);
@@ -49,16 +59,22 @@ export const pool = new Pool(poolConfig);
 export const testConnection = async (): Promise<void> => {
   try {
     const client = await pool.connect();
-    logger.info("✅ Database connection successful", {
-      host: config.host,
-      port: config.port,
-      database: config.database,
-    });
+    if (!isTest) {
+      logger.info("✅ Database connection successful", {
+        host: config.host,
+        port: config.port,
+        database: config.database,
+        environment: envConfig.nodeEnv,
+      });
+    }
     client.release();
   } catch (error) {
+    const errorMessage =
+      error instanceof Error ? error.message : "Unknown error";
     logger.error("❌ Database connection failed", {
-      error: error instanceof Error ? error.message : "Unknown error",
-      config: { ...config, password: "***" }, // Hide password in logs
+      error: errorMessage,
+      environment: envConfig.nodeEnv,
+      config: { ...config, password: "***" },
     });
     throw error;
   }
@@ -68,8 +84,13 @@ export const testConnection = async (): Promise<void> => {
 export const closePool = async (): Promise<void> => {
   try {
     await pool.end();
-    logger.info("Database pool closed");
+    if (!isTest) {
+      logger.info("Database pool closed");
+    }
   } catch (error) {
     logger.error("Error closing database pool", { error });
   }
 };
+
+// Export config for testing purposes
+export const getDatabaseConfigForTesting = () => config;
