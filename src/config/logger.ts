@@ -60,14 +60,16 @@ const logFormat = winston.format.combine(
 const getTransports = () => {
   const transports: winston.transport[] = [];
   if (isTest) {
-    // In test environment, only log errors and only to console (optional)
+    // In test environment, only use console transport with simple format
     transports.push(
       new winston.transports.Console({
-        format: winston.format.simple(),
-        level: "error", // Only show errors in tests
+        format: winston.format.combine(
+          winston.format.timestamp({ format: "HH:mm:ss" }),
+          winston.format.printf((info) => `${info.timestamp} ${info.level}: ${info.message}`)
+        ),
+        level: "info", // Show info and above in tests for migration visibility
       })
     );
-    // Don't add file transports in test environment
   } else {
     // Console transport for development
     if (isDevelopment) {
@@ -79,14 +81,21 @@ const getTransports = () => {
     }
 
     // File transport for production and development
-    transports.push(
-      new DailyRotateFile({
-        filename: "logs/app-%DATE%.log",
-        datePattern: "YYYY-MM-DD",
-        maxFiles: "14d",
-        maxSize: "20m",
-      })
-    );
+    // Ensure logs directory exists or handle gracefully
+    try {
+      transports.push(
+        new DailyRotateFile({
+          filename: "logs/app-%DATE%.log",
+          datePattern: "YYYY-MM-DD",
+          maxFiles: "14d",
+          maxSize: "20m",
+          createSymlink: true,
+          symlinkName: "app.log",
+        })
+      );
+    } catch (error) {
+      console.warn("Failed to create file transport:", error);
+    }
   }
 
   return transports;
@@ -94,7 +103,7 @@ const getTransports = () => {
 
 // Get log level based on environment
 const getLogLevel = () => {
-  if (isTest) return "error"; // Only log errors in tests
+  if (isTest) return "info"; // Show info and above in tests for migration visibility
   if (isProduction) return "http";
   return "debug"; // Development
 };
@@ -120,7 +129,7 @@ const logger = winston.createLogger({
           new winston.transports.File({ filename: "logs/rejections.log" }),
         ],
       }),
-  silent: env.logging.silent, // Use centralized logging configuration
+  silent: false, // Never silence in any environment for debugging
 });
 
 export default logger;
