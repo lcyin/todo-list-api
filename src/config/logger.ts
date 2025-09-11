@@ -36,11 +36,38 @@ console.log("Logger initialized in", env.nodeEnv, "mode", {
   isTest,
 });
 
+// Custom format for error objects
+const errorFormat = winston.format((info) => {
+  if (info instanceof Error) {
+    return {
+      ...info,
+      message: info.message,
+      stack: info.stack,
+    };
+  }
+  
+  // Handle error objects in metadata
+  if (info.error) {
+    if (info.error instanceof Error) {
+      info.error = {
+        message: info.error.message,
+        stack: info.error.stack,
+        code: (info.error as any).code,
+        detail: (info.error as any).detail,
+        hint: (info.error as any).hint,
+      };
+    }
+  }
+  
+  return info;
+});
+
 // Custom format for logs
 const logFormat = winston.format.combine(
   winston.format.timestamp({ format: "YYYY-MM-DD HH:mm:ss:ms" }),
+  errorFormat(),
   winston.format.colorize({ all: true }),
-  isDevelopment
+  isDevelopment || isTest
     ? winston.format.printf((info) => {
         const { timestamp, level, message, ...meta } = info;
         let output = `${timestamp} ${level}: ${message}`;
@@ -60,14 +87,25 @@ const logFormat = winston.format.combine(
 const getTransports = () => {
   const transports: winston.transport[] = [];
   if (isTest) {
-    // In test environment, only use console transport with simple format
+    // In test environment, show detailed errors in console
     transports.push(
       new winston.transports.Console({
         format: winston.format.combine(
           winston.format.timestamp({ format: "HH:mm:ss" }),
-          winston.format.printf((info) => `${info.timestamp} ${info.level}: ${info.message}`)
+          errorFormat(),
+          winston.format.printf((info) => {
+            const { timestamp, level, message, ...meta } = info;
+            let output = `${timestamp} ${level}: ${message}`;
+            
+            // Show detailed metadata including errors
+            if (Object.keys(meta).length > 0) {
+              output += "\n" + JSON.stringify(meta, null, 2);
+            }
+            
+            return output;
+          })
         ),
-        level: "info", // Show info and above in tests for migration visibility
+        level: "error", // Change to error level to see error logs
       })
     );
   } else {
@@ -103,7 +141,7 @@ const getTransports = () => {
 
 // Get log level based on environment
 const getLogLevel = () => {
-  if (isTest) return "info"; // Show info and above in tests for migration visibility
+  if (isTest) return "error"; // Show errors in tests for debugging
   if (isProduction) return "http";
   return "debug"; // Development
 };
