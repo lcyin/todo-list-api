@@ -9,14 +9,14 @@ export class TodoService {
   constructor(private todoRepository: TodoRepository) {}
 
   public async getAllTodos(): Promise<Todo[]> {
-    return await this.todoRepository.getAllTodos();
+    return this.todoRepository.getAllTodos();
   }
 
   public getTodoById(id: string): Todo | undefined {
     return this.todoRepository.getTodoById(id);
   }
 
-  public createTodo(data: CreateTodoRequest): Todo {
+  public async createTodo(data: CreateTodoRequest): Promise<Todo> {
     return this.todoRepository.createTodo(data);
   }
 

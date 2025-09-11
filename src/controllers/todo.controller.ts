@@ -50,14 +50,14 @@ export class TodoController {
       message: "Todo retrieved successfully",
     });
   };
-  public createTodo = (
+  public createTodo = async (
     req: Request<{}, {}, CreateTodoRequest>,
     res: Response
-  ): Response<ApiResponse<Todo>> => {
+  ): Promise<Response<ApiResponse<Todo>>> => {
     const { title, description } = req.body;
 
     // Validation is now handled by Zod middleware
-    const newTodo = this.todoService.createTodo({ title, description });
+    const newTodo = await this.todoService.createTodo({ title, description });
 
     return res.status(201).json({
       success: true,

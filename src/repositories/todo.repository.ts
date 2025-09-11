@@ -80,17 +80,29 @@ export class TodoRepository {
     return this.todos.find((todo) => todo.id === id);
   }
 
-  public createTodo(data: CreateTodoRequest): Todo {
-    const newTodo: Todo = {
-      id: uuidv4(),
-      title: data.title,
-      description: data.description,
-      completed: false,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
-    this.todos.push(newTodo);
-    return newTodo;
+  public async createTodo(data: CreateTodoRequest): Promise<Todo> {
+    try {
+      const query = `
+        INSERT INTO todos (id, title, description)
+        VALUES ($1, $2, $3, $4, $5, $6)
+        RETURNING id, title, description
+      `;
+      const newTodo: Pick<Todo, "id" | "title" | "description"> = {
+        id: uuidv4(),
+        title: data.title,
+        description: data.description,
+      };
+      const values = [newTodo.id, newTodo.title, newTodo.description];
+
+      const result = await pool.query(query, values);
+      return this.mapRowToTodo(result.rows[0]);
+    } catch (error) {
+      logger.error("Error creating new todo", { error });
+      const dbError = new Error("Failed to create todo");
+      (dbError as any).type = ErrorCode.DATABASE_ERROR;
+      (dbError as any).originalError = error;
+      throw dbError;
+    }
   }
 
   public updateTodo(id: string, data: UpdateTodoRequest): Todo | undefined {
