@@ -1,5 +1,9 @@
 import winston from "winston";
 import DailyRotateFile from "winston-daily-rotate-file";
+import { loadEnvironmentConfig } from "./environment";
+
+// Load environment configuration
+const env = loadEnvironmentConfig();
 
 // Define log levels
 const logLevels = {
@@ -22,11 +26,11 @@ const logColors = {
 winston.addColors(logColors);
 
 // Environment-specific configuration
-const isProduction = process.env.NODE_ENV === "production";
-const isTest = process.env.NODE_ENV === "test";
+const isProduction = env.nodeEnv === "production";
+const isTest = env.nodeEnv === "test";
 const isDevelopment =
-  process.env.NODE_ENV === "development" || !process.env.NODE_ENV;
-console.log("Logger initialized in", process.env.NODE_ENV, "mode", {
+  env.nodeEnv === "development" || !env.nodeEnv;
+console.log("Logger initialized in", env.nodeEnv, "mode", {
   isDevelopment,
   isProduction,
   isTest,
@@ -94,7 +98,6 @@ const getLogLevel = () => {
   if (isProduction) return "http";
   return "debug"; // Development
 };
-const transports = getTransports();
 // Create logger instance
 const logger = winston.createLogger({
   level: getLogLevel(),
@@ -117,7 +120,7 @@ const logger = winston.createLogger({
           new winston.transports.File({ filename: "logs/rejections.log" }),
         ],
       }),
-  silent: isTest && process.env.JEST_VERBOSE !== "true", // Silent in tests unless verbose
+  silent: env.logging.silent, // Use centralized logging configuration
 });
 
 export default logger;
