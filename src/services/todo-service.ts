@@ -12,8 +12,12 @@ export class TodoService {
     return this.todoRepository.getAllTodos();
   }
 
-  public async getTodoById(id: string): Promise<Todo | undefined> {
-    return this.todoRepository.getTodoById(id);
+  public async getTodoById(id: string): Promise<Todo | string> {
+    const todo = await this.todoRepository.getTodoById(id);
+    if (!todo) {
+      return `Todo not found, id: ${id}`;
+    }
+    return todo;
   }
 
   public async createTodo(data: CreateTodoRequest): Promise<Todo> {

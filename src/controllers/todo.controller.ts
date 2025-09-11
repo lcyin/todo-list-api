@@ -34,16 +34,16 @@ export class TodoController {
     next: Function
   ): Promise<Response<ApiResponse<Todo>> | undefined> => {
     const { id } = req.params; // Extract ID from request parameters
-    const todo = await this.todoService.getTodoById(id); // Use service to get todo by ID
+    const todoOrString = await this.todoService.getTodoById(id); // Use service to get todo by ID
 
-    if (!todo) {
+    if (typeof todoOrString === "string") {
       next({
         type: ErrorCode.TODO_NOT_FOUND,
         message: `Todo not found, id: ${id}`,
       });
       return;
     }
-
+    const todo = todoOrString;
     return res.json({
       success: true,
       data: todo,
