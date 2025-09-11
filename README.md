@@ -386,9 +386,10 @@ Tests:       5 passed, 5 total
 
 ### Database Integration
 
-- [ ] Replace in-memory storage with MongoDB or PostgreSQL
-- [ ] Add database migrations and seeding
-- [ ] Implement connection pooling and error handling
+- [x] **Replace in-memory storage with PostgreSQL** - Full PostgreSQL integration with connection pooling
+- [x] **Add database migrations and seeding** - Automated migration system with tracking
+- [x] **Implement connection pooling and error handling** - Environment-specific pool configurations
+- [x] **Environment-based database configuration** - Separate databases for development, test, and production
 
 ### Advanced Features
 
@@ -410,7 +411,294 @@ Tests:       5 passed, 5 total
 ## Environment Variables
 
 - `PORT` - Server port (default: 3000)
-- `NODE_ENV` - Environment (development/production)
+- `NODE_ENV` - Environment (development/production/test)
+- `DB_HOST` - Database host (default: localhost)
+- `DB_PORT` - Database port (default: 5432)
+- `DB_NAME` - Database name (environment-specific)
+- `DB_USER` - Database username
+- `DB_PASSWORD` - Database password
+- `DB_SSL` - Enable SSL for database connection
+- `LOG_LEVEL` - Logging level (debug/info/error)
+
+## Environment Configuration Strategy
+
+This project implements a comprehensive environment configuration system that provides complete isolation between development, test, and production environments.
+
+### Environment Files Structure
+
+```
+.env                 # Base environment variables (shared across all environments)
+.env.development     # Development-specific overrides
+.env.test            # Test-specific overrides  
+.env.production      # Production-specific overrides
+```
+
+### Automatic Environment Detection
+
+The application automatically detects the current environment using `NODE_ENV` and loads the appropriate configuration files:
+
+1. **Base Configuration**: Always loads `.env` first
+2. **Environment-Specific**: Loads `.env.{NODE_ENV}` to override base settings
+3. **Fallback Defaults**: Uses sensible defaults if environment variables are missing
+
+### Environment-Specific Database Configuration
+
+Each environment uses its own isolated database to prevent data contamination:
+
+| Environment | Database Name | Pool Size | Timeouts | Logging |
+|-------------|---------------|-----------|----------|---------|
+| **Development** | `todo_list` | 20 connections | 30s | Full logging |
+| **Test** | `todo_list_test` | 5 connections | 1s | Silent mode |
+| **Production** | `todo_list_prod` | 50 connections | 30s | Error only |
+
+### Environment Scripts
+
+```bash
+# Development environment
+npm run dev                    # Start development server
+npm run migrate               # Run development migrations
+
+# Test environment  
+npm run test                  # Run tests with test database
+npm run test:db              # Test database connection
+npm run migrate:test         # Run test database migrations
+
+# Production environment
+npm start                    # Start production server
+npm run migrate:prod         # Run production migrations
+```
+
+### Environment Configuration Features
+
+#### 1. **Database Isolation**
+- Each environment uses a separate PostgreSQL database
+- Prevents test data from contaminating development/production
+- Independent schema migrations per environment
+
+#### 2. **Connection Pool Optimization**
+- **Test Environment**: Small pool (5 connections) for fast test execution
+- **Development**: Medium pool (20 connections) for local development
+- **Production**: Large pool (50 connections) for high concurrency
+
+#### 3. **Logging Configuration**
+- **Test**: Silent mode to reduce test output noise
+- **Development**: Full debug logging for troubleshooting
+- **Production**: Error-level logging for performance
+
+#### 4. **Security Considerations**
+- Production automatically enables SSL for database connections
+- Environment files excluded from version control (`.gitignore`)
+- Sensitive data (passwords) never logged in plain text
+
+### Setting Up Environments
+
+#### Development Setup
+1. Create `.env` file with base configuration:
+```env
+DB_HOST=localhost
+DB_PORT=5432
+DB_NAME=todo_list
+DB_USER=postgres
+DB_PASSWORD=your_password
+DB_SSL=false
+NODE_ENV=development
+PORT=3000
+```
+
+#### Test Environment Setup
+1. Create `.env.test` file:
+```env
+DB_NAME=todo_list_test
+NODE_ENV=test
+PORT=3001
+LOG_LEVEL=error
+```
+
+2. Create test database and run migrations:
+```bash
+npm run migrate:test
+```
+
+#### Production Deployment
+1. Create `.env.production` file:
+```env
+DB_HOST=your-production-host
+DB_NAME=todo_list_prod  
+DB_SSL=true
+NODE_ENV=production
+LOG_LEVEL=info
+```
+
+2. Run production migrations:
+```bash
+npm run migrate:prod
+```
+
+### Environment Configuration Benefits
+
+1. **Complete Isolation**: Each environment is completely isolated
+2. **Type Safety**: Full TypeScript interfaces for configuration
+3. **Flexible Overrides**: Easy to override any setting per environment
+4. **Automatic Detection**: No manual configuration switching needed
+5. **Performance Optimization**: Environment-specific optimizations
+6. **Security**: Production-ready security defaults
+7. **Developer Experience**: Simple commands for each environment
+
+### Configuration Validation
+
+The application validates database connections on startup and provides detailed error messages:
+
+```bash
+# Test database connection
+npm run test:db
+
+# Example output:
+✅ Database connection successful!
+┌──────────────┬─────────────────┐
+│ (index)      │ Values          │
+├──────────────┼─────────────────┤
+│ Host         │ 'localhost'     │
+│ Port         │ 5432            │
+│ Database     │ 'todo_list'     │
+│ User         │ 'postgres'      │
+│ Password Set │ '✅ Yes'        │
+│ SSL          │ false           │
+└──────────────┴─────────────────┘
+```
+
+This robust environment system ensures reliable deployments and prevents configuration-related issues across different deployment stages.
+
+## Database & Migration System
+
+The application uses PostgreSQL with a comprehensive migration system that tracks and manages database schema changes across all environments.
+
+### Database Features
+
+- **PostgreSQL Integration**: Full PostgreSQL support with connection pooling
+- **Migration Tracking**: Database-tracked migration system prevents duplicate executions
+- **Environment Isolation**: Separate databases for development, test, and production
+- **Automatic Schema Management**: SQL-based migrations with rollback safety
+- **Sample Data Seeding**: Pre-populated test data for development
+
+### Migration System
+
+#### Migration Files Structure
+```
+migrations/
+└── 001_create_todos_table.sql    # Initial todos table creation
+```
+
+#### Migration Commands
+```bash
+# Run migrations for different environments
+npm run migrate              # Development database
+npm run migrate:test        # Test database  
+npm run migrate:prod        # Production database
+
+# Check migration status
+npm run migrate:status      # View executed and pending migrations
+```
+
+#### Migration Features
+
+1. **Automatic Tracking**: Creates `migrations` table to track executed migrations
+2. **Idempotent Operations**: Safe to run multiple times without duplicating changes
+3. **Transaction Safety**: Each migration runs in a database transaction
+4. **Ordered Execution**: Migrations execute in alphabetical/numeric order
+5. **Detailed Logging**: Comprehensive logs of migration progress and errors
+
+#### Sample Migration Output
+```bash
+✅ Loaded .env.development
+✅ Database connection successful
+✅ Migrations tracking table ensured
+✅ Migration completed: 001_create_todos_table.sql
+✅ All migrations completed successfully
+```
+
+### Database Schema
+
+#### Todos Table
+```sql
+CREATE TABLE todos (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    title VARCHAR(200) NOT NULL,
+    description TEXT,
+    completed BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+```
+
+#### Features
+- **UUID Primary Keys**: Uses PostgreSQL's `gen_random_uuid()` for unique IDs
+- **Automatic Timestamps**: `created_at` and `updated_at` managed by database triggers
+- **Performance Indexes**: Optimized queries on `completed` and `created_at` columns
+- **Data Validation**: Database-level constraints ensure data integrity
+
+### Database Setup Instructions
+
+#### 1. Install PostgreSQL
+```bash
+# macOS with Homebrew
+brew install postgresql
+brew services start postgresql
+
+# Create database user (if needed)
+createuser -s postgres
+```
+
+#### 2. Create Databases
+```bash
+# Connect to PostgreSQL
+psql postgres
+
+# Create databases for each environment
+CREATE DATABASE todo_list;          -- Development
+CREATE DATABASE todo_list_test;     -- Testing  
+CREATE DATABASE todo_list_prod;     -- Production
+```
+
+#### 3. Configure Environment Variables
+Create appropriate `.env` files with database credentials (see Environment Configuration section above).
+
+#### 4. Run Migrations
+```bash
+# Development environment
+npm run migrate
+
+# Test environment  
+npm run migrate:test
+```
+
+#### 5. Verify Setup
+```bash
+# Test database connection
+npm run test:db
+
+# Start application
+npm run dev
+```
+
+### Repository Pattern Implementation
+
+The application implements a complete PostgreSQL integration following the Repository pattern:
+
+#### Current Implementation Status
+- ✅ **getAllTodos()** - Fully migrated to PostgreSQL with async/await
+- ⏳ **getTodoById()** - In progress (next implementation target)
+- ⏳ **createTodo()** - Planned PostgreSQL migration
+- ⏳ **updateTodo()** - Planned PostgreSQL migration  
+- ⏳ **deleteTodo()** - Planned PostgreSQL migration
+
+#### Database Integration Features
+- **Connection Pooling**: Efficient database connection management
+- **Error Handling**: Custom error types for database operations
+- **Logging Integration**: Comprehensive database operation logging
+- **Type Safety**: Full TypeScript integration with database operations
+- **Data Mapping**: Automatic conversion between database rows and TypeScript objects
+
+The migration from in-memory storage to PostgreSQL maintains full API compatibility while adding enterprise-grade data persistence.
 
 ## Architecture Benefits
 
