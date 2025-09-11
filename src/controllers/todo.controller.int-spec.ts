@@ -136,7 +136,7 @@ describe("TodoController API Response Shape Tests", () => {
     });
   });
 
-  xdescribe("PUT /api/todos/:id", () => {
+  describe("PUT /api/todos/:id", () => {
     it("should return correct response shape for updateTodo", async () => {
       const testTodo = {
         description: "Study Node.js fundamentals",

@@ -24,8 +24,7 @@ export const updateTodoSchema = z.object({
         .string()
         .trim()
         .min(1, "Title cannot be empty")
-        .max(200, "Title must be less than 200 characters")
-        .optional(),
+        .max(200, "Title must be less than 200 characters"),
       description: z
         .string()
         .max(1000, "Description must be less than 1000 characters")

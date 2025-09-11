@@ -71,49 +71,31 @@ export class TodoController {
     }
   };
 
-  public updateTodo = (
+  public updateTodo = async (
     req: Request<{ id: string }, {}, UpdateTodoRequest>,
     res: Response,
     next: Function
-  ): Response<ApiResponse<Todo>> | undefined => {
+  ): Promise<Response<ApiResponse<Todo>> | undefined> => {
     const { id } = req.params;
     const { title, description, completed } = req.body;
 
-    const foundTodo = this.todoService.getTodoById(id) as any;
-
-    if (!foundTodo) {
-      next({
-        type: ErrorCode.TODO_NOT_FOUND,
-        message: `Todo not found, id: ${id}`,
-      });
-      return;
-    }
-
-    if (foundTodo.completed && completed === false) {
-      next({
-        type: ErrorCode.INVALID_TODO_STATE,
-        message: "Cannot mark a completed todo as incomplete",
-      });
-      return;
-    }
-
-    if (
-      foundTodo.completed &&
-      (description !== undefined || title !== undefined)
-    ) {
-      next({
-        type: ErrorCode.INVALID_TODO_STATE,
-        message: "Cannot update a completed todo",
-      });
-      return;
-    }
-
-    const updatedTodo = this.todoService.updateTodo(id, {
+    const updatedTodoOrError = await this.todoService.updateTodo(id, {
       title,
       description,
       completed,
     });
 
+    if (typeof updatedTodoOrError === "string") {
+      next({
+        type:
+          updatedTodoOrError === `Todo not found, id: ${id}`
+            ? ErrorCode.TODO_NOT_FOUND
+            : ErrorCode.INVALID_TODO_STATE,
+        message: updatedTodoOrError,
+      });
+      return;
+    }
+    const updatedTodo = updatedTodoOrError;
     return res.json({
       success: true,
       data: updatedTodo,

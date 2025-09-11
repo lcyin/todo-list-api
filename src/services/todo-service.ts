@@ -20,8 +20,24 @@ export class TodoService {
     return this.todoRepository.createTodo(data);
   }
 
-  public updateTodo(id: string, data: UpdateTodoRequest): Todo | undefined {
-    return this.todoRepository.updateTodo(id, data);
+  public async updateTodo(
+    id: string,
+    data: UpdateTodoRequest
+  ): Promise<Todo | string> {
+    const foundTodo = await this.todoRepository.getTodoById(id);
+    if (!foundTodo) {
+      return `Todo not found, id: ${id}`;
+    }
+    // Cannot update an complete todo
+    if (foundTodo.completed) {
+      return `Cannot update a completed todo`;
+    }
+    const updatedData = {
+      title: data.title ?? foundTodo.title,
+      description: data.description ?? foundTodo.description ?? "",
+      completed: data.completed ?? foundTodo.completed,
+    };
+    return this.todoRepository.updateTodo(id, updatedData);
   }
 
   public deleteTodo(id: string): boolean {

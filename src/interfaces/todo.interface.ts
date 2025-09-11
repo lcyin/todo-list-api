@@ -13,7 +13,7 @@ export interface CreateTodoRequest {
 }
 
 export interface UpdateTodoRequest {
-  title?: string;
+  title: string;
   description?: string;
   completed?: boolean;
 }

@@ -7,6 +7,7 @@ import { pool } from "../config/database";
 import { ErrorCode } from "../middleware/enums/error-code.enum";
 import logger from "../config/logger";
 import { v4 as uuidv4 } from "uuid";
+import { QueryResult } from "pg";
 
 export class TodoRepository {
   private mapRowToTodo(row: any): Todo {
@@ -121,15 +122,33 @@ export class TodoRepository {
     }
   }
 
-  public updateTodo(id: string, data: UpdateTodoRequest): Todo | undefined {
-    const todo = this.getTodoById(id);
-    if (todo) {
-      Object.assign(todo, {
-        ...data,
-        updatedAt: new Date(),
-      });
+  public async updateTodo(
+    id: string,
+    data: {
+      title: string;
+      description: string;
+      completed: boolean;
     }
-    return todo as unknown as Todo | undefined;
+  ): Promise<Todo> {
+    try {
+      const updateQuery = `
+        UPDATE todos
+        SET title = $1,
+            description = $2,
+            completed = $3
+        WHERE id = $4
+        RETURNING id, title, description, completed, created_at, updated_at;
+      `;
+      const values = [data.title, data.description, data.completed, id];
+      const updateResult = await pool.query(updateQuery, values);
+      return this.mapRowToTodo(updateResult.rows[0]);
+    } catch (error) {
+      logger.error("Error updating todo", { error });
+      const dbError = new Error("Failed to update todo");
+      (dbError as any).type = ErrorCode.DATABASE_ERROR;
+      (dbError as any).originalError = error;
+      throw dbError;
+    }
   }
 
   public deleteTodo(id: string): boolean {
