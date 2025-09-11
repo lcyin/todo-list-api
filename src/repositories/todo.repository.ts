@@ -9,26 +9,6 @@ import logger from "../config/logger";
 import { v4 as uuidv4 } from "uuid";
 
 export class TodoRepository {
-  public async getAllTodos(): Promise<Todo[]> {
-    try {
-      const query = `
-        SELECT id, title, description, completed, created_at, updated_at
-        FROM todos
-        ORDER BY created_at DESC
-      `;
-
-      const result = await pool.query(query);
-
-      return result.rows.map(this.mapRowToTodo);
-    } catch (error) {
-      logger.error("Error fetching all todos", { error });
-      const dbError = new Error("Failed to retrieve todos");
-      (dbError as any).type = ErrorCode.DATABASE_ERROR;
-      (dbError as any).originalError = error;
-      throw dbError;
-    }
-  }
-
   private mapRowToTodo(row: any): Todo {
     return {
       id: row.id,
@@ -75,6 +55,26 @@ export class TodoRepository {
       updatedAt: new Date(),
     },
   ];
+
+  public async getAllTodos(): Promise<Todo[]> {
+    try {
+      const query = `
+        SELECT id, title, description, completed, created_at, updated_at
+        FROM todos
+        ORDER BY created_at DESC
+      `;
+
+      const result = await pool.query(query);
+
+      return result.rows.map(this.mapRowToTodo);
+    } catch (error) {
+      logger.error("Error fetching all todos", { error });
+      const dbError = new Error("Failed to retrieve todos");
+      (dbError as any).type = ErrorCode.DATABASE_ERROR;
+      (dbError as any).originalError = error;
+      throw dbError;
+    }
+  }
 
   public getTodoById(id: string): Todo | undefined {
     return this.todos.find((todo) => todo.id === id);
