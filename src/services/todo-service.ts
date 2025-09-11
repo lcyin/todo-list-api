@@ -12,7 +12,7 @@ export class TodoService {
     return this.todoRepository.getAllTodos();
   }
 
-  public getTodoById(id: string): Todo | undefined {
+  public async getTodoById(id: string): Promise<Todo | undefined> {
     return this.todoRepository.getTodoById(id);
   }
 

@@ -28,13 +28,13 @@ export class TodoController {
       next(error);
     }
   };
-  public getTodoById = (
+  public getTodoById = async (
     req: Request,
     res: Response,
     next: Function
-  ): Response<ApiResponse<Todo>> | undefined => {
+  ): Promise<Response<ApiResponse<Todo>> | undefined> => {
     const { id } = req.params; // Extract ID from request parameters
-    const todo = this.todoService.getTodoById(id); // Use service to get todo by ID
+    const todo = await this.todoService.getTodoById(id); // Use service to get todo by ID
 
     if (!todo) {
       next({
@@ -79,7 +79,7 @@ export class TodoController {
     const { id } = req.params;
     const { title, description, completed } = req.body;
 
-    const foundTodo = this.todoService.getTodoById(id);
+    const foundTodo = this.todoService.getTodoById(id) as any;
 
     if (!foundTodo) {
       next({

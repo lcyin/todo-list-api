@@ -68,21 +68,19 @@ describe("TodoController API Response Shape Tests", () => {
     });
   });
 
-  xdescribe("GET /api/todos/:id", () => {
+  describe("GET /api/todos/:id", () => {
     it("should return correct response shape for getTodoById", async () => {
       const testTodo = {
         description: "Study Node.js fundamentals",
         title: "Learn Node.js",
       };
-      const { body: createdTodo } = await request(appInstance)
-        .post("/api/todos")
-        .send({
-          title: testTodo.title,
-          description: testTodo.description,
-        });
 
+      const {
+        rows: [todo1],
+      } = await setupTodos(pool);
+      console.log('todo1:', todo1);
       const { body, status } = await request(appInstance).get(
-        "/api/todos/:id".replace(":id", createdTodo.data.id)
+        "/api/todos/:id".replace(":id", todo1.id)
       );
 
       expect({
@@ -94,7 +92,7 @@ describe("TodoController API Response Shape Tests", () => {
             completed: false,
             createdAt: expect.any(String),
             description: "Study Node.js fundamentals",
-            id: createdTodo.data.id,
+            id: todo1.id,
             title: "Learn Node.js",
             updatedAt: expect.any(String),
           },
@@ -201,7 +199,16 @@ describe("TodoController API Response Shape Tests", () => {
   });
 });
 
-async function setupTodos(pool: Pool) {
+async function setupTodos(pool: Pool): Promise<{
+  rows: Array<{
+    id: string;
+    title: string;
+    description: string;
+    completed: boolean;
+    created_at: Date;
+    updated_at: Date;
+  }>;
+}> {
   const todos = [
     {
       id: uuidv4(),
@@ -245,7 +252,8 @@ async function setupTodos(pool: Pool) {
   const query = `
     INSERT INTO todos (id, title, description, completed, created_at, updated_at)
     VALUES 
-      ${values};
+      ${values}
+    RETURNING id, title, description, completed, created_at, updated_at;
   `;
-  await pool.query(query);
+  return pool.query(query);
 }

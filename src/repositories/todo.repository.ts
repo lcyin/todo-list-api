@@ -76,8 +76,25 @@ export class TodoRepository {
     }
   }
 
-  public getTodoById(id: string): Todo | undefined {
-    return this.todos.find((todo) => todo.id === id);
+  public async getTodoById(id: string): Promise<Todo | undefined> {
+    try {
+      const query = `
+      SELECT id, title, description, completed, created_at, updated_at
+      FROM todos
+      WHERE id = $1;
+      `;
+      const result = await pool.query(query, [id]);
+      if (result.rows.length > 0) {
+        return this.mapRowToTodo(result.rows[0]);
+      }
+      return undefined;
+    } catch (error) {
+      logger.error("Error fetching todo by ID", { error });
+      const dbError = new Error("Failed to retrieve todo");
+      (dbError as any).type = ErrorCode.DATABASE_ERROR;
+      (dbError as any).originalError = error;
+      throw dbError;
+    }
   }
 
   public async createTodo(data: CreateTodoRequest): Promise<Todo> {
@@ -112,7 +129,7 @@ export class TodoRepository {
         updatedAt: new Date(),
       });
     }
-    return todo;
+    return todo as unknown as Todo | undefined;
   }
 
   public deleteTodo(id: string): boolean {
