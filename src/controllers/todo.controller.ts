@@ -73,12 +73,13 @@ export class TodoController {
 
       // Validation is now handled by Zod middleware
       const newTodo = await this.todoService.createTodo({ title, description });
-
-      res.status(201).json({
+      const response = TodoResponseSchema.parse({
         success: true,
-        data: newTodo,
+        data: TodoSchema.parse(newTodo),
         message: "Todo created successfully",
       });
+
+      res.status(201).json(response);
     } catch (error) {
       next(error);
     }
