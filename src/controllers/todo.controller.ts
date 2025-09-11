@@ -126,18 +126,18 @@ export class TodoController {
     const { id } = req.params;
     const deletedOrError = await this.todoService.deleteTodo(id);
 
-    if (!deletedOrError) {
+    if (typeof deletedOrError === "string") {
       next({
         type: ErrorCode.TODO_NOT_FOUND,
         message: `Todo not found, id: ${id}`,
       });
       return;
     }
-
-    return res.json({
+    const response = TodosResponseSchema.parse({
       success: true,
-      data: null,
+      data: [],
       message: "Todo deleted successfully",
     });
+    return res.json(response);
   };
 }

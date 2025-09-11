@@ -171,7 +171,7 @@ describe("TodoController API Response Shape Tests", () => {
         .expect(200);
 
       expect(response.body).toEqual({
-        data: null,
+        data: [],
         message: "Todo deleted successfully",
         success: true,
       });
