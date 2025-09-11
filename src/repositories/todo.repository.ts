@@ -1,13 +1,7 @@
-import {
-  Todo,
-  CreateTodoRequest,
-  UpdateTodoRequest,
-} from "../interfaces/todo.interface";
+import { Todo, CreateTodoRequest } from "../interfaces/todo.interface";
 import { pool } from "../config/database";
 import { ErrorCode } from "../middleware/enums/error-code.enum";
 import logger from "../config/logger";
-import { v4 as uuidv4 } from "uuid";
-import { QueryResult } from "pg";
 
 export class TodoRepository {
   private mapRowToTodo(row: any): Todo {
@@ -20,42 +14,6 @@ export class TodoRepository {
       updatedAt: new Date(row.updated_at),
     };
   }
-
-  // Temporary: Keep other methods with in-memory implementation for now
-  private readonly todos: Todo[] = [
-    {
-      id: "1",
-      title: "Learn Node.js",
-      description: "Study Node.js fundamentals",
-      completed: false,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    },
-    {
-      id: "2",
-      title: "Build a REST API",
-      description: "Use Express.js to create a robust API",
-      completed: true,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    },
-    {
-      id: "3",
-      title: "Explore TypeScript",
-      description: "Deep dive into TypeScript features and best practices",
-      completed: false,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    },
-    {
-      id: "4",
-      title: "Set up CI/CD",
-      description: "Implement continuous integration and deployment pipelines",
-      completed: false,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    },
-  ];
 
   public async getAllTodos(): Promise<Todo[]> {
     try {
