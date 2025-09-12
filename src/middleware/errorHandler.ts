@@ -85,7 +85,7 @@ export const errorHandler = (
   const response = ErrorResponseSchema.parse({
     success: false,
     error: errorMessage,
-    stack: err.stack,
+    // stack: err.stack,
   });
 
   return res.status(statusCode).json(response);
