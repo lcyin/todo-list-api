@@ -1,13 +1,13 @@
-import { Request, Response, NextFunction } from 'express';
-import { AuthService } from '../services/auth.service';
-import { ErrorCode } from '../middleware/enums/error-code.enum';
-import { AuthenticatedRequest } from '../middleware/auth.middleware';
+import { Request, Response, NextFunction } from "express";
+import { AuthService } from "../services/auth.service";
+import { ErrorCode } from "../middleware/enums/error-code.enum";
+import { AuthenticatedRequest } from "../middleware/auth.middleware";
 import {
   AuthResponseSchema,
   UserResponseSchema,
   UserSchema,
-} from '../schemas/auth.schema';
-import logger from '../config/logger';
+} from "../schemas/auth.schema";
+import logger from "../config/logger";
 
 export class AuthController {
   constructor(private authService: AuthService) {
@@ -39,7 +39,7 @@ export class AuthController {
           user: UserSchema.parse(authResult.user),
           token: authResult.token,
         },
-        message: 'User registered successfully',
+        message: "User registered successfully",
       });
 
       res.status(201).json(response);
@@ -71,7 +71,7 @@ export class AuthController {
           user: UserSchema.parse(authResult.user),
           token: authResult.token,
         },
-        message: 'Login successful',
+        message: "Login successful",
       });
 
       res.json(response);
@@ -93,7 +93,7 @@ export class AuthController {
       if (!req.user?.id) {
         next({
           type: ErrorCode.AUTHENTICATION_ERROR,
-          message: 'User not authenticated',
+          message: "User not authenticated",
         });
         return;
       }
@@ -103,7 +103,7 @@ export class AuthController {
       const response = UserResponseSchema.parse({
         success: true,
         data: UserSchema.parse(user),
-        message: 'Profile retrieved successfully',
+        message: "Profile retrieved successfully",
       });
 
       res.json(response);
@@ -125,13 +125,13 @@ export class AuthController {
       if (!req.user?.id) {
         next({
           type: ErrorCode.AUTHENTICATION_ERROR,
-          message: 'User not authenticated',
+          message: "User not authenticated",
         });
         return;
       }
 
       const { firstName, lastName, email } = req.body;
-      
+
       // Filter out undefined values
       const updates: any = {};
       if (firstName !== undefined) updates.firstName = firstName;
@@ -141,17 +141,20 @@ export class AuthController {
       if (Object.keys(updates).length === 0) {
         next({
           type: ErrorCode.VALIDATION_ERROR,
-          message: 'At least one field must be provided for update',
+          message: "At least one field must be provided for update",
         });
         return;
       }
 
-      const updatedUser = await this.authService.updateProfile(req.user.id, updates);
+      const updatedUser = await this.authService.updateProfile(
+        req.user.id,
+        updates
+      );
 
       const response = UserResponseSchema.parse({
         success: true,
         data: UserSchema.parse(updatedUser),
-        message: 'Profile updated successfully',
+        message: "Profile updated successfully",
       });
 
       res.json(response);
@@ -173,7 +176,7 @@ export class AuthController {
       if (!req.user?.id) {
         next({
           type: ErrorCode.AUTHENTICATION_ERROR,
-          message: 'User not authenticated',
+          message: "User not authenticated",
         });
         return;
       }
@@ -188,7 +191,7 @@ export class AuthController {
 
       res.json({
         success: true,
-        message: 'Password changed successfully',
+        message: "Password changed successfully",
       });
     } catch (error) {
       next(error);
@@ -208,7 +211,7 @@ export class AuthController {
       if (!req.user?.id) {
         next({
           type: ErrorCode.AUTHENTICATION_ERROR,
-          message: 'User not authenticated',
+          message: "User not authenticated",
         });
         return;
       }
@@ -217,7 +220,7 @@ export class AuthController {
 
       res.json({
         success: true,
-        message: 'Account deleted successfully',
+        message: "Account deleted successfully",
       });
     } catch (error) {
       next(error);
@@ -239,7 +242,7 @@ export class AuthController {
       if (!token) {
         next({
           type: ErrorCode.VALIDATION_ERROR,
-          message: 'Token is required',
+          message: "Token is required",
         });
         return;
       }
@@ -249,7 +252,7 @@ export class AuthController {
       const response = UserResponseSchema.parse({
         success: true,
         data: UserSchema.parse(user),
-        message: 'Token is valid',
+        message: "Token is valid",
       });
 
       res.json(response);
@@ -259,6 +262,7 @@ export class AuthController {
   };
 
   /**
+   * @NotImplemented
    * Logout (client-side implementation)
    * POST /api/auth/logout
    * Note: Since we're using stateless JWT, logout is handled on the client side
@@ -275,12 +279,16 @@ export class AuthController {
       // 1. Add the token to a blacklist
       // 2. Store logout timestamp
       // 3. Invalidate refresh tokens
-      
-      logger.info(`User logged out: ${req.user?.email || 'unknown'} (${req.user?.id || 'unknown'})`);
+
+      logger.info(
+        `User logged out: ${req.user?.email || "unknown"} (${
+          req.user?.id || "unknown"
+        })`
+      );
 
       res.json({
         success: true,
-        message: 'Logout successful',
+        message: "Logout successful",
       });
     } catch (error) {
       next(error);

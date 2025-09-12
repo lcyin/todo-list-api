@@ -349,66 +349,6 @@ describe("AuthController", () => {
       });
     });
   });
-
-  //   xdescribe("logout", () => {
-  //     it("should logout successfully", async () => {
-  //       // Act
-  //       await authController.logout(
-  //         mockAuthenticatedRequest as AuthenticatedRequest,
-  //         mockResponse as Response,
-  //         mockNext
-  //       );
-
-  //       // Assert
-  //       expect(logger.info).toHaveBeenCalledWith(
-  //         `User logged out: ${mockUser.email} (${mockUser.id})`
-  //       );
-  //       expect(mockResponse.json).toHaveBeenCalledWith({
-  //         success: true,
-  //         message: "Logout successful",
-  //       });
-  //     });
-
-  //     it("should handle logout with missing user info", async () => {
-  //       // Arrange
-  //       const requestWithoutUser = { ...mockAuthenticatedRequest };
-  //       delete requestWithoutUser.user;
-
-  //       // Act
-  //       await authController.logout(
-  //         requestWithoutUser as AuthenticatedRequest,
-  //         mockResponse as Response,
-  //         mockNext
-  //       );
-
-  //       // Assert
-  //       expect(logger.info).toHaveBeenCalledWith(
-  //         "User logged out: unknown (unknown)"
-  //       );
-  //       expect(mockResponse.json).toHaveBeenCalledWith({
-  //         success: true,
-  //         message: "Logout successful",
-  //       });
-  //     });
-
-  //     it("should handle logout errors", async () => {
-  //       // Arrange
-  //       const error = new Error("Logout error");
-  //       (logger.info as jest.Mock).mockImplementation(() => {
-  //         throw error;
-  //       });
-
-  //       // Act
-  //       await authController.logout(
-  //         mockAuthenticatedRequest as AuthenticatedRequest,
-  //         mockResponse as Response,
-  //         mockNext
-  //       );
-
-  //       // Assert
-  //       expect(mockNext).toHaveBeenCalledWith(error);
-  //     });
-  //   });
 });
 
 async function setupUser(
