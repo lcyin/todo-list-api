@@ -58,6 +58,12 @@ export class AuthService {
         firstName,
         lastName,
       });
+      if (!user) {
+        throw {
+          type: ErrorCode.INTERNAL_SERVER_ERROR,
+          message: "User creation failed",
+        };
+      }
 
       // Generate JWT token
       const token = JwtService.generateAccessToken(user.id, user.email);

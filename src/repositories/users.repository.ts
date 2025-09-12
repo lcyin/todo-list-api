@@ -21,7 +21,7 @@ export class UserRepository {
   /**
    * Create a new user with hashed password
    */
-  async createUser(userData: CreateUserData): Promise<User> {
+  async createUser(userData: CreateUserData): Promise<User | null> {
     const { email, password, firstName, lastName } = userData;
 
     try {
@@ -38,14 +38,6 @@ export class UserRepository {
         lastName,
       ]);
 
-      if (result.rows.length === 0) {
-        logger.error("Failed to create user - no rows returned");
-        throw {
-          type: ErrorCode.DATABASE_ERROR,
-          message: "Failed to create user",
-        };
-      }
-
       const user = result.rows[0];
       logger.info(`User created successfully: ${email} (${user.id})`);
 
@@ -55,7 +47,7 @@ export class UserRepository {
       if (error.code === "23505" && error.constraint === "users_email_key") {
         logger.warn(`Attempt to create user with existing email: ${email}`);
         throw {
-          type: ErrorCode.USER_ALREADY_EXISTS,
+          type: ErrorCode.DATABASE_ERROR,
           message: "Email already exists",
         };
       }
@@ -160,10 +152,6 @@ export class UserRepository {
       `;
 
       const result = await this.db.query(query, [...updateValues, id]);
-
-      if (result.rows.length === 0) {
-        return null;
-      }
 
       const user = result.rows[0];
       logger.info(`User updated successfully: ${user.email} (${id})`);
