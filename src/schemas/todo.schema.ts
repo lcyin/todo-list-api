@@ -5,6 +5,7 @@ export const TodoSchema = z.object({
   title: z.string().min(1).max(255),
   description: z.string().optional(),
   completed: z.boolean(),
+  userId: z.uuid(),
   createdAt: z.date(),
   updatedAt: z.date(),
 });
