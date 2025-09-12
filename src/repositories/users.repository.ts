@@ -193,8 +193,6 @@ export class UserRepository {
 
   async changePassword(id: string, newHashedPassword: string): Promise<void> {
     try {
-      // const hashedPassword = await bcrypt.hash(newPassword, 10);
-
       const query = `
         UPDATE users 
         SET password = $1, updated_at = CURRENT_TIMESTAMP
@@ -220,13 +218,6 @@ export class UserRepository {
     id: string
   ): Promise<{ id: string; deletedAt: string } | null> {
     try {
-      const foundUserQuery = `SELECT * FROM users WHERE id = $1`;
-      const foundUserResult = await this.db.query(foundUserQuery, [id]);
-      const foundUser = foundUserResult.rows[0];
-      if (!foundUser) {
-        return null;
-      }
-
       const softDeleteQuery = `
         UPDATE users 
         SET deleted_at = CURRENT_TIMESTAMP 

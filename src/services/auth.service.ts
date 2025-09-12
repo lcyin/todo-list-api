@@ -291,6 +291,13 @@ export class AuthService {
    */
   async deleteAccount(userId: string) {
     try {
+      const existingUser = await this.userRepository.findById(userId);
+      if (!existingUser) {
+        throw {
+          type: ErrorCode.USER_NOT_FOUND,
+          message: "User not found",
+        };
+      }
       const deleted = await this.userRepository.deleteUser(userId);
 
       if (!deleted) {
