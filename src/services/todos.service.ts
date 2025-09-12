@@ -20,7 +20,10 @@ export class TodoService {
     return todo;
   }
 
-  public async createTodo(data: CreateTodoRequest, userId: string): Promise<Todo> {
+  public async createTodo(
+    data: CreateTodoRequest,
+    userId: string
+  ): Promise<Todo> {
     return this.todoRepository.createTodo(data, userId);
   }
 
@@ -33,7 +36,7 @@ export class TodoService {
     if (!foundTodo) {
       return `Todo not found, id: ${id}`;
     }
-    
+
     // Cannot update a completed todo
     if (foundTodo.completed && data.completed !== false) {
       return `Cannot update a completed todo`;
@@ -41,18 +44,26 @@ export class TodoService {
 
     const updatedData: any = {};
     if (data.title !== undefined) updatedData.title = data.title;
-    if (data.description !== undefined) updatedData.description = data.description;
+    if (data.description !== undefined)
+      updatedData.description = data.description;
     if (data.completed !== undefined) updatedData.completed = data.completed;
 
-    const updatedTodo = await this.todoRepository.updateTodo(id, updatedData, userId);
+    const updatedTodo = await this.todoRepository.updateTodo(
+      id,
+      updatedData,
+      userId
+    );
     if (!updatedTodo) {
       return `Todo not found, id: ${id}`;
     }
-    
+
     return updatedTodo;
   }
 
-  public async deleteTodo(id: string, userId: string): Promise<boolean | string> {
+  public async deleteTodo(
+    id: string,
+    userId: string
+  ): Promise<boolean | string> {
     const result = await this.todoRepository.deleteTodo(id, userId);
     if (!result) {
       return `Todo not found, id: ${id}`;

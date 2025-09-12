@@ -17,29 +17,16 @@ export class TodoRepository {
     };
   }
 
-  public async getAllTodos(userId?: string): Promise<Todo[]> {
+  public async getAllTodos(userId: string): Promise<Todo[]> {
     try {
-      let query: string;
-      let params: any[] = [];
-
-      if (userId) {
-        query = `
+      const query = `
           SELECT id, title, description, completed, user_id, created_at, updated_at
           FROM todos
           WHERE user_id = $1
           ORDER BY created_at DESC
         `;
-        params = [userId];
-      } else {
-        // For admin or system use - get all todos regardless of user
-        query = `
-          SELECT id, title, description, completed, user_id, created_at, updated_at
-          FROM todos
-          ORDER BY created_at DESC
-        `;
-      }
 
-      const result = await pool.query(query, params);
+      const result = await pool.query(query, [userId]);
 
       return result.rows.map(this.mapRowToTodo);
     } catch (error) {
