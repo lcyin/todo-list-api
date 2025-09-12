@@ -12,7 +12,18 @@ export interface CreateUserData {
 }
 
 export class UserRepository {
-  private db: Pool;
+  private readonly db: Pool;
+
+  private mapRowToUser(row: any): User {
+    return {
+      id: row.id,
+      email: row.email,
+      firstName: row.first_name,
+      lastName: row.last_name,
+      createdAt: row.created_at,
+      updatedAt: row.updated_at,
+    };
+  }
 
   constructor(pool: Pool) {
     this.db = pool;
@@ -28,7 +39,7 @@ export class UserRepository {
       const query = `
         INSERT INTO users (email, password, first_name, last_name)
         VALUES ($1, $2, $3, $4)
-        RETURNING id, email, first_name as "firstName", last_name as "lastName", created_at as "createdAt", updated_at as "updatedAt"
+        RETURNING id, email, first_name, last_name, created_at, updated_at
       `;
 
       const result = await this.db.query(query, [
@@ -41,7 +52,7 @@ export class UserRepository {
       const user = result.rows[0];
       logger.info(`User created successfully: ${email} (${user.id})`);
 
-      return user as User;
+      return this.mapRowToUser(user);
     } catch (error: any) {
       // Handle unique constraint violation (duplicate email)
       if (error.code === "23505" && error.constraint === "users_email_key") {
