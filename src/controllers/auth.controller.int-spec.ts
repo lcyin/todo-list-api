@@ -12,6 +12,7 @@ import { pool } from "../config/database";
 jest.mock("../components/user.component", () => {
   return {
     verifyPassword: () => Promise.resolve(true),
+    hashPassword: (password: string) => Promise.resolve(`hashed-${password}`),
   };
 });
 
@@ -125,12 +126,7 @@ describe("AuthController", () => {
 
   describe("login", () => {
     it("should login user successfully", async () => {
-      const existingUser = await setupUser(
-        "test@example.com",
-        "Password@123",
-        "John",
-        "Doe"
-      );
+      await setupUser("test@example.com", "Password@123", "John", "Doe");
       const path = "/api/auth/login";
       const payload = {
         email: "test@example.com",

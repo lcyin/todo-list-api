@@ -6,7 +6,7 @@ import { JwtService } from "./jwt.service";
 import { User, UserWithPassword } from "../schemas/auth.schema";
 import { ErrorCode } from "../middleware/enums/error-code.enum";
 import logger from "../config/logger";
-import { verifyPassword } from "../components/user.component";
+import { hashPassword, verifyPassword } from "../components/user.component";
 
 export interface RegisterData {
   email: string;
@@ -38,6 +38,9 @@ export class AuthService {
   async register(userData: RegisterData): Promise<AuthResult> {
     try {
       const { email, password, firstName, lastName } = userData;
+      // Hash password
+
+      const hashedPassword = await hashPassword(password);
 
       // Check if user already exists
       const existingUser = await this.userRepository.findByEmail(email);
@@ -51,7 +54,7 @@ export class AuthService {
       // Create user
       const user = await this.userRepository.createUser({
         email,
-        password,
+        password: hashedPassword,
         firstName,
         lastName,
       });

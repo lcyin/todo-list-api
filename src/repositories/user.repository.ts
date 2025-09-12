@@ -1,9 +1,10 @@
-import { Pool } from 'pg';
-import bcrypt from 'bcryptjs';
-import { UserWithPassword, User } from '../schemas/auth.schema';
-import { pool } from '../config/database';
-import logger from '../config/logger';
-import { ErrorCode } from '../middleware/enums/error-code.enum';
+import { Pool } from "pg";
+import bcrypt from "bcryptjs";
+import { UserWithPassword, User } from "../schemas/auth.schema";
+import { pool } from "../config/database";
+import logger from "../config/logger";
+import { ErrorCode } from "../middleware/enums/error-code.enum";
+import { hashPassword } from "../components/user.component";
 
 export interface CreateUserData {
   email: string;
@@ -26,9 +27,6 @@ export class UserRepository {
     const { email, password, firstName, lastName } = userData;
 
     try {
-      // Hash password
-      const saltRounds = 12;
-      const hashedPassword = await bcrypt.hash(password, saltRounds);
 
       const query = `
         INSERT INTO users (email, password, first_name, last_name)
@@ -36,27 +34,32 @@ export class UserRepository {
         RETURNING id, email, first_name as "firstName", last_name as "lastName", created_at as "createdAt", updated_at as "updatedAt"
       `;
 
-      const result = await this.db.query(query, [email, hashedPassword, firstName, lastName]);
-      
+      const result = await this.db.query(query, [
+        email,
+        password,
+        firstName,
+        lastName,
+      ]);
+
       if (result.rows.length === 0) {
-        logger.error('Failed to create user - no rows returned');
+        logger.error("Failed to create user - no rows returned");
         throw {
           type: ErrorCode.DATABASE_ERROR,
-          message: 'Failed to create user',
+          message: "Failed to create user",
         };
       }
 
       const user = result.rows[0];
       logger.info(`User created successfully: ${email} (${user.id})`);
-      
+
       return user as User;
     } catch (error: any) {
       // Handle unique constraint violation (duplicate email)
-      if (error.code === '23505' && error.constraint === 'users_email_key') {
+      if (error.code === "23505" && error.constraint === "users_email_key") {
         logger.warn(`Attempt to create user with existing email: ${email}`);
         throw {
           type: ErrorCode.USER_ALREADY_EXISTS,
-          message: 'Email already exists',
+          message: "Email already exists",
         };
       }
 
@@ -65,10 +68,10 @@ export class UserRepository {
         throw error; // Re-throw custom errors
       }
 
-      logger.error('Database error creating user:', error);
+      logger.error("Database error creating user:", error);
       throw {
         type: ErrorCode.DATABASE_ERROR,
-        message: 'Failed to create user',
+        message: "Failed to create user",
       };
     }
   }
@@ -92,17 +95,17 @@ export class UserRepository {
       `;
 
       const result = await this.db.query(query, [email]);
-      
+
       if (result.rows.length === 0) {
         return null;
       }
 
       return result.rows[0] as UserWithPassword;
     } catch (error) {
-      logger.error('Database error finding user by email:', error);
+      logger.error("Database error finding user by email:", error);
       throw {
         type: ErrorCode.DATABASE_ERROR,
-        message: 'Failed to find user',
+        message: "Failed to find user",
       };
     }
   }
@@ -125,27 +128,28 @@ export class UserRepository {
       `;
 
       const result = await this.db.query(query, [id]);
-      
+
       if (result.rows.length === 0) {
         return null;
       }
 
       return result.rows[0] as User;
     } catch (error) {
-      logger.error('Database error finding user by ID:', error);
+      logger.error("Database error finding user by ID:", error);
       throw {
         type: ErrorCode.DATABASE_ERROR,
-        message: 'Failed to find user',
+        message: "Failed to find user",
       };
     }
   }
 
-
-
   /**
    * Update user information
    */
-  async updateUser(id: string, updates: Partial<CreateUserData>): Promise<User | null> {
+  async updateUser(
+    id: string,
+    updates: Partial<CreateUserData>
+  ): Promise<User | null> {
     try {
       const updateFields: string[] = [];
       const values: any[] = [];
@@ -177,7 +181,7 @@ export class UserRepository {
       if (updateFields.length === 0) {
         throw {
           type: ErrorCode.VALIDATION_ERROR,
-          message: 'No valid fields to update',
+          message: "No valid fields to update",
         };
       }
 
@@ -186,27 +190,27 @@ export class UserRepository {
 
       const query = `
         UPDATE users 
-        SET ${updateFields.join(', ')}, updated_at = CURRENT_TIMESTAMP
+        SET ${updateFields.join(", ")}, updated_at = CURRENT_TIMESTAMP
         WHERE id = $${parameterIndex}
         RETURNING id, email, first_name as "firstName", last_name as "lastName", created_at as "createdAt", updated_at as "updatedAt"
       `;
 
       const result = await this.db.query(query, values);
-      
+
       if (result.rows.length === 0) {
         return null;
       }
 
       const user = result.rows[0];
       logger.info(`User updated successfully: ${user.email} (${id})`);
-      
+
       return user as User;
     } catch (error: any) {
       // Handle unique constraint violation (duplicate email)
-      if (error.code === '23505' && error.constraint === 'users_email_key') {
+      if (error.code === "23505" && error.constraint === "users_email_key") {
         throw {
           type: ErrorCode.USER_ALREADY_EXISTS,
-          message: 'Email already exists',
+          message: "Email already exists",
         };
       }
 
@@ -215,10 +219,10 @@ export class UserRepository {
         throw error; // Re-throw custom errors
       }
 
-      logger.error('Database error updating user:', error);
+      logger.error("Database error updating user:", error);
       throw {
         type: ErrorCode.DATABASE_ERROR,
-        message: 'Failed to update user',
+        message: "Failed to update user",
       };
     }
   }
@@ -228,20 +232,20 @@ export class UserRepository {
    */
   async deleteUser(id: string): Promise<boolean> {
     try {
-      const query = 'DELETE FROM users WHERE id = $1';
+      const query = "DELETE FROM users WHERE id = $1";
       const result = await this.db.query(query, [id]);
-      
+
       const deleted = result.rowCount !== null && result.rowCount > 0;
       if (deleted) {
         logger.info(`User deleted successfully: ${id}`);
       }
-      
+
       return deleted;
     } catch (error) {
-      logger.error('Database error deleting user:', error);
+      logger.error("Database error deleting user:", error);
       throw {
         type: ErrorCode.DATABASE_ERROR,
-        message: 'Failed to delete user',
+        message: "Failed to delete user",
       };
     }
   }
@@ -251,14 +255,14 @@ export class UserRepository {
    */
   async emailExists(email: string): Promise<boolean> {
     try {
-      const query = 'SELECT 1 FROM users WHERE email = $1 LIMIT 1';
+      const query = "SELECT 1 FROM users WHERE email = $1 LIMIT 1";
       const result = await this.db.query(query, [email]);
       return result.rows.length > 0;
     } catch (error) {
-      logger.error('Database error checking email existence:', error);
+      logger.error("Database error checking email existence:", error);
       throw {
         type: ErrorCode.DATABASE_ERROR,
-        message: 'Failed to check email existence',
+        message: "Failed to check email existence",
       };
     }
   }
