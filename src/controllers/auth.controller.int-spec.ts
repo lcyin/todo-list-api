@@ -1,13 +1,6 @@
 import request from "supertest";
 import app from "../app";
 import { pool } from "../config/database";
-// Mock the logger
-// jest.mock("../../config/logger", () => ({
-//   info: jest.fn(),
-//   error: jest.fn(),
-//   warn: jest.fn(),
-//   debug: jest.fn(),
-// }));
 
 jest.mock("../components/users.component", () => {
   return {
