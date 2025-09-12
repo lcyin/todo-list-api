@@ -1,0 +1,275 @@
+import { Pool } from 'pg';
+import bcrypt from 'bcryptjs';
+import { UserWithPassword, User } from '../schemas/auth.schema';
+import { pool } from '../config/database';
+import logger from '../config/logger';
+import { ErrorCode } from '../middleware/enums/error-code.enum';
+
+export interface CreateUserData {
+  email: string;
+  password: string;
+  firstName: string;
+  lastName: string;
+}
+
+export class UserRepository {
+  private db: Pool;
+
+  constructor() {
+    this.db = pool;
+  }
+
+  /**
+   * Create a new user with hashed password
+   */
+  async createUser(userData: CreateUserData): Promise<User> {
+    const { email, password, firstName, lastName } = userData;
+
+    try {
+      // Hash password
+      const saltRounds = 12;
+      const hashedPassword = await bcrypt.hash(password, saltRounds);
+
+      const query = `
+        INSERT INTO users (email, password, first_name, last_name)
+        VALUES ($1, $2, $3, $4)
+        RETURNING id, email, first_name as "firstName", last_name as "lastName", created_at as "createdAt", updated_at as "updatedAt"
+      `;
+
+      const result = await this.db.query(query, [email, hashedPassword, firstName, lastName]);
+      
+      if (result.rows.length === 0) {
+        logger.error('Failed to create user - no rows returned');
+        throw {
+          type: ErrorCode.DATABASE_ERROR,
+          message: 'Failed to create user',
+        };
+      }
+
+      const user = result.rows[0];
+      logger.info(`User created successfully: ${email} (${user.id})`);
+      
+      return user as User;
+    } catch (error: any) {
+      // Handle unique constraint violation (duplicate email)
+      if (error.code === '23505' && error.constraint === 'users_email_key') {
+        logger.warn(`Attempt to create user with existing email: ${email}`);
+        throw {
+          type: ErrorCode.USER_ALREADY_EXISTS,
+          message: 'Email already exists',
+        };
+      }
+
+      // Handle other database errors
+      if (error.type) {
+        throw error; // Re-throw custom errors
+      }
+
+      logger.error('Database error creating user:', error);
+      throw {
+        type: ErrorCode.DATABASE_ERROR,
+        message: 'Failed to create user',
+      };
+    }
+  }
+
+  /**
+   * Find user by email (including password for authentication)
+   */
+  async findByEmail(email: string): Promise<UserWithPassword | null> {
+    try {
+      const query = `
+        SELECT 
+          id, 
+          email, 
+          password,
+          first_name as "firstName", 
+          last_name as "lastName", 
+          created_at as "createdAt", 
+          updated_at as "updatedAt"
+        FROM users 
+        WHERE email = $1
+      `;
+
+      const result = await this.db.query(query, [email]);
+      
+      if (result.rows.length === 0) {
+        return null;
+      }
+
+      return result.rows[0] as UserWithPassword;
+    } catch (error) {
+      logger.error('Database error finding user by email:', error);
+      throw {
+        type: ErrorCode.DATABASE_ERROR,
+        message: 'Failed to find user',
+      };
+    }
+  }
+
+  /**
+   * Find user by ID (without password)
+   */
+  async findById(id: string): Promise<User | null> {
+    try {
+      const query = `
+        SELECT 
+          id, 
+          email, 
+          first_name as "firstName", 
+          last_name as "lastName", 
+          created_at as "createdAt", 
+          updated_at as "updatedAt"
+        FROM users 
+        WHERE id = $1
+      `;
+
+      const result = await this.db.query(query, [id]);
+      
+      if (result.rows.length === 0) {
+        return null;
+      }
+
+      return result.rows[0] as User;
+    } catch (error) {
+      logger.error('Database error finding user by ID:', error);
+      throw {
+        type: ErrorCode.DATABASE_ERROR,
+        message: 'Failed to find user',
+      };
+    }
+  }
+
+  /**
+   * Verify user password
+   */
+  async verifyPassword(plainPassword: string, hashedPassword: string): Promise<boolean> {
+    try {
+      return await bcrypt.compare(plainPassword, hashedPassword);
+    } catch (error) {
+      logger.error('Error verifying password:', error);
+      return false;
+    }
+  }
+
+  /**
+   * Update user information
+   */
+  async updateUser(id: string, updates: Partial<CreateUserData>): Promise<User | null> {
+    try {
+      const updateFields: string[] = [];
+      const values: any[] = [];
+      let parameterIndex = 1;
+
+      // Build dynamic update query
+      if (updates.firstName) {
+        updateFields.push(`first_name = $${parameterIndex++}`);
+        values.push(updates.firstName);
+      }
+
+      if (updates.lastName) {
+        updateFields.push(`last_name = $${parameterIndex++}`);
+        values.push(updates.lastName);
+      }
+
+      if (updates.email) {
+        updateFields.push(`email = $${parameterIndex++}`);
+        values.push(updates.email);
+      }
+
+      if (updates.password) {
+        const saltRounds = 12;
+        const hashedPassword = await bcrypt.hash(updates.password, saltRounds);
+        updateFields.push(`password = $${parameterIndex++}`);
+        values.push(hashedPassword);
+      }
+
+      if (updateFields.length === 0) {
+        throw {
+          type: ErrorCode.VALIDATION_ERROR,
+          message: 'No valid fields to update',
+        };
+      }
+
+      // Add ID parameter
+      values.push(id);
+
+      const query = `
+        UPDATE users 
+        SET ${updateFields.join(', ')}, updated_at = CURRENT_TIMESTAMP
+        WHERE id = $${parameterIndex}
+        RETURNING id, email, first_name as "firstName", last_name as "lastName", created_at as "createdAt", updated_at as "updatedAt"
+      `;
+
+      const result = await this.db.query(query, values);
+      
+      if (result.rows.length === 0) {
+        return null;
+      }
+
+      const user = result.rows[0];
+      logger.info(`User updated successfully: ${user.email} (${id})`);
+      
+      return user as User;
+    } catch (error: any) {
+      // Handle unique constraint violation (duplicate email)
+      if (error.code === '23505' && error.constraint === 'users_email_key') {
+        throw {
+          type: ErrorCode.USER_ALREADY_EXISTS,
+          message: 'Email already exists',
+        };
+      }
+
+      // Handle other database errors
+      if (error.type) {
+        throw error; // Re-throw custom errors
+      }
+
+      logger.error('Database error updating user:', error);
+      throw {
+        type: ErrorCode.DATABASE_ERROR,
+        message: 'Failed to update user',
+      };
+    }
+  }
+
+  /**
+   * Delete user by ID
+   */
+  async deleteUser(id: string): Promise<boolean> {
+    try {
+      const query = 'DELETE FROM users WHERE id = $1';
+      const result = await this.db.query(query, [id]);
+      
+      const deleted = result.rowCount !== null && result.rowCount > 0;
+      if (deleted) {
+        logger.info(`User deleted successfully: ${id}`);
+      }
+      
+      return deleted;
+    } catch (error) {
+      logger.error('Database error deleting user:', error);
+      throw {
+        type: ErrorCode.DATABASE_ERROR,
+        message: 'Failed to delete user',
+      };
+    }
+  }
+
+  /**
+   * Check if email exists
+   */
+  async emailExists(email: string): Promise<boolean> {
+    try {
+      const query = 'SELECT 1 FROM users WHERE email = $1 LIMIT 1';
+      const result = await this.db.query(query, [email]);
+      return result.rows.length > 0;
+    } catch (error) {
+      logger.error('Database error checking email existence:', error);
+      throw {
+        type: ErrorCode.DATABASE_ERROR,
+        message: 'Failed to check email existence',
+      };
+    }
+  }
+}
