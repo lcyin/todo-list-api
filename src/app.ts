@@ -2,11 +2,13 @@ import express, { Application, Request, Response, NextFunction } from "express";
 import cors from "cors";
 import helmet from "helmet";
 import morgan from "morgan";
+import swaggerUi from "swagger-ui-express";
 import todoRoutes from "./routes/todos.route";
 import { authRoutes } from "./routes/auth.route";
 import { errorHandler } from "./middleware/errorHandler";
 import { requestLogger, addRequestId } from "./middleware/requestLogger";
 import logger from "./config/logger";
+import { generateOpenAPIDocument } from "./config/openapi";
 import { transports } from "winston";
 
 const app: Application = express();
@@ -38,6 +40,24 @@ logger.info(
 app.use(express.json()); // Parse JSON bodies
 app.use(express.urlencoded({ extended: true })); // Parse URL-encoded bodies
 
+// Swagger Documentation
+const swaggerDocument = generateOpenAPIDocument();
+app.use(
+  "/api-docs",
+  swaggerUi.serve,
+  swaggerUi.setup(swaggerDocument, {
+    explorer: true,
+    customCss: ".swagger-ui .topbar { display: none }",
+    customSiteTitle: "Todo List API Documentation",
+  })
+);
+
+// OpenAPI JSON endpoint
+app.get("/api-docs.json", (req: Request, res: Response) => {
+  res.setHeader("Content-Type", "application/json");
+  res.send(swaggerDocument);
+});
+
 // Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/todos", todoRoutes);
@@ -60,6 +80,8 @@ app.get("/", (req: Request, res: Response) => {
       health: "/health",
       auth: "/api/auth",
       todos: "/api/todos",
+      documentation: "/api-docs",
+      openapi: "/api-docs.json",
     },
   });
 });
@@ -83,7 +105,8 @@ if (process.env.NODE_ENV !== "test") {
       environment: process.env.NODE_ENV || "development",
       timestamp: new Date().toISOString(),
     });
-    logger.info(`📚 API Documentation: http://localhost:${PORT}`);
+    logger.info(`📚 API Documentation: http://localhost:${PORT}/api-docs`);
+    logger.info(`📖 OpenAPI JSON: http://localhost:${PORT}/api-docs.json`);
     logger.info(`🏥 Health Check: http://localhost:${PORT}/health`);
   });
 }

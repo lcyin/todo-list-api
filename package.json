@@ -16,6 +16,8 @@
         "migrate:prod": "NODE_ENV=production ts-node src/scripts/migrate.ts",
         "migrate:status": "NODE_ENV=development ts-node src/scripts/migrate.ts status",
         "test:db": "NODE_ENV=test ts-node src/test/setup/test-db-connection.ts",
+        "openapi:generate": "ts-node src/scripts/generate-openapi.ts",
+        "docs:generate": "npm run openapi:generate",
         "logs": "tail -f logs/app-$(date +%Y-%m-%d).log",
         "logs:error": "tail -f logs/exceptions.log",
         "logs:all": "tail -f logs/*.log"
@@ -29,6 +31,7 @@
     "author": "",
     "license": "ISC",
     "dependencies": {
+        "@asteasolutions/zod-to-openapi": "^8.1.0",
         "bcryptjs": "^3.0.2",
         "cors": "^2.8.5",
         "dotenv": "^17.2.2",
@@ -37,6 +40,7 @@
         "jsonwebtoken": "^9.0.2",
         "morgan": "^1.10.0",
         "pg": "^8.16.3",
+        "swagger-ui-express": "^5.0.1",
         "uuid": "^9.0.0",
         "winston": "^3.17.0",
         "winston-daily-rotate-file": "^5.0.0",
@@ -52,6 +56,7 @@
         "@types/node": "^20.4.5",
         "@types/pg": "^8.15.5",
         "@types/supertest": "^6.0.3",
+        "@types/swagger-ui-express": "^4.1.8",
         "@types/uuid": "^9.0.2",
         "@types/winston": "^2.4.4",
         "jest": "^30.1.3",
