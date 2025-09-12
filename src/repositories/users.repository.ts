@@ -149,51 +149,27 @@ export class UserRepository {
     updates: Partial<CreateUserData>
   ): Promise<User | null> {
     try {
-      const updateFields: string[] = [];
-      const values: any[] = [];
-      let parameterIndex = 1;
-
-      // Build dynamic update query
-      if (updates.firstName) {
-        updateFields.push(`first_name = $${parameterIndex++}`);
-        values.push(updates.firstName);
+      const existingUser = await this.findById(id);
+      if (!existingUser) {
+        return null;
       }
 
-      if (updates.lastName) {
-        updateFields.push(`last_name = $${parameterIndex++}`);
-        values.push(updates.lastName);
-      }
+      const { email, firstName, lastName } = existingUser;
 
-      if (updates.email) {
-        updateFields.push(`email = $${parameterIndex++}`);
-        values.push(updates.email);
-      }
-
-      if (updates.password) {
-        const saltRounds = 12;
-        const hashedPassword = await bcrypt.hash(updates.password, saltRounds);
-        updateFields.push(`password = $${parameterIndex++}`);
-        values.push(hashedPassword);
-      }
-
-      if (updateFields.length === 0) {
-        throw {
-          type: ErrorCode.VALIDATION_ERROR,
-          message: "No valid fields to update",
-        };
-      }
-
-      // Add ID parameter
-      values.push(id);
+      const updateValues = [
+        updates.firstName || firstName,
+        updates.lastName || lastName,
+        updates.email || email,
+      ];
 
       const query = `
         UPDATE users 
-        SET ${updateFields.join(", ")}, updated_at = CURRENT_TIMESTAMP
-        WHERE id = $${parameterIndex}
+        SET first_name = $1, last_name = $2, email = $3, updated_at = CURRENT_TIMESTAMP
+        WHERE id = $4
         RETURNING id, email, first_name as "firstName", last_name as "lastName", created_at as "createdAt", updated_at as "updatedAt"
       `;
 
-      const result = await this.db.query(query, values);
+      const result = await this.db.query(query, [...updateValues, id]);
 
       if (result.rows.length === 0) {
         return null;

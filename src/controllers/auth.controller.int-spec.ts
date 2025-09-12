@@ -16,6 +16,27 @@ jest.mock("../components/users.component", () => {
   };
 });
 
+jest.mock("../middleware/auth.middleware", () => {
+  return {
+    authenticateToken: (
+      req: any,
+      res: any,
+      next: (err?: any) => void
+    ): void => {
+      // Mock authentication by attaching a user object to the request
+      const authHeader = req.headers.authorization;
+      if (!authHeader || !authHeader.startsWith("Bearer ")) {
+        throw new Error("No token provided");
+      }
+      const userId = authHeader.substring(7);
+      req.user = {
+        id: userId,
+      };
+      next();
+    },
+  };
+});
+
 describe("AuthController", () => {
   //   let authController: AuthController;
   //   let mockAuthService: jest.Mocked<AuthService>;
@@ -215,89 +236,92 @@ describe("AuthController", () => {
   //     });
   //   });
 
-  //   xdescribe("updateProfile", () => {
-  //     it("should update user profile successfully", async () => {
-  //       // Arrange
-  //       mockAuthenticatedRequest.body = {
-  //         firstName: "Jane",
-  //         lastName: "Smith",
-  //         email: "jane@example.com",
-  //       };
-  //       const updatedUser = {
-  //         ...mockUser,
-  //         firstName: "Jane",
-  //         lastName: "Smith",
-  //         email: "jane@example.com",
-  //       };
-  //       mockAuthService.updateProfile.mockResolvedValue(updatedUser);
+  describe("updateProfile", () => {
+    it("should update user profile successfully", async () => {
+      const existingUser = await setupUser(
+        "test@example.com",
+        "Password@123",
+        "John",
+        "Doe"
+      );
 
-  //       // Act
-  //       await authController.updateProfile(
-  //         mockAuthenticatedRequest as AuthenticatedRequest,
-  //         mockResponse as Response,
-  //         mockNext
-  //       );
+      const updatedData = {
+        firstName: "Jane",
+        lastName: "Smith",
+        email: "jane@example.com",
+      };
 
-  //       // Assert
-  //       expect(mockAuthService.updateProfile).toHaveBeenCalledWith(mockUser.id, {
-  //         firstName: "Jane",
-  //         lastName: "Smith",
-  //         email: "jane@example.com",
-  //       });
-  //       expect(mockResponse.json).toHaveBeenCalledWith({
-  //         success: true,
-  //         data: updatedUser,
-  //         message: "Profile updated successfully",
-  //       });
-  //     });
+      const path = "/api/auth/profile";
+      const { body, status } = await request(appInstance)
+        .put(path)
+        .set("Authorization", `Bearer ${existingUser.id}`) // Mock auth token with user ID
+        .send(updatedData);
 
-  //     it("should handle empty update object", async () => {
-  //       // Arrange
-  //       mockAuthenticatedRequest.body = {};
+      expect({ body, status }).toEqual({
+        body: {
+          data: {
+            createdAt: expect.any(String),
+            email: "jane@example.com",
+            firstName: "Jane",
+            id: expect.any(String),
+            lastName: "Smith",
+            updatedAt: expect.any(String),
+          },
+          message: "Profile updated successfully",
+          success: true,
+        },
+        status: 200,
+      });
+    });
+    // });
 
-  //       // Act
-  //       await authController.updateProfile(
-  //         mockAuthenticatedRequest as AuthenticatedRequest,
-  //         mockResponse as Response,
-  //         mockNext
-  //       );
+    // it("should handle empty update object", async () => {
+    //   // Arrange
+    //   mockAuthenticatedRequest.body = {};
 
-  //       // Assert
-  //       expect(mockNext).toHaveBeenCalledWith({
-  //         type: ErrorCode.VALIDATION_ERROR,
-  //         message: "At least one field must be provided for update",
-  //       });
-  //       expect(mockAuthService.updateProfile).not.toHaveBeenCalled();
-  //     });
+    //   // Act
+    //   await authController.updateProfile(
+    //     mockAuthenticatedRequest as AuthenticatedRequest,
+    //     mockResponse as Response,
+    //     mockNext
+    //   );
 
-  //     it("should filter out undefined values", async () => {
-  //       // Arrange
-  //       mockAuthenticatedRequest.body = {
-  //         firstName: "Jane",
-  //         lastName: undefined,
-  //         email: "jane@example.com",
-  //       };
-  //       const updatedUser = {
-  //         ...mockUser,
-  //         firstName: "Jane",
-  //         email: "jane@example.com",
-  //       };
-  //       mockAuthService.updateProfile.mockResolvedValue(updatedUser);
+    //   // Assert
+    //   expect(mockNext).toHaveBeenCalledWith({
+    //     type: ErrorCode.VALIDATION_ERROR,
+    //     message: "At least one field must be provided for update",
+    //   });
+    //   expect(mockAuthService.updateProfile).not.toHaveBeenCalled();
+    // });
 
-  //       // Act
-  //       await authController.updateProfile(
-  //         mockAuthenticatedRequest as AuthenticatedRequest,
-  //         mockResponse as Response,
-  //         mockNext
-  //       );
+    // it("should filter out undefined values", async () => {
+    //   // Arrange
+    //   mockAuthenticatedRequest.body = {
+    //     firstName: "Jane",
+    //     lastName: undefined,
+    //     email: "jane@example.com",
+    //   };
+    //   const updatedUser = {
+    //     ...mockUser,
+    //     firstName: "Jane",
+    //     email: "jane@example.com",
+    //   };
+    //   mockAuthService.updateProfile.mockResolvedValue(updatedUser);
 
-  //       // Assert
-  //       expect(mockAuthService.updateProfile).toHaveBeenCalledWith(mockUser.id, {
-  //         firstName: "Jane",
-  //         email: "jane@example.com",
-  //       });
-  //     });
-  //   });
+    //   // Act
+    //   await authController.updateProfile(
+    //     mockAuthenticatedRequest as AuthenticatedRequest,
+    //     mockResponse as Response,
+    //     mockNext
+    //   );
+
+    //   // Assert
+    //   expect(mockAuthService.updateProfile).toHaveBeenCalledWith(mockUser.id, {
+    //     firstName: "Jane",
+    //     email: "jane@example.com",
+    //   });
+    // });
+  });
 
   //   xdescribe("changePassword", () => {
   //     it("should change password successfully", async () => {
