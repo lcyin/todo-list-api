@@ -2,6 +2,7 @@ import { Router } from "express";
 import { TodoService } from "../services/todo-service";
 import { TodoController } from "../controllers/todo.controller";
 import { TodoRepository } from "../repositories/todo.repository";
+import { authenticateToken } from "../middleware/auth.middleware";
 import {
   validate,
   validateBody,
@@ -20,43 +21,45 @@ const todoController = new TodoController(todoService);
 
 /**
  * @route   GET /api/todos
- * @desc    Get all todos
- * @access  Public
+ * @desc    Get all todos for authenticated user
+ * @access  Private
  */
-router.get("/", todoController.getAllTodos);
+router.get("/", authenticateToken, todoController.getAllTodos);
 
 /**
  * @route   GET /api/todos/:id
- * @desc    Get todo by ID
- * @access  Public
+ * @desc    Get todo by ID for authenticated user
+ * @access  Private
  */
 router.get(
   "/:id",
+  authenticateToken,
   validateParams(todoParamsSchema),
   todoController.getTodoById
 );
 
 /**
  * @route   POST /api/todos
- * @desc    Create new todo
- * @access  Public
+ * @desc    Create new todo for authenticated user
+ * @access  Private
  */
-router.post("/", validate(createTodoSchema), todoController.createTodo);
+router.post("/", authenticateToken, validate(createTodoSchema), todoController.createTodo);
 
 /**
  * @route   PUT /api/todos/:id
- * @desc    Update todo
- * @access  Public
+ * @desc    Update todo for authenticated user
+ * @access  Private
  */
-router.put("/:id", validate(updateTodoSchema), todoController.updateTodo);
+router.put("/:id", authenticateToken, validate(updateTodoSchema), todoController.updateTodo);
 
 /**
  * @route   DELETE /api/todos/:id
- * @desc    Delete todo
- * @access  Public
+ * @desc    Delete todo for authenticated user
+ * @access  Private
  */
 router.delete(
   "/:id",
+  authenticateToken,
   validateParams(todoParamsSchema),
   todoController.deleteTodo
 );
