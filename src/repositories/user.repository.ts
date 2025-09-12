@@ -140,17 +140,7 @@ export class UserRepository {
     }
   }
 
-  /**
-   * Verify user password
-   */
-  async verifyPassword(plainPassword: string, hashedPassword: string): Promise<boolean> {
-    try {
-      return await bcrypt.compare(plainPassword, hashedPassword);
-    } catch (error) {
-      logger.error('Error verifying password:', error);
-      return false;
-    }
-  }
+
 
   /**
    * Update user information

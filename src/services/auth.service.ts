@@ -1,8 +1,12 @@
-import { UserRepository, CreateUserData } from '../repositories/user.repository';
-import { JwtService } from './jwt.service';
-import { User, UserWithPassword } from '../schemas/auth.schema';
-import { ErrorCode } from '../middleware/enums/error-code.enum';
-import logger from '../config/logger';
+import {
+  UserRepository,
+  CreateUserData,
+} from "../repositories/user.repository";
+import { JwtService } from "./jwt.service";
+import { User, UserWithPassword } from "../schemas/auth.schema";
+import { ErrorCode } from "../middleware/enums/error-code.enum";
+import logger from "../config/logger";
+import { verifyPassword } from "../components/user.component";
 
 export interface RegisterData {
   email: string;
@@ -40,7 +44,7 @@ export class AuthService {
       if (existingUser) {
         throw {
           type: ErrorCode.USER_ALREADY_EXISTS,
-          message: 'User with this email already exists',
+          message: "User with this email already exists",
         };
       }
 
@@ -66,10 +70,10 @@ export class AuthService {
         throw error; // Re-throw custom errors
       }
 
-      logger.error('Registration error:', error);
+      logger.error("Registration error:", error);
       throw {
         type: ErrorCode.INTERNAL_SERVER_ERROR,
-        message: 'Registration failed',
+        message: "Registration failed",
       };
     }
   }
@@ -86,12 +90,12 @@ export class AuthService {
       if (!userWithPassword) {
         throw {
           type: ErrorCode.INVALID_CREDENTIALS,
-          message: 'Invalid email or password',
+          message: "Invalid email or password",
         };
       }
 
       // Verify password
-      const isPasswordValid = await this.userRepository.verifyPassword(
+      const isPasswordValid = await verifyPassword(
         password,
         userWithPassword.password
       );
@@ -100,7 +104,7 @@ export class AuthService {
         logger.warn(`Failed login attempt for email: ${email}`);
         throw {
           type: ErrorCode.INVALID_CREDENTIALS,
-          message: 'Invalid email or password',
+          message: "Invalid email or password",
         };
       }
 
@@ -121,10 +125,10 @@ export class AuthService {
         throw error; // Re-throw custom errors
       }
 
-      logger.error('Login error:', error);
+      logger.error("Login error:", error);
       throw {
         type: ErrorCode.INTERNAL_SERVER_ERROR,
-        message: 'Login failed',
+        message: "Login failed",
       };
     }
   }
@@ -135,11 +139,11 @@ export class AuthService {
   async getProfile(userId: string): Promise<User> {
     try {
       const user = await this.userRepository.findById(userId);
-      
+
       if (!user) {
         throw {
           type: ErrorCode.USER_NOT_FOUND,
-          message: 'User not found',
+          message: "User not found",
         };
       }
 
@@ -149,10 +153,10 @@ export class AuthService {
         throw error; // Re-throw custom errors
       }
 
-      logger.error('Get profile error:', error);
+      logger.error("Get profile error:", error);
       throw {
         type: ErrorCode.INTERNAL_SERVER_ERROR,
-        message: 'Failed to get user profile',
+        message: "Failed to get user profile",
       };
     }
   }
@@ -170,28 +174,30 @@ export class AuthService {
       if (!existingUser) {
         throw {
           type: ErrorCode.USER_NOT_FOUND,
-          message: 'User not found',
+          message: "User not found",
         };
       }
 
       // If email is being updated, check if it already exists
       if (updates.email && updates.email !== existingUser.email) {
-        const emailExists = await this.userRepository.emailExists(updates.email);
+        const emailExists = await this.userRepository.emailExists(
+          updates.email
+        );
         if (emailExists) {
           throw {
             type: ErrorCode.USER_ALREADY_EXISTS,
-            message: 'Email already exists',
+            message: "Email already exists",
           };
         }
       }
 
       // Update user
       const updatedUser = await this.userRepository.updateUser(userId, updates);
-      
+
       if (!updatedUser) {
         throw {
           type: ErrorCode.USER_NOT_FOUND,
-          message: 'User not found',
+          message: "User not found",
         };
       }
 
@@ -203,10 +209,10 @@ export class AuthService {
         throw error; // Re-throw custom errors
       }
 
-      logger.error('Update profile error:', error);
+      logger.error("Update profile error:", error);
       throw {
         type: ErrorCode.INTERNAL_SERVER_ERROR,
-        message: 'Failed to update user profile',
+        message: "Failed to update user profile",
       };
     }
   }
@@ -225,21 +231,23 @@ export class AuthService {
       if (!user) {
         throw {
           type: ErrorCode.USER_NOT_FOUND,
-          message: 'User not found',
+          message: "User not found",
         };
       }
 
       // Get user with password for verification
-      const userWithPassword = await this.userRepository.findByEmail(user.email);
+      const userWithPassword = await this.userRepository.findByEmail(
+        user.email
+      );
       if (!userWithPassword) {
         throw {
           type: ErrorCode.USER_NOT_FOUND,
-          message: 'User not found',
+          message: "User not found",
         };
       }
 
       // Verify current password
-      const isCurrentPasswordValid = await this.userRepository.verifyPassword(
+      const isCurrentPasswordValid = await verifyPassword(
         currentPassword,
         userWithPassword.password
       );
@@ -247,7 +255,7 @@ export class AuthService {
       if (!isCurrentPasswordValid) {
         throw {
           type: ErrorCode.INVALID_CREDENTIALS,
-          message: 'Current password is incorrect',
+          message: "Current password is incorrect",
         };
       }
 
@@ -260,10 +268,10 @@ export class AuthService {
         throw error; // Re-throw custom errors
       }
 
-      logger.error('Change password error:', error);
+      logger.error("Change password error:", error);
       throw {
         type: ErrorCode.INTERNAL_SERVER_ERROR,
-        message: 'Failed to change password',
+        message: "Failed to change password",
       };
     }
   }
@@ -274,11 +282,11 @@ export class AuthService {
   async deleteAccount(userId: string): Promise<void> {
     try {
       const deleted = await this.userRepository.deleteUser(userId);
-      
+
       if (!deleted) {
         throw {
           type: ErrorCode.USER_NOT_FOUND,
-          message: 'User not found',
+          message: "User not found",
         };
       }
 
@@ -288,10 +296,10 @@ export class AuthService {
         throw error; // Re-throw custom errors
       }
 
-      logger.error('Delete account error:', error);
+      logger.error("Delete account error:", error);
       throw {
         type: ErrorCode.INTERNAL_SERVER_ERROR,
-        message: 'Failed to delete account',
+        message: "Failed to delete account",
       };
     }
   }
@@ -303,27 +311,27 @@ export class AuthService {
     try {
       const decoded = JwtService.verifyToken(token);
       const user = await this.userRepository.findById(decoded.userId);
-      
+
       if (!user) {
         throw {
           type: ErrorCode.USER_NOT_FOUND,
-          message: 'User not found',
+          message: "User not found",
         };
       }
 
       return user;
     } catch (error: any) {
-      if (error.message?.includes('expired')) {
+      if (error.message?.includes("expired")) {
         throw {
           type: ErrorCode.AUTHENTICATION_ERROR,
-          message: 'Token expired',
+          message: "Token expired",
         };
       }
 
-      if (error.message?.includes('invalid')) {
+      if (error.message?.includes("invalid")) {
         throw {
           type: ErrorCode.AUTHENTICATION_ERROR,
-          message: 'Invalid token',
+          message: "Invalid token",
         };
       }
 
@@ -331,10 +339,10 @@ export class AuthService {
         throw error; // Re-throw custom errors
       }
 
-      logger.error('Token verification error:', error);
+      logger.error("Token verification error:", error);
       throw {
         type: ErrorCode.AUTHENTICATION_ERROR,
-        message: 'Token verification failed',
+        message: "Token verification failed",
       };
     }
   }

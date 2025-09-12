@@ -9,6 +9,12 @@ import { pool } from "../config/database";
 //   debug: jest.fn(),
 // }));
 
+jest.mock("../components/user.component", () => {
+  return {
+    verifyPassword: () => Promise.resolve(true),
+  };
+});
+
 describe("AuthController", () => {
   //   let authController: AuthController;
   //   let mockAuthService: jest.Mocked<AuthService>;
