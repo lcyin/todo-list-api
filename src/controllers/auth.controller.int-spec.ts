@@ -38,22 +38,8 @@ jest.mock("../middleware/auth.middleware", () => {
 });
 
 describe("AuthController", () => {
-  //   let authController: AuthController;
-  //   let mockAuthService: jest.Mocked<AuthService>;
-  //   let mockRequest: Partial<Request>;
-  //   let mockAuthenticatedRequest: Partial<AuthenticatedRequest>;
-  //   let mockResponse: Partial<Response>;
-  //   let mockNext: jest.MockedFunction<NextFunction>;
   const appInstance = app;
-  // Mock user data
-  const mockUser = {
-    id: "123e4567-e89b-12d3-a456-426614174000",
-    email: "test@example.com",
-    firstName: "John",
-    lastName: "Doe",
-    createdAt: new Date("2023-01-01"),
-    updatedAt: new Date("2023-01-01"),
-  };
+
   beforeEach(() => {
     // Reset any state if necessary before each test
     // For example, clear the postgres database
@@ -95,12 +81,7 @@ describe("AuthController", () => {
     describe("should handle registration errors", () => {
       describe("when email is already in use", () => {
         it("should return 400 if email is already in use", async () => {
-          const existingUser = await setupUser(
-            "test@example.com",
-            "Password@123",
-            "John",
-            "Doe"
-          );
+          await setupUser("test@example.com", "Password@123", "John", "Doe");
           const path = "/api/auth/register";
           const payload = {
             email: "test@example.com",
@@ -177,64 +158,74 @@ describe("AuthController", () => {
     });
   });
 
-  //   xdescribe("getProfile", () => {
-  //     it("should get user profile successfully", async () => {
-  //       // Arrange
-  //       mockAuthService.getProfile.mockResolvedValue(mockUser);
+  xdescribe("getProfile", () => {
+    it("should get user profile successfully", async () => {
+      // Arrange
+      const existingUser = await setupUser(
+        "test@example.com",
+        "Password@123",
+        "John",
+        "Doe"
+      );
+      const path = "/api/auth/profile";
+      const { body, status } = await request(appInstance)
+        .get(path)
+        .set("Authorization", `Bearer ${existingUser.id}`) // Mock auth token with user ID
+        .send();
 
-  //       // Act
-  //       await authController.getProfile(
-  //         mockAuthenticatedRequest as AuthenticatedRequest,
-  //         mockResponse as Response,
-  //         mockNext
-  //       );
+      expect({ body, status }).toEqual({
+        body: {
+          data: {
+            createdAt: expect.any(String),
+            email: "test@example.com",
+            firstName: "John",
+            id: expect.any(String),
+            lastName: "Doe",
+            updatedAt: expect.any(String),
+          },
+          message: "Profile retrieved successfully",
+          success: true,
+        },
+        status: 200,
+      });
+    });
 
-  //       // Assert
-  //       expect(mockAuthService.getProfile).toHaveBeenCalledWith(mockUser.id);
-  //       expect(mockResponse.json).toHaveBeenCalledWith({
-  //         success: true,
-  //         data: mockUser,
-  //         message: "Profile retrieved successfully",
-  //       });
-  //       expect(mockNext).not.toHaveBeenCalled();
-  //     });
+    // it("should handle missing user in request", async () => {
+    //   // Arrange
+    //   const requestWithoutUser = { ...mockAuthenticatedRequest };
+    //   delete requestWithoutUser.user;
 
-  //     it("should handle missing user in request", async () => {
-  //       // Arrange
-  //       const requestWithoutUser = { ...mockAuthenticatedRequest };
-  //       delete requestWithoutUser.user;
+    //   // Act
+    //   await authController.getProfile(
+    //     requestWithoutUser as AuthenticatedRequest,
+    //     mockResponse as Response,
+    //     mockNext
+    //   );
 
-  //       // Act
-  //       await authController.getProfile(
-  //         requestWithoutUser as AuthenticatedRequest,
-  //         mockResponse as Response,
-  //         mockNext
-  //       );
+    //   // Assert
+    //   expect(mockNext).toHaveBeenCalledWith({
+    //     type: ErrorCode.AUTHENTICATION_ERROR,
+    //     message: "User not authenticated",
+    //   });
+    //   expect(mockAuthService.getProfile).not.toHaveBeenCalled();
+    // });
 
-  //       // Assert
-  //       expect(mockNext).toHaveBeenCalledWith({
-  //         type: ErrorCode.AUTHENTICATION_ERROR,
-  //         message: "User not authenticated",
-  //       });
-  //       expect(mockAuthService.getProfile).not.toHaveBeenCalled();
-  //     });
+    // it("should handle service errors", async () => {
+    //   // Arrange
+    //   const error = new Error("User not found");
+    //   mockAuthService.getProfile.mockRejectedValue(error);
 
-  //     it("should handle service errors", async () => {
-  //       // Arrange
-  //       const error = new Error("User not found");
-  //       mockAuthService.getProfile.mockRejectedValue(error);
+    //   // Act
+    //   await authController.getProfile(
+    //     mockAuthenticatedRequest as AuthenticatedRequest,
+    //     mockResponse as Response,
+    //     mockNext
+    //   );
 
-  //       // Act
-  //       await authController.getProfile(
-  //         mockAuthenticatedRequest as AuthenticatedRequest,
-  //         mockResponse as Response,
-  //         mockNext
-  //       );
-
-  //       // Assert
-  //       expect(mockNext).toHaveBeenCalledWith(error);
-  //     });
-  //   });
+    //   // Assert
+    //   expect(mockNext).toHaveBeenCalledWith(error);
+    // });
+  });
 
   describe("updateProfile", () => {
     it("should update user profile successfully", async () => {
