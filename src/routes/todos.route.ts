@@ -1,7 +1,7 @@
 import { Router } from "express";
-import { TodoService } from "../services/todo.service";
-import { TodoController } from "../controllers/todo.controller";
-import { TodoRepository } from "../repositories/todo.repository";
+import { TodoService } from "../services/todos.service";
+import { TodoController } from "../controllers/todos.controller";
+import { TodoRepository } from "../repositories/todos.repository";
 import { authenticateToken } from "../middleware/auth.middleware";
 import {
   validate,
@@ -12,7 +12,7 @@ import {
   createTodoSchema,
   updateTodoSchema,
   todoParamsSchema,
-} from "../schemas/todo.schema";
+} from "../schemas/todos.schema";
 
 const router = Router();
 const todoRepository = new TodoRepository();

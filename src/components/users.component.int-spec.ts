@@ -1,4 +1,4 @@
-import { hashPassword, verifyPassword } from "./user.component";
+import { hashPassword, verifyPassword } from "./users.component";
 
 describe("@users.component", () => {
   describe("verifyPassword", () => {

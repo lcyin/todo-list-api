@@ -2,7 +2,7 @@ import { Request, Response, NextFunction } from "express";
 import { ErrorCode } from "./enums/error-code.enum";
 import { ErrorDetails } from "./interfaces/errore-interface";
 import logger from "../config/logger";
-import { ErrorResponseSchema } from "../schemas/todo.schema";
+import { ErrorResponseSchema } from "../schemas/todos.schema";
 
 interface LoggingRequest extends Request {
   requestId?: string;

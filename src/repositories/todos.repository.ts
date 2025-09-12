@@ -1,4 +1,4 @@
-import { Todo, CreateTodoRequest } from "../interfaces/todo.interface";
+import { Todo, CreateTodoRequest } from "../interfaces/todos.interface";
 import { pool } from "../config/database";
 import { ErrorCode } from "../middleware/enums/error-code.enum";
 import logger from "../config/logger";

@@ -1,12 +1,12 @@
 import {
   UserRepository,
   CreateUserData,
-} from "../repositories/user.repository";
+} from "../repositories/users.repository";
 import { JwtService } from "./jwt.service";
 import { User, UserWithPassword } from "../schemas/auth.schema";
 import { ErrorCode } from "../middleware/enums/error-code.enum";
 import logger from "../config/logger";
-import { hashPassword, verifyPassword } from "../components/user.component";
+import { hashPassword, verifyPassword } from "../components/users.component";
 
 export interface RegisterData {
   email: string;

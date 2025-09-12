@@ -4,7 +4,7 @@ import { UserWithPassword, User } from "../schemas/auth.schema";
 import { pool } from "../config/database";
 import logger from "../config/logger";
 import { ErrorCode } from "../middleware/enums/error-code.enum";
-import { hashPassword } from "../components/user.component";
+import { hashPassword } from "../components/users.component";
 
 export interface CreateUserData {
   email: string;

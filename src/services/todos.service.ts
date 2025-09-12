@@ -1,9 +1,9 @@
-import { TodoRepository } from "../repositories/todo.repository";
+import { TodoRepository } from "../repositories/todos.repository";
 import {
   CreateTodoRequest,
   Todo,
   UpdateTodoRequest,
-} from "../interfaces/todo.interface";
+} from "../interfaces/todos.interface";
 
 export class TodoService {
   constructor(private todoRepository: TodoRepository) {}

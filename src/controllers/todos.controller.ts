@@ -4,15 +4,15 @@ import {
   CreateTodoRequest,
   UpdateTodoRequest,
   ApiResponse,
-} from "../interfaces/todo.interface";
-import { TodoService } from "../services/todo.service";
+} from "../interfaces/todos.interface";
+import { TodoService } from "../services/todos.service";
 import { ErrorCode } from "../middleware/enums/error-code.enum";
 import { AuthenticatedRequest } from "../middleware/auth.middleware";
 import {
   TodoResponseSchema,
   TodoSchema,
   TodosResponseSchema,
-} from "../schemas/todo.schema";
+} from "../schemas/todos.schema";
 import z from "zod";
 
 export class TodoController {
