@@ -214,7 +214,7 @@ export class UserRepository {
   /**
    * Delete user by ID
    */
-  async deleteUser(
+  async softDeleteUser(
     id: string
   ): Promise<{ id: string; deletedAt: string } | null> {
     try {

@@ -298,7 +298,7 @@ export class AuthService {
           message: "User not found",
         };
       }
-      const deleted = await this.userRepository.deleteUser(userId);
+      const deleted = await this.userRepository.softDeleteUser(userId);
 
       if (!deleted) {
         throw {
