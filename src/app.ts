@@ -3,6 +3,7 @@ import cors from "cors";
 import helmet from "helmet";
 import morgan from "morgan";
 import todoRoutes from "./routes/todos.route";
+import { authRoutes } from "./routes/auth.route";
 import { errorHandler } from "./middleware/errorHandler";
 import { requestLogger, addRequestId } from "./middleware/requestLogger";
 import logger from "./config/logger";
@@ -38,6 +39,7 @@ app.use(express.json()); // Parse JSON bodies
 app.use(express.urlencoded({ extended: true })); // Parse URL-encoded bodies
 
 // Routes
+app.use("/api/auth", authRoutes);
 app.use("/api/todos", todoRoutes);
 
 // Health check endpoint
@@ -56,6 +58,7 @@ app.get("/", (req: Request, res: Response) => {
     version: "1.0.0",
     endpoints: {
       health: "/health",
+      auth: "/api/auth",
       todos: "/api/todos",
     },
   });
