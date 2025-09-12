@@ -153,12 +153,21 @@ export class TodoController {
   };
 
   public deleteTodo = async (
-    req: Request,
+    req: AuthenticatedRequest,
     res: Response,
     next: Function
   ): Promise<Response<ApiResponse<null>> | undefined> => {
     const { id } = req.params;
-    const deletedOrError = await this.todoService.deleteTodo(id);
+    
+    if (!req.user?.id) {
+      next({
+        type: ErrorCode.AUTHENTICATION_ERROR,
+        message: 'User not authenticated',
+      });
+      return;
+    }
+
+    const deletedOrError = await this.todoService.deleteTodo(id, req.user.id);
 
     if (typeof deletedOrError === "string") {
       next({
