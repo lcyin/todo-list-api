@@ -37,30 +37,16 @@ export class TodoRepository {
 
   public async getTodoById(
     id: string,
-    userId?: string
+    userId: string
   ): Promise<Todo | undefined> {
     try {
-      let query: string;
-      let params: any[];
-
-      if (userId) {
-        query = `
+      const query = `
           SELECT id, title, description, completed, user_id, created_at, updated_at
           FROM todos
           WHERE id = $1 AND user_id = $2
         `;
-        params = [id, userId];
-      } else {
-        // For admin or system use
-        query = `
-          SELECT id, title, description, completed, user_id, created_at, updated_at
-          FROM todos
-          WHERE id = $1
-        `;
-        params = [id];
-      }
 
-      const result = await pool.query(query, params);
+      const result = await pool.query(query, [id, userId]);
 
       if (result.rows.length > 0) {
         return this.mapRowToTodo(result.rows[0]);
