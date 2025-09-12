@@ -92,6 +92,28 @@ describe("AuthController", () => {
           });
         });
       });
+      describe("invalid password", () => {
+        it("should return 400 if password is too short", async () => {
+          const path = "/api/auth/register";
+          const payload = {
+            email: "test@example.com",
+            password: "short",
+            firstName: "John",
+            lastName: "Doe",
+          };
+          const { body, status } = await request(appInstance)
+            .post(path)
+            .send(payload);
+          expect({ body, status }).toEqual({
+            body: {
+              error:
+                "Validation failed: body.password: Password must be at least 8 characters long, body.password: Password must contain at least one lowercase letter, one uppercase letter, and one number",
+              success: false,
+            },
+            status: 400,
+          });
+        });
+      });
     });
   });
 
