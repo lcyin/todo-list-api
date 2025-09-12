@@ -15,6 +15,12 @@ export const UserWithPasswordSchema = UserSchema.extend({
   password: z.string(),
 });
 
+// Delete User schema (for delete operations)
+export const DeletedUserSchema = z.object({
+  id: z.uuid(),
+  deletedAt: z.date(),
+});
+
 // Registration schema
 export const registerSchema = z.object({
   body: z.object({
@@ -87,3 +93,4 @@ export type LoginRequest = z.infer<typeof loginSchema>;
 export type AuthResponse = z.infer<typeof AuthResponseSchema>;
 export type UserResponse = z.infer<typeof UserResponseSchema>;
 export type JwtPayload = z.infer<typeof JwtPayloadSchema>;
+export type DeletedUser = z.infer<typeof DeletedUserSchema>;

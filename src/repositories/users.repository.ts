@@ -1,5 +1,5 @@
 import { Pool } from "pg";
-import { UserWithPassword, User } from "../schemas/auth.schema";
+import { UserWithPassword, User, DeletedUser } from "../schemas/auth.schema";
 
 import logger from "../config/logger";
 import { ErrorCode } from "../middleware/enums/error-code.enum";
@@ -37,7 +37,7 @@ export class UserRepository {
     };
   }
 
-  private mapRowToDeletedUser(row: any): { id: string; deletedAt: string } {
+  private mapRowToDeletedUser(row: any): DeletedUser {
     return {
       id: row.id,
       deletedAt: row.deleted_at,
@@ -51,7 +51,7 @@ export class UserRepository {
   /**
    * Create a new user with hashed password
    */
-  async createUser(userData: CreateUserData): Promise<User | null> {
+  async createUser(userData: CreateUserData) {
     const { email, password, firstName, lastName } = userData;
 
     try {
@@ -101,7 +101,7 @@ export class UserRepository {
   /**
    * Find user by email (including password for authentication)
    */
-  async findByEmail(email: string): Promise<UserWithPassword | null> {
+  async findByEmail(email: string) {
     try {
       const query = `
         SELECT 
@@ -134,7 +134,7 @@ export class UserRepository {
   /**
    * Find user by ID (without password)
    */
-  async findById(id: string): Promise<User | null> {
+  async findById(id: string) {
     try {
       const query = `
         SELECT 
@@ -170,7 +170,7 @@ export class UserRepository {
   async updateUser(
     id: string,
     updates: Pick<CreateUserData, "email" | "firstName" | "lastName">
-  ): Promise<User | null> {
+  ) {
     try {
       const { email, firstName, lastName } = updates;
 
@@ -213,7 +213,7 @@ export class UserRepository {
     }
   }
 
-  async changePassword(id: string, newHashedPassword: string): Promise<void> {
+  async changePassword(id: string, newHashedPassword: string) {
     try {
       const query = `
         UPDATE users 
@@ -236,9 +236,7 @@ export class UserRepository {
   /**
    * Delete user by ID
    */
-  async softDeleteUser(
-    id: string
-  ): Promise<{ id: string; deletedAt: string } | null> {
+  async softDeleteUser(id: string) {
     try {
       const softDeleteQuery = `
         UPDATE users 
@@ -268,7 +266,7 @@ export class UserRepository {
   /**
    * Check if email exists
    */
-  async emailExists(email: string): Promise<boolean> {
+  async emailExists(email: string) {
     try {
       const query = "SELECT 1 FROM users WHERE email = $1 LIMIT 1";
       const result = await this.db.query(query, [email]);
