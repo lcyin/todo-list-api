@@ -5,7 +5,7 @@ import {
   UpdateTodoRequest,
   ApiResponse,
 } from "../interfaces/todo.interface";
-import { TodoService } from "../services/todo-service";
+import { TodoService } from "../services/todo.service";
 import { ErrorCode } from "../middleware/enums/error-code.enum";
 import { AuthenticatedRequest } from "../middleware/auth.middleware";
 import {
