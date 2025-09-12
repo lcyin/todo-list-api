@@ -25,6 +25,18 @@ export class UserRepository {
     };
   }
 
+  private mapRowToUserWithPassword(row: any): UserWithPassword {
+    return {
+      id: row.id,
+      email: row.email,
+      password: row.password,
+      firstName: row.first_name,
+      lastName: row.last_name,
+      createdAt: row.created_at,
+      updatedAt: row.updated_at,
+    };
+  }
+
   constructor(pool: Pool) {
     this.db = pool;
   }
@@ -84,12 +96,12 @@ export class UserRepository {
       const query = `
         SELECT 
           id, 
-          email, 
+          email,
           password,
-          first_name as "firstName", 
-          last_name as "lastName", 
-          created_at as "createdAt", 
-          updated_at as "updatedAt"
+          first_name, 
+          last_name, 
+          created_at, 
+          updated_at
         FROM users 
         WHERE email = $1
       `;
@@ -99,8 +111,8 @@ export class UserRepository {
       if (result.rows.length === 0) {
         return null;
       }
-
-      return result.rows[0] as UserWithPassword;
+      const rawUser = result.rows[0];
+      return this.mapRowToUserWithPassword(rawUser);
     } catch (error) {
       logger.error("Database error finding user by email:", error);
       throw {
