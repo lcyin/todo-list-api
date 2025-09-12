@@ -7,6 +7,7 @@ import {
 } from "../interfaces/todo.interface";
 import { TodoService } from "../services/todo-service";
 import { ErrorCode } from "../middleware/enums/error-code.enum";
+import { AuthenticatedRequest } from "../middleware/auth.middleware";
 import {
   TodoResponseSchema,
   TodoSchema,
@@ -19,12 +20,20 @@ export class TodoController {
     this.todoService = todoService;
   }
   public getAllTodos = async (
-    req: Request,
+    req: AuthenticatedRequest,
     res: Response,
     next: Function
   ): Promise<void> => {
     try {
-      const todoRaws = await this.todoService.getAllTodos();
+      if (!req.user?.id) {
+        next({
+          type: ErrorCode.AUTHENTICATION_ERROR,
+          message: 'User not authenticated',
+        });
+        return;
+      }
+
+      const todoRaws = await this.todoService.getAllTodos(req.user.id);
       const todos: Todo[] = z
         .array(TodoSchema)
         .parse(todoRaws.map((todo) => TodoSchema.parse(todo)));
@@ -41,12 +50,21 @@ export class TodoController {
     }
   };
   public getTodoById = async (
-    req: Request,
+    req: AuthenticatedRequest,
     res: Response,
     next: Function
   ): Promise<Response<ApiResponse<Todo>> | undefined> => {
     const { id } = req.params; // Extract ID from request parameters
-    const todoOrString = await this.todoService.getTodoById(id); // Use service to get todo by ID
+    
+    if (!req.user?.id) {
+      next({
+        type: ErrorCode.AUTHENTICATION_ERROR,
+        message: 'User not authenticated',
+      });
+      return;
+    }
+
+    const todoOrString = await this.todoService.getTodoById(id, req.user.id); // Use service to get todo by ID
 
     if (typeof todoOrString === "string") {
       next({
@@ -64,15 +82,23 @@ export class TodoController {
     return res.json(response);
   };
   public createTodo = async (
-    req: Request<{}, {}, CreateTodoRequest>,
+    req: AuthenticatedRequest,
     res: Response,
     next: Function
   ) => {
     try {
+      if (!req.user?.id) {
+        next({
+          type: ErrorCode.AUTHENTICATION_ERROR,
+          message: 'User not authenticated',
+        });
+        return;
+      }
+
       const { title, description } = req.body;
 
       // Validation is now handled by Zod middleware
-      const newTodo = await this.todoService.createTodo({ title, description });
+      const newTodo = await this.todoService.createTodo({ title, description }, req.user.id);
       const response = TodoResponseSchema.parse({
         success: true,
         data: TodoSchema.parse(newTodo),
@@ -86,18 +112,26 @@ export class TodoController {
   };
 
   public updateTodo = async (
-    req: Request<{ id: string }, {}, UpdateTodoRequest>,
+    req: AuthenticatedRequest,
     res: Response,
     next: Function
   ): Promise<Response<ApiResponse<Todo>> | undefined> => {
     const { id } = req.params;
     const { title, description, completed } = req.body;
 
+    if (!req.user?.id) {
+      next({
+        type: ErrorCode.AUTHENTICATION_ERROR,
+        message: 'User not authenticated',
+      });
+      return;
+    }
+
     const updatedTodoOrError = await this.todoService.updateTodo(id, {
       title,
       description,
       completed,
-    });
+    }, req.user.id);
 
     if (typeof updatedTodoOrError === "string") {
       next({
