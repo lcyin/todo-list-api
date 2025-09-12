@@ -8,6 +8,15 @@ describe("@users.component", () => {
       const isMatch = await verifyPassword(password, hashedPassword);
       expect(isMatch).toBe(true);
     });
+    describe("should return false for incorrect password", () => {
+      it("when password is wrong", async () => {
+        const password = "Password@123";
+        const wrongPassword = "WrongPassword@123";
+        const hashedPassword = await hashPassword(password);
+        const isMatch = await verifyPassword(wrongPassword, hashedPassword);
+        expect(isMatch).toBe(false);
+      });
+    });
   });
   describe("hashPassword", () => {
     it("should hash the password correctly", async () => {

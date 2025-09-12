@@ -9,7 +9,7 @@ import { pool } from "../config/database";
 //   debug: jest.fn(),
 // }));
 
-jest.mock("../components/user.component", () => {
+jest.mock("../components/users.component", () => {
   return {
     verifyPassword: () => Promise.resolve(true),
     hashPassword: (password: string) => Promise.resolve(`hashed-${password}`),
@@ -154,26 +154,6 @@ describe("AuthController", () => {
         status: 200,
       });
     });
-
-    //   it("should handle login errors", async () => {
-    //     // Arrange
-    //     mockRequest.body = {
-    //       email: "test@example.com",
-    //       password: "wrongpassword",
-    //     };
-    //     const error = new Error("Invalid credentials");
-    //     mockAuthService.login.mockRejectedValue(error);
-
-    //     // Act
-    //     await authController.login(
-    //       mockRequest as Request,
-    //       mockResponse as Response,
-    //       mockNext
-    //     );
-
-    //     // Assert
-    //     expect(mockNext).toHaveBeenCalledWith(error);
-    //   });
   });
 
   //   xdescribe("getProfile", () => {
