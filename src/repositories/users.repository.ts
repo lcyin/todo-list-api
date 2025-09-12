@@ -1,10 +1,9 @@
 import { Pool } from "pg";
 import bcrypt from "bcryptjs";
 import { UserWithPassword, User } from "../schemas/auth.schema";
-import { pool } from "../config/database";
+
 import logger from "../config/logger";
 import { ErrorCode } from "../middleware/enums/error-code.enum";
-import { hashPassword } from "../components/users.component";
 
 export interface CreateUserData {
   email: string;
@@ -16,7 +15,7 @@ export interface CreateUserData {
 export class UserRepository {
   private db: Pool;
 
-  constructor() {
+  constructor(pool: Pool) {
     this.db = pool;
   }
 
@@ -27,7 +26,6 @@ export class UserRepository {
     const { email, password, firstName, lastName } = userData;
 
     try {
-
       const query = `
         INSERT INTO users (email, password, first_name, last_name)
         VALUES ($1, $2, $3, $4)

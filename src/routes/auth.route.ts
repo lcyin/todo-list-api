@@ -6,6 +6,7 @@ import { validate } from '../middleware/validation';
 import { authenticateToken } from '../middleware/auth.middleware';
 import { registerSchema, loginSchema } from '../schemas/auth.schema';
 import { z } from 'zod';
+import { pool } from '../config/database';
 
 // Validation schemas for auth-specific endpoints
 const updateProfileSchema = z.object({
@@ -56,7 +57,7 @@ const verifyTokenSchema = z.object({
 const router = Router();
 
 // Initialize dependencies
-const userRepository = new UserRepository();
+const userRepository = new UserRepository(pool);
 const authService = new AuthService(userRepository);
 const authController = new AuthController(authService);
 
