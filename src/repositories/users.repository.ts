@@ -1,5 +1,4 @@
 import { Pool } from "pg";
-import bcrypt from "bcryptjs";
 import { UserWithPassword, User } from "../schemas/auth.schema";
 
 import logger from "../config/logger";
@@ -146,21 +145,12 @@ export class UserRepository {
    */
   async updateUser(
     id: string,
-    updates: Partial<CreateUserData>
+    updates: Pick<CreateUserData, "email" | "firstName" | "lastName">
   ): Promise<User | null> {
     try {
-      const existingUser = await this.findById(id);
-      if (!existingUser) {
-        return null;
-      }
+      const { email, firstName, lastName } = updates;
 
-      const { email, firstName, lastName } = existingUser;
-
-      const updateValues = [
-        updates.firstName || firstName,
-        updates.lastName || lastName,
-        updates.email || email,
-      ];
+      const updateValues = [firstName, lastName, email];
 
       const query = `
         UPDATE users 
@@ -197,6 +187,28 @@ export class UserRepository {
       throw {
         type: ErrorCode.DATABASE_ERROR,
         message: "Failed to update user",
+      };
+    }
+  }
+
+  async changePassword(id: string, newHashedPassword: string): Promise<void> {
+    try {
+      // const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+      const query = `
+        UPDATE users 
+        SET password = $1, updated_at = CURRENT_TIMESTAMP
+        WHERE id = $2
+      `;
+
+      await this.db.query(query, [newHashedPassword, id]);
+
+      logger.info(`User password changed successfully: ${id}`);
+    } catch (error) {
+      logger.error("Database error changing user password:", error);
+      throw {
+        type: ErrorCode.DATABASE_ERROR,
+        message: "Failed to change user password",
       };
     }
   }

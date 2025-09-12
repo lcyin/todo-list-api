@@ -193,9 +193,16 @@ export class AuthService {
           };
         }
       }
-
+      const updateUserValues = {
+        firstName: updates.firstName || existingUser.firstName,
+        lastName: updates.lastName || existingUser.lastName,
+        email: updates.email || existingUser.email,
+      };
       // Update user
-      const updatedUser = await this.userRepository.updateUser(userId, updates);
+      const updatedUser = await this.userRepository.updateUser(
+        userId,
+        updateUserValues
+      );
 
       if (!updatedUser) {
         throw {
@@ -261,9 +268,9 @@ export class AuthService {
           message: "Current password is incorrect",
         };
       }
-
+      const newHashedPassword = await hashPassword(newPassword);
       // Update password
-      await this.userRepository.updateUser(userId, { password: newPassword });
+      await this.userRepository.changePassword(userId, newHashedPassword);
 
       logger.info(`Password changed for user: ${user.email} (${userId})`);
     } catch (error: any) {
