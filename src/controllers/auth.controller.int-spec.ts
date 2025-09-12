@@ -189,42 +189,6 @@ describe("AuthController", () => {
         status: 200,
       });
     });
-
-    // it("should handle missing user in request", async () => {
-    //   // Arrange
-    //   const requestWithoutUser = { ...mockAuthenticatedRequest };
-    //   delete requestWithoutUser.user;
-
-    //   // Act
-    //   await authController.getProfile(
-    //     requestWithoutUser as AuthenticatedRequest,
-    //     mockResponse as Response,
-    //     mockNext
-    //   );
-
-    //   // Assert
-    //   expect(mockNext).toHaveBeenCalledWith({
-    //     type: ErrorCode.AUTHENTICATION_ERROR,
-    //     message: "User not authenticated",
-    //   });
-    //   expect(mockAuthService.getProfile).not.toHaveBeenCalled();
-    // });
-
-    // it("should handle service errors", async () => {
-    //   // Arrange
-    //   const error = new Error("User not found");
-    //   mockAuthService.getProfile.mockRejectedValue(error);
-
-    //   // Act
-    //   await authController.getProfile(
-    //     mockAuthenticatedRequest as AuthenticatedRequest,
-    //     mockResponse as Response,
-    //     mockNext
-    //   );
-
-    //   // Assert
-    //   expect(mockNext).toHaveBeenCalledWith(error);
-    // });
   });
 
   describe("updateProfile", () => {
