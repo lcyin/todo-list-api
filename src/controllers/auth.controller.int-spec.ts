@@ -350,67 +350,6 @@ describe("AuthController", () => {
     });
   });
 
-  //   xdescribe("verifyToken", () => {
-  //     it("should verify token successfully", async () => {
-  //       // Arrange
-  //       mockRequest.body = { token: "valid-jwt-token" };
-  //       mockAuthService.verifyTokenAndGetUser.mockResolvedValue(mockUser);
-
-  //       // Act
-  //       await authController.verifyToken(
-  //         mockRequest as Request,
-  //         mockResponse as Response,
-  //         mockNext
-  //       );
-
-  //       // Assert
-  //       expect(mockAuthService.verifyTokenAndGetUser).toHaveBeenCalledWith(
-  //         "valid-jwt-token"
-  //       );
-  //       expect(mockResponse.json).toHaveBeenCalledWith({
-  //         success: true,
-  //         data: mockUser,
-  //         message: "Token is valid",
-  //       });
-  //     });
-
-  //     it("should handle missing token", async () => {
-  //       // Arrange
-  //       mockRequest.body = {};
-
-  //       // Act
-  //       await authController.verifyToken(
-  //         mockRequest as Request,
-  //         mockResponse as Response,
-  //         mockNext
-  //       );
-
-  //       // Assert
-  //       expect(mockNext).toHaveBeenCalledWith({
-  //         type: ErrorCode.VALIDATION_ERROR,
-  //         message: "Token is required",
-  //       });
-  //       expect(mockAuthService.verifyTokenAndGetUser).not.toHaveBeenCalled();
-  //     });
-
-  //     it("should handle invalid token", async () => {
-  //       // Arrange
-  //       mockRequest.body = { token: "invalid-token" };
-  //       const error = new Error("Invalid token");
-  //       mockAuthService.verifyTokenAndGetUser.mockRejectedValue(error);
-
-  //       // Act
-  //       await authController.verifyToken(
-  //         mockRequest as Request,
-  //         mockResponse as Response,
-  //         mockNext
-  //       );
-
-  //       // Assert
-  //       expect(mockNext).toHaveBeenCalledWith(error);
-  //     });
-  //   });
-
   //   xdescribe("logout", () => {
   //     it("should logout successfully", async () => {
   //       // Act
