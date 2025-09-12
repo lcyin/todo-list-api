@@ -215,8 +215,24 @@ export class AuthController {
         });
         return;
       }
+      const foundUser = await this.authService.getProfile(req.user.id);
+      if (!foundUser) {
+        next({
+          type: ErrorCode.USER_NOT_FOUND,
+          message: "User not found",
+        });
+        return;
+      }
 
-      await this.authService.deleteAccount(req.user.id);
+      const result = await this.authService.deleteAccount(req.user.id);
+
+      if (!result) {
+        next({
+          type: ErrorCode.INTERNAL_SERVER_ERROR,
+          message: "Failed to delete account",
+        });
+        return;
+      }
 
       res.json({
         success: true,

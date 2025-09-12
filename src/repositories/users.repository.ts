@@ -37,6 +37,13 @@ export class UserRepository {
     };
   }
 
+  private mapRowToDeletedUser(row: any): { id: string; deletedAt: string } {
+    return {
+      id: row.id,
+      deletedAt: row.deleted_at,
+    };
+  }
+
   constructor(pool: Pool) {
     this.db = pool;
   }
@@ -243,11 +250,12 @@ export class UserRepository {
       const result = await this.db.query(softDeleteQuery, [id]);
 
       const deleted = result.rows[0];
-      if (deleted) {
-        logger.info(`User soft deleted successfully: ${id}`);
+      if (!deleted) {
+        return null;
       }
+      logger.info(`User soft deleted successfully: ${id}`);
 
-      return deleted;
+      return this.mapRowToDeletedUser(deleted);
     } catch (error) {
       logger.error("Database error deleting user:", error);
       throw {

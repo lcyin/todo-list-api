@@ -158,7 +158,7 @@ describe("AuthController", () => {
     });
   });
 
-  xdescribe("getProfile", () => {
+  describe("getProfile", () => {
     it("should get user profile successfully", async () => {
       // Arrange
       const existingUser = await setupUser(
@@ -326,7 +326,7 @@ describe("AuthController", () => {
   //     });
   //   });
 
-  xdescribe("deleteAccount", () => {
+  describe("deleteAccount", () => {
     it("should delete account successfully", async () => {
       const existingUser = await setupUser(
         "delete-account-test@example.com",
@@ -334,18 +334,17 @@ describe("AuthController", () => {
         "Delete",
         "Me"
       );
-      const path = "/api/auth/delete-account";
+      const path = "/api/auth/account";
       const { body, status } = await request(appInstance)
         .delete(path)
         .set("Authorization", `Bearer ${existingUser.id}`) // Mock auth token with user ID
         .send();
       expect({ body, status }).toEqual({
         body: {
-          data: {
-            id: expect.any(String),
-            email: "delete-account-test@example.com",
-          },
+          success: true,
+          message: "Account deleted successfully",
         },
+        status: 200,
       });
     });
   });
