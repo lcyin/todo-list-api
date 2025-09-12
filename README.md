@@ -1,22 +1,27 @@
 # Todo List API
 
-A RESTful API for managing todos built with Express.js and TypeScript following clean architecture principles.
+A comprehensive RESTful API for managing todos and user authentication built with Express.js and TypeScript following clean architecture principles.
 
 ## Features
 
 - ✅ Full CRUD operations for todos
+- 🔐 **User authentication and authorization (JWT)**
+- 👤 **User registration, login, and profile management**
 - 🏗️ Layered architecture (Controller → Service → Repository)
+- 🗄️ **PostgreSQL database with connection pooling**
+- 📋 **Database migrations and schema management**
 - 🔒 Security middleware (Helmet)
 - 🌐 CORS enabled
-- 📝 Request logging with Morgan
-- 🛡️ **Comprehensive error handling system**
-- ⚠️ **Structured error types with ErrorCode enum**
-- 🎯 **Custom error interfaces and detailed error responses**
+- 📝 **Comprehensive logging with Winston and Morgan**
+- 🛡️ **Advanced error handling system with ErrorCode enum**
+- ⚠️ **Structured error types and detailed error responses**
 - ✨ **Input validation with Zod**
+- 📚 **Auto-generated OpenAPI/Swagger documentation**
 - 🧪 **Automated testing with Jest and Supertest**
-- 📊 TypeScript for type safety
+- 📊 TypeScript for complete type safety
 - 🚀 Hot reload with Nodemon
 - 🔄 Dependency injection pattern
+- 🌍 **Multi-environment configuration (dev/test/prod)**
 
 ## Getting Started
 
@@ -53,93 +58,179 @@ npm start
 ## API Endpoints
 
 ### Health Check
+
 - `GET /health` - Check API status
 
+### Authentication
+
+- `POST /api/auth/register` - Register a new user
+- `POST /api/auth/login` - Login user
+- `POST /api/auth/logout` - Logout user (with token blacklisting)
+- `GET /api/auth/profile` - Get current user profile (requires auth)
+- `PUT /api/auth/profile` - Update user profile (requires auth)
+- `PUT /api/auth/change-password` - Change user password (requires auth)
+- `POST /api/auth/verify-token` - Verify JWT token validity
+
 ### Todos
-- `GET /api/todos` - Get all todos
-- `GET /api/todos/:id` - Get todo by ID
-- `POST /api/todos` - Create new todo
-- `PUT /api/todos/:id` - Update todo
-- `DELETE /api/todos/:id` - Delete todo
+
+- `GET /api/todos` - Get all todos for authenticated user
+- `GET /api/todos/:id` - Get todo by ID (user-owned only)
+- `POST /api/todos` - Create new todo for authenticated user
+- `PUT /api/todos/:id` - Update user's todo
+- `DELETE /api/todos/:id` - Delete user's todo
+
+### Documentation
+
+- `GET /api-docs` - Interactive Swagger UI documentation
+- `GET /api-docs.json` - OpenAPI JSON specification
 
 ### Example Requests
 
-#### Create Todo
+#### Register User
+
+```bash
+curl -X POST http://localhost:3000/api/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "user@example.com",
+    "password": "SecurePass123",
+    "firstName": "John",
+    "lastName": "Doe"
+  }'
+```
+
+#### Login User
+
+```bash
+curl -X POST http://localhost:3000/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "user@example.com",
+    "password": "SecurePass123"
+  }'
+```
+
+#### Create Todo (Authenticated)
+
 ```bash
 curl -X POST http://localhost:3000/api/todos \
   -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
   -d '{"title": "Learn TypeScript", "description": "Study TS fundamentals"}'
 ```
 
-#### Get All Todos
-```bash
-curl http://localhost:3000/api/todos
-```
+#### Get User's Todos
 
-#### Update Todo
 ```bash
-curl -X PUT http://localhost:3000/api/todos/1 \
-  -H "Content-Type: application/json" \
-  -d '{"completed": true}'
+curl -H "Authorization: Bearer YOUR_JWT_TOKEN" \
+  http://localhost:3000/api/todos
 ```
 
 ## Project Structure
 
 ```
 src/
-├── app.ts                     # Main application file
+├── app.ts                     # Main application entry point
+├── config/                    # Configuration files
+│   ├── config.ts             # Application configuration
+│   ├── database.ts           # Database connection & pooling
+│   ├── environment.ts        # Environment variable management
+│   ├── logger.ts             # Winston logger configuration
+│   ├── openapi.ts            # OpenAPI documentation generator
+│   └── openapi-routes.ts     # OpenAPI route documentation
 ├── controllers/               # Request handlers (HTTP layer)
-│   └── todo-controller.ts
+│   ├── auth.controller.ts    # Authentication endpoints
+│   ├── auth.controller.int-spec.ts # Auth integration tests
+│   ├── todos.controller.ts   # Todo CRUD endpoints
+│   └── todos.controller.int-spec.ts # Todo integration tests
 ├── services/                  # Business logic layer
-│   └── todo-service.ts
+│   ├── auth.service.ts       # Authentication & user management
+│   ├── jwt.service.ts        # JWT token management
+│   └── todos.service.ts      # Todo business logic
 ├── repositories/              # Data access layer
-│   └── todo-repository.ts
+│   ├── todos.repository.ts   # Todo database operations
+│   └── users.repository.ts   # User database operations
 ├── middleware/                # Custom middleware
-│   ├── errorHandler.ts        # Centralized error handling middleware
-│   ├── validation.ts          # Zod validation middleware
-│   ├── enums/                 # Error classification enums
-│   │   └── error-code.enum.ts # Centralized error codes
-│   ├── exceptions/            # Custom exception classes (empty)
-│   └── interfaces/            # Error-related interfaces
-│       └── errore-interface.ts # Error details interface
+│   ├── auth.middleware.ts    # JWT authentication middleware
+│   ├── errorHandler.ts       # Centralized error handling
+│   ├── requestLogger.ts      # Request/response logging
+│   ├── validation.ts         # Zod validation middleware
+│   ├── enums/
+│   │   └── error-code.enum.ts # Error classification system
+│   └── interfaces/
+│       └── errore-interface.ts # Error interfaces
 ├── routes/                    # Route definitions
-│   └── todos.ts
+│   ├── auth.route.ts         # Authentication routes
+│   └── todos.route.ts        # Todo routes
 ├── schemas/                   # Zod validation schemas
-│   └── todo.schema.ts
-├── types/                     # TypeScript type definitions
-│   └── todo-route.ts
-└── interfaces/                # TypeScript interfaces (empty)
+│   ├── auth.schema.ts        # Authentication validation
+│   └── todos.schema.ts       # Todo validation
+├── interfaces/                # TypeScript interfaces
+│   ├── auth.interface.ts     # Authentication types
+│   └── todos.interface.ts    # Todo types
+├── scripts/                   # Utility scripts
+│   ├── migrate.ts            # Database migration runner
+│   └── generate-openapi.ts   # OpenAPI documentation generator
+├── test/                      # Test setup and utilities
+│   └── setup/
+│       └── test-db-connection.ts # Test database configuration
+├── components/                # Reusable components
+│   ├── users.component.ts    # User management component
+│   └── users.component.int-spec.ts # User component tests
+├── utils/                     # Utility functions
+│   └── throw-custom-error.helper.ts # Error helper utilities
+├── domain/                    # Domain layer (future use)
+│   └── ports/                # Port interfaces for clean architecture
+└── validation/                # Additional validation utilities
+
+migrations/                    # Database migration files
+├── 001_create_todos_table.sql # Initial todos table
+├── 002_create_users_table.sql # Users table with authentication
+├── 003_add_user_id_to_todos.sql # Link todos to users
+└── 004_add_delete_at_users.sql # Soft delete for users
+
+docs/                          # Documentation
+├── README.md                 # Zod to OpenAPI documentation
+├── ZOD_OPENAPI_GUIDE.md     # OpenAPI generation guide
+└── openapi.json             # Generated OpenAPI specification
+
+schemas/                      # External schema files (if any)
+logs/                         # Application log files
+├── app.log                  # General application logs
+├── app-YYYY-MM-DD.log      # Daily rotating logs
+├── exceptions.log           # Exception logs
+└── rejections.log           # Promise rejection logs
 ```
 
 ### Architecture
 
-This project follows a **layered architecture** pattern with **input validation** and **structured error handling**:
+This project follows a **clean architecture** pattern with **comprehensive authentication**, **multi-layer validation**, and **advanced error handling**:
 
-1. **Controllers** - Handle HTTP requests and responses, throw structured errors
-2. **Services** - Contain business logic, validate business rules
-3. **Repositories** - Manage data access and storage
-4. **Middleware** - Handle validation, centralized error handling, and security
-5. **Schemas** - Define input validation rules with Zod
-6. **Types/Interfaces** - Define TypeScript contracts
-7. **Error Management** - Centralized error codes, custom error interfaces, and structured error responses
-
-## Sample Data
-
-The application comes with pre-loaded sample todos for testing:
-
-1. **Learn Node.js** - Study Node.js fundamentals (incomplete)
-2. **Build a REST API** - Use Express.js to create a robust API (complete)
+1. **Controllers** - Handle HTTP requests/responses, authentication, and structured error throwing
+2. **Services** - Contain business logic, user management, and JWT token handling
+3. **Repositories** - Manage PostgreSQL database operations with connection pooling
+4. **Middleware** - Handle authentication, validation, error handling, and logging
+5. **Schemas** - Define input/output validation with Zod and OpenAPI generation
+6. **Interfaces** - Define TypeScript contracts for type safety
+7. **Error Management** - Centralized error codes, custom interfaces, and structured responses
+8. **Authentication System** - JWT-based auth with user registration, login, and profile management
+9. **Database Layer** - PostgreSQL with migrations, connection pooling, and environment isolation
+10. **Documentation** - Auto-generated OpenAPI/Swagger docs from Zod schemas
 
 ## Development Guidelines
 
 When adding new features:
 
-1. **Create types** in `src/types/` for any new data structures
-2. **Define validation schemas** in `src/schemas/` using Zod
-3. **Add repository methods** in `src/repositories/` for data access
-4. **Implement business logic** in `src/services/`
-5. **Create controller methods** in `src/controllers/` for HTTP handling
-6. **Define routes** in `src/routes/` with validation middleware and wire up dependencies
+1. **Create interfaces** in `src/interfaces/` for any new data structures
+2. **Define validation schemas** in `src/schemas/` using Zod for both validation and OpenAPI generation
+3. **Add repository methods** in `src/repositories/` for database operations
+4. **Implement business logic** in `src/services/` with proper error handling
+5. **Create controller methods** in `src/controllers/` for HTTP handling and authentication checks
+6. **Define routes** in `src/routes/` with validation middleware and authentication
+7. **Add integration tests** in `*.int-spec.ts` files for full API testing
+8. **Update OpenAPI documentation** via Zod schema annotations
+9. **Consider user authorization** for multi-user data access patterns
+10. **Add database migrations** for schema changes in `migrations/` directory
 
 ## Input Validation with Zod
 
@@ -365,6 +456,13 @@ Tests:       5 passed, 5 total
 - `npm run test:watch` - Run tests in watch mode for development
 - `npm run test:coverage` - Run tests with coverage report
 - `npm run test:verbose` - Run tests with detailed output
+- `npm run migrate` - Run database migrations for development
+- `npm run migrate:test` - Run database migrations for test environment
+- `npm run migrate:prod` - Run database migrations for production
+- `npm run migrate:status` - Check migration status
+- `npm run test:db` - Test database connection
+- `npm run openapi:generate` - Generate OpenAPI documentation
+- `npm run docs:generate` - Alias for OpenAPI generation
 - `npm run logs` - View today's application logs in real-time
 - `npm run logs:error` - View error logs (exceptions and rejections)
 - `npm run logs:all` - View all log files in real-time
@@ -375,38 +473,55 @@ Tests:       5 passed, 5 total
 ### ✅ Completed Features
 
 - [x] **Input validation with Zod** - Comprehensive request validation with schemas
-- [x] Type-safe validation middleware with proper error handling
-- [x] Request body, parameters, and query validation
+- [x] **Type-safe validation middleware** with proper error handling
+- [x] **Request body, parameters, and query validation**
+- [x] **Proper error types and custom exceptions** - Structured error handling with ErrorCode enum
+- [x] **Request/response logging middleware** - Comprehensive logging with Winston and Morgan
+- [x] **Automated testing with Jest and Supertest** - Integration tests for API response validation
+- [x] **PostgreSQL database integration** - Full PostgreSQL support with connection pooling
+- [x] **Database migrations and seeding** - Automated migration system with tracking
+- [x] **Environment-based configuration** - Separate databases for development, test, and production
+- [x] **User authentication and authorization (JWT)** - Complete auth system with registration/login
+- [x] **User profile management** - Update profile, change password, token verification
+- [x] **Auto-generated OpenAPI/Swagger documentation** - Generated from Zod schemas
+- [x] **Multi-user todo system** - User-specific todos with proper authorization
+- [x] **Comprehensive logging system** - Winston with daily rotation and request tracking
 
-### Immediate Improvements
+### 🚧 In Progress
 
-- [x] **Implement proper error types and custom exceptions** - Structured error handling with ErrorCode enum and CustomError interface
-- [x] **Add request/response logging middleware** - Comprehensive logging with Winston, request tracking, and structured logs
-- [x] **Set up automated testing with Jest and Supertest** - Integration tests for API response shape validation and endpoint testing
+- [ ] **Advanced user management** - Email verification, password reset, account recovery
+- [ ] **Todo sharing and collaboration** - Share todos between users, team workspaces
+- [ ] **Enhanced todo features** - Categories, tags, due dates, priorities, attachments
 
-### Database Integration
+### 📋 Planned Features
 
-- [x] **Replace in-memory storage with PostgreSQL** - Full PostgreSQL integration with connection pooling
-- [x] **Add database migrations and seeding** - Automated migration system with tracking
-- [x] **Implement connection pooling and error handling** - Environment-specific pool configurations
-- [x] **Environment-based database configuration** - Separate databases for development, test, and production
+#### API Enhancements
+- [ ] **Pagination for large datasets** - Implement offset/limit and cursor-based pagination
+- [ ] **Advanced filtering and sorting** - Filter by date, status, user, with complex queries
+- [ ] **Search functionality** - Full-text search across todo titles and descriptions
+- [ ] **Bulk operations** - Bulk create, update, delete todos
+- [ ] **API versioning** - Version management for backward compatibility
 
-### Advanced Features
+#### Security & Performance
+- [ ] **Rate limiting and request throttling** - Protect against abuse and DoS attacks
+- [ ] **API key authentication** - Alternative auth method for service-to-service calls
+- [ ] **Input sanitization** - XSS and injection protection
+- [ ] **Caching strategy (Redis)** - Cache frequently accessed data
+- [ ] **Database query optimization** - Indexes, query analysis, performance monitoring
 
-- [ ] Add authentication and authorization (JWT)
-- [ ] Implement pagination for large datasets
-- [ ] Add filtering and sorting capabilities
-- [ ] Create API documentation with Swagger/OpenAPI
-- [ ] Add rate limiting and request throttling
-- [ ] Implement caching strategy (Redis)
+#### DevOps & Production
+- [ ] **Docker containerization** - Multi-stage builds for development and production
+- [ ] **CI/CD pipeline** - Automated testing, building, and deployment
+- [ ] **Health checks and metrics** - Application monitoring and observability
+- [ ] **Load balancing** - Scale horizontally with multiple instances
+- [ ] **Backup and disaster recovery** - Automated database backups
 
-### DevOps & Production
-
-- [ ] Add Docker containerization
-- [ ] Set up CI/CD pipeline
-- [ ] Add monitoring and logging (Winston, Morgan)
-- [ ] Implement health checks and metrics
-- [ ] Add environment-specific configurations
+#### Advanced Features
+- [ ] **Real-time updates** - WebSocket support for live todo updates
+- [ ] **Notification system** - Email/push notifications for todo reminders
+- [ ] **Mobile app integration** - REST API optimizations for mobile clients
+- [ ] **Third-party integrations** - Calendar sync, Slack notifications, etc.
+- [ ] **Analytics and reporting** - User activity, todo completion statistics
 
 ## Environment Variables
 
@@ -419,6 +534,111 @@ Tests:       5 passed, 5 total
 - `DB_PASSWORD` - Database password
 - `DB_SSL` - Enable SSL for database connection
 - `LOG_LEVEL` - Logging level (debug/info/error)
+- `JWT_SECRET` - Secret key for JWT token signing
+- `JWT_EXPIRES_IN` - JWT token expiration time (default: 24h)
+- `JWT_REFRESH_SECRET` - Secret key for refresh tokens (optional)
+- `BCRYPT_ROUNDS` - BCrypt hashing rounds (default: 12)
+
+## Authentication & Security Features
+
+The application implements a comprehensive JWT-based authentication system with enterprise-grade security features.
+
+### Authentication Flow
+
+1. **User Registration**: Create account with email, password, and profile information
+2. **Login**: Authenticate with email/password, receive JWT token
+3. **Token-based Access**: Include JWT token in Authorization header for protected routes
+4. **Profile Management**: Update user information and change passwords
+5. **Token Verification**: Validate token integrity and expiration
+6. **Logout**: Token blacklisting for secure logout (if implemented)
+
+### Security Features
+
+#### Password Security
+- **BCrypt Hashing**: Industry-standard password hashing with configurable rounds
+- **Password Strength Requirements**: Minimum 8 characters, uppercase, lowercase, and numbers
+- **Secure Password Changes**: Require current password verification for changes
+
+#### JWT Token Management
+- **Configurable Expiration**: Set token lifetime (default 24 hours)
+- **Secret Key Protection**: Environment-based JWT secret configuration
+- **Token Validation**: Comprehensive token verification middleware
+- **Authorization Headers**: Standard Bearer token authentication
+
+#### Data Protection
+- **Input Validation**: Comprehensive Zod schema validation for all auth endpoints
+- **SQL Injection Prevention**: Parameterized queries with PostgreSQL
+- **XSS Protection**: Input sanitization and validation
+- **CORS Configuration**: Controlled cross-origin resource sharing
+
+#### User Data Management
+- **Unique Email Constraints**: Database-level uniqueness enforcement
+- **Profile Updates**: Secure user information modification
+- **Data Validation**: Email format, name length, and type validation
+- **Error Handling**: Secure error responses without information leakage
+
+### Authentication Endpoints
+
+#### Registration
+```bash
+POST /api/auth/register
+{
+  "email": "user@example.com",
+  "password": "SecurePass123",
+  "firstName": "John",
+  "lastName": "Doe"
+}
+```
+
+#### Login
+```bash
+POST /api/auth/login
+{
+  "email": "user@example.com", 
+  "password": "SecurePass123"
+}
+```
+
+#### Profile Management
+```bash
+# Get current user profile
+GET /api/auth/profile
+Authorization: Bearer <jwt_token>
+
+# Update profile
+PUT /api/auth/profile  
+Authorization: Bearer <jwt_token>
+{
+  "firstName": "Jane",
+  "email": "jane@example.com"
+}
+
+# Change password
+PUT /api/auth/change-password
+Authorization: Bearer <jwt_token>
+{
+  "currentPassword": "OldPass123",
+  "newPassword": "NewSecurePass456"
+}
+```
+
+### Protected Route Access
+
+All todo endpoints require authentication:
+
+```bash
+# Example authenticated request
+curl -H "Authorization: Bearer <your_jwt_token>" \
+     -H "Content-Type: application/json" \
+     http://localhost:3000/api/todos
+```
+
+### User-Todo Relationship
+
+- **User Isolation**: Each user can only access their own todos
+- **Automatic Association**: New todos are automatically linked to the authenticated user
+- **Database Constraints**: Foreign key relationships ensure data integrity
+- **Authorization Checks**: Middleware verifies user ownership for all operations
 
 ## Environment Configuration Strategy
 
@@ -618,6 +838,19 @@ npm run migrate:status      # View executed and pending migrations
 
 ### Database Schema
 
+#### Users Table
+```sql
+CREATE TABLE users (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    email VARCHAR(255) UNIQUE NOT NULL,
+    password VARCHAR(255) NOT NULL,
+    first_name VARCHAR(100) NOT NULL,
+    last_name VARCHAR(100) NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+```
+
 #### Todos Table
 ```sql
 CREATE TABLE todos (
@@ -625,16 +858,20 @@ CREATE TABLE todos (
     title VARCHAR(200) NOT NULL,
     description TEXT,
     completed BOOLEAN DEFAULT FALSE,
+    user_id UUID REFERENCES users(id) ON DELETE CASCADE,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 ```
 
-#### Features
-- **UUID Primary Keys**: Uses PostgreSQL's `gen_random_uuid()` for unique IDs
+#### Database Features
+- **UUID Primary Keys**: Uses PostgreSQL's `gen_random_uuid()` for unique, secure IDs
 - **Automatic Timestamps**: `created_at` and `updated_at` managed by database triggers
-- **Performance Indexes**: Optimized queries on `completed` and `created_at` columns
+- **Foreign Key Relationships**: Todos linked to users with CASCADE delete
+- **Performance Indexes**: Optimized queries on `email`, `user_id`, `completed`, and timestamp columns
 - **Data Validation**: Database-level constraints ensure data integrity
+- **Email Uniqueness**: Database-enforced unique constraint on user emails
+- **User Data Protection**: Cascading deletes ensure no orphaned todos
 
 ### Database Setup Instructions
 
