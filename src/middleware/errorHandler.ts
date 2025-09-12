@@ -37,7 +37,22 @@ export const errorHandler = (
       errorMessage = err.message;
       break;
     case ErrorCode.TODO_NOT_FOUND:
+    case ErrorCode.USER_NOT_FOUND:
       statusCode = 404;
+      errorMessage = err.message;
+      break;
+    case ErrorCode.AUTHENTICATION_ERROR:
+    case ErrorCode.UNAUTHORIZED:
+      statusCode = 401;
+      errorMessage = err.message;
+      break;
+    case ErrorCode.FORBIDDEN:
+      statusCode = 403;
+      errorMessage = err.message;
+      break;
+    case ErrorCode.USER_ALREADY_EXISTS:
+    case ErrorCode.INVALID_CREDENTIALS:
+      statusCode = 400;
       errorMessage = err.message;
       break;
     case ErrorCode.DATABASE_ERROR:
