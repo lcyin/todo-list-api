@@ -10,9 +10,7 @@ import {
 import logger from "../config/logger";
 
 export class AuthController {
-  constructor(private authService: AuthService) {
-    this.authService = authService;
-  }
+  constructor(private readonly authService: AuthService) {}
 
   /**
    * Register a new user

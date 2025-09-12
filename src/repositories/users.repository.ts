@@ -12,8 +12,6 @@ export interface CreateUserData {
 }
 
 export class UserRepository {
-  private readonly db: Pool;
-
   private mapRowToUser(row: any): User {
     return {
       id: row.id,
@@ -44,9 +42,7 @@ export class UserRepository {
     };
   }
 
-  constructor(pool: Pool) {
-    this.db = pool;
-  }
+  constructor(private readonly db: Pool) {}
 
   /**
    * Create a new user with hashed password
