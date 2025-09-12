@@ -117,58 +117,62 @@ describe("AuthController", () => {
     });
   });
 
-  //   xdescribe("login", () => {
-  //     it("should login user successfully", async () => {
-  //       // Arrange
-  //       mockRequest.body = {
-  //         email: "test@example.com",
-  //         password: "password123",
-  //       };
-  //       mockAuthService.login.mockResolvedValue(mockAuthResult);
+  describe("login", () => {
+    it("should login user successfully", async () => {
+      const existingUser = await setupUser(
+        "test@example.com",
+        "Password@123",
+        "John",
+        "Doe"
+      );
+      const path = "/api/auth/login";
+      const payload = {
+        email: "test@example.com",
+        password: "Password@123",
+      };
+      const { body, status } = await request(appInstance)
+        .post(path)
+        .send(payload);
+      expect({ body, status }).toEqual({
+        body: {
+          data: {
+            token: expect.any(String),
+            user: {
+              createdAt: expect.any(String),
+              email: "test@example.com",
+              firstName: "John",
+              id: expect.any(String),
+              lastName: "Doe",
+              updatedAt: expect.any(String),
+            },
+          },
+          message: "Login successful",
+          success: true,
+        },
+        status: 200,
+      });
+    });
 
-  //       // Act
-  //       await authController.login(
-  //         mockRequest as Request,
-  //         mockResponse as Response,
-  //         mockNext
-  //       );
+    //   it("should handle login errors", async () => {
+    //     // Arrange
+    //     mockRequest.body = {
+    //       email: "test@example.com",
+    //       password: "wrongpassword",
+    //     };
+    //     const error = new Error("Invalid credentials");
+    //     mockAuthService.login.mockRejectedValue(error);
 
-  //       // Assert
-  //       expect(mockAuthService.login).toHaveBeenCalledWith({
-  //         email: "test@example.com",
-  //         password: "password123",
-  //       });
-  //       expect(mockResponse.json).toHaveBeenCalledWith({
-  //         success: true,
-  //         data: {
-  //           user: mockUser,
-  //           token: "mock-jwt-token",
-  //         },
-  //         message: "Login successful",
-  //       });
-  //       expect(mockNext).not.toHaveBeenCalled();
-  //     });
+    //     // Act
+    //     await authController.login(
+    //       mockRequest as Request,
+    //       mockResponse as Response,
+    //       mockNext
+    //     );
 
-  //     it("should handle login errors", async () => {
-  //       // Arrange
-  //       mockRequest.body = {
-  //         email: "test@example.com",
-  //         password: "wrongpassword",
-  //       };
-  //       const error = new Error("Invalid credentials");
-  //       mockAuthService.login.mockRejectedValue(error);
-
-  //       // Act
-  //       await authController.login(
-  //         mockRequest as Request,
-  //         mockResponse as Response,
-  //         mockNext
-  //       );
-
-  //       // Assert
-  //       expect(mockNext).toHaveBeenCalledWith(error);
-  //     });
-  //   });
+    //     // Assert
+    //     expect(mockNext).toHaveBeenCalledWith(error);
+    //   });
+  });
 
   //   xdescribe("getProfile", () => {
   //     it("should get user profile successfully", async () => {
