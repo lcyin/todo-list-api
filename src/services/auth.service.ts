@@ -282,7 +282,7 @@ export class AuthService {
   /**
    * Delete user account
    */
-  async deleteAccount(userId: string): Promise<void> {
+  async deleteAccount(userId: string) {
     try {
       const deleted = await this.userRepository.deleteUser(userId);
 
@@ -294,6 +294,7 @@ export class AuthService {
       }
 
       logger.info(`User account deleted: ${userId}`);
+      return deleted;
     } catch (error: any) {
       if (error.type) {
         throw error; // Re-throw custom errors

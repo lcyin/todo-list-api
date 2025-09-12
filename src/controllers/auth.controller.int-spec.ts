@@ -326,42 +326,29 @@ describe("AuthController", () => {
   //     });
   //   });
 
-  //   xdescribe("deleteAccount", () => {
-  //     it("should delete account successfully", async () => {
-  //       // Arrange
-  //       mockAuthService.deleteAccount.mockResolvedValue(undefined);
-
-  //       // Act
-  //       await authController.deleteAccount(
-  //         mockAuthenticatedRequest as AuthenticatedRequest,
-  //         mockResponse as Response,
-  //         mockNext
-  //       );
-
-  //       // Assert
-  //       expect(mockAuthService.deleteAccount).toHaveBeenCalledWith(mockUser.id);
-  //       expect(mockResponse.json).toHaveBeenCalledWith({
-  //         success: true,
-  //         message: "Account deleted successfully",
-  //       });
-  //     });
-
-  //     it("should handle service errors", async () => {
-  //       // Arrange
-  //       const error = new Error("Failed to delete account");
-  //       mockAuthService.deleteAccount.mockRejectedValue(error);
-
-  //       // Act
-  //       await authController.deleteAccount(
-  //         mockAuthenticatedRequest as AuthenticatedRequest,
-  //         mockResponse as Response,
-  //         mockNext
-  //       );
-
-  //       // Assert
-  //       expect(mockNext).toHaveBeenCalledWith(error);
-  //     });
-  //   });
+  xdescribe("deleteAccount", () => {
+    it("should delete account successfully", async () => {
+      const existingUser = await setupUser(
+        "delete-account-test@example.com",
+        "password123",
+        "Delete",
+        "Me"
+      );
+      const path = "/api/auth/delete-account";
+      const { body, status } = await request(appInstance)
+        .delete(path)
+        .set("Authorization", `Bearer ${existingUser.id}`) // Mock auth token with user ID
+        .send();
+      expect({ body, status }).toEqual({
+        body: {
+          data: {
+            id: expect.any(String),
+            email: "delete-account-test@example.com",
+          },
+        },
+      });
+    });
+  });
 
   //   xdescribe("verifyToken", () => {
   //     it("should verify token successfully", async () => {

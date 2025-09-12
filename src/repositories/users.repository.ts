@@ -204,14 +204,29 @@ export class UserRepository {
   /**
    * Delete user by ID
    */
-  async deleteUser(id: string): Promise<boolean> {
+  async deleteUser(
+    id: string
+  ): Promise<{ id: string; deletedAt: string } | null> {
     try {
-      const query = "DELETE FROM users WHERE id = $1";
-      const result = await this.db.query(query, [id]);
+      const foundUserQuery = `SELECT * FROM users WHERE id = $1`;
+      const foundUserResult = await this.db.query(foundUserQuery, [id]);
+      const foundUser = foundUserResult.rows[0];
+      if (!foundUser) {
+        return null;
+      }
 
-      const deleted = result.rowCount !== null && result.rowCount > 0;
+      const softDeleteQuery = `
+        UPDATE users 
+        SET deleted_at = CURRENT_TIMESTAMP 
+        WHERE id = $1
+        RETURNING id, deleted_at;
+      `;
+
+      const result = await this.db.query(softDeleteQuery, [id]);
+
+      const deleted = result.rows[0];
       if (deleted) {
-        logger.info(`User deleted successfully: ${id}`);
+        logger.info(`User soft deleted successfully: ${id}`);
       }
 
       return deleted;
@@ -219,7 +234,7 @@ export class UserRepository {
       logger.error("Database error deleting user:", error);
       throw {
         type: ErrorCode.DATABASE_ERROR,
-        message: "Failed to delete user",
+        message: "Failed to soft delete user",
       };
     }
   }
