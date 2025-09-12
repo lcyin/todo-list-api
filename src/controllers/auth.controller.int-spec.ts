@@ -35,12 +35,15 @@ describe("AuthController", () => {
   describe("register", () => {
     it("should register a new user successfully", async () => {
       const path = "/api/auth/register";
-      const { body, status } = await request(appInstance).post(path).send({
+      const payload = {
         email: "test@example.com",
         password: "Password@123",
         firstName: "John",
         lastName: "Doe",
-      });
+      };
+      const { body, status } = await request(appInstance)
+        .post(path)
+        .send(payload);
       expect({ body, status }).toEqual({
         body: {
           data: {
@@ -61,29 +64,35 @@ describe("AuthController", () => {
       });
     });
 
-    // it("should handle registration errors", async () => {
-    //   // Arrange
-    //   mockRequest.body = {
-    //     email: "test@example.com",
-    //     password: "password123",
-    //     firstName: "John",
-    //     lastName: "Doe",
-    //   };
-    //   const error = new Error("Email already exists");
-    //   mockAuthService.register.mockRejectedValue(error);
-
-    //   // Act
-    //   await authController.register(
-    //     mockRequest as Request,
-    //     mockResponse as Response,
-    //     mockNext
-    //   );
-
-    //   // Assert
-    //   expect(mockNext).toHaveBeenCalledWith(error);
-    //   expect(mockResponse.status).not.toHaveBeenCalled();
-    //   expect(mockResponse.json).not.toHaveBeenCalled();
-    // });
+    describe("should handle registration errors", () => {
+      describe("when email is already in use", () => {
+        it("should return 400 if email is already in use", async () => {
+          const existingUser = await setupUser(
+            "test@example.com",
+            "Password@123",
+            "John",
+            "Doe"
+          );
+          const path = "/api/auth/register";
+          const payload = {
+            email: "test@example.com",
+            password: "Password@123",
+            firstName: "John",
+            lastName: "Doe",
+          };
+          const { body, status } = await request(appInstance)
+            .post(path)
+            .send(payload);
+          expect({ body, status }).toEqual({
+            body: {
+              error: "User with this email already exists",
+              success: false,
+            },
+            status: 400,
+          });
+        });
+      });
+    });
   });
 
   //   xdescribe("login", () => {
@@ -488,3 +497,19 @@ describe("AuthController", () => {
   //     });
   //   });
 });
+
+async function setupUser(
+  email: string,
+  password: string,
+  firstName: string,
+  lastName: string
+) {
+  const query = `
+    INSERT INTO users (email, password, first_name, last_name)
+    VALUES ($1, $2, $3, $4)
+    RETURNING id, email, first_name AS "firstName", last_name AS "lastName", created_at AS "createdAt", updated_at AS "updatedAt"
+  `;
+  const values = [email, password, firstName, lastName];
+  const result = await pool.query(query, values);
+  return result.rows[0];
+}
