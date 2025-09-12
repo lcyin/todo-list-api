@@ -62,6 +62,9 @@ export class UserRepository {
       ]);
 
       const user = result.rows[0];
+      if (!user) {
+        return null;
+      }
       logger.info(`User created successfully: ${email} (${user.id})`);
 
       return this.mapRowToUser(user);
@@ -107,11 +110,10 @@ export class UserRepository {
       `;
 
       const result = await this.db.query(query, [email]);
-
-      if (result.rows.length === 0) {
+      const rawUser = result.rows[0];
+      if (!rawUser) {
         return null;
       }
-      const rawUser = result.rows[0];
       return this.mapRowToUserWithPassword(rawUser);
     } catch (error) {
       logger.error("Database error finding user by email:", error);
@@ -131,21 +133,21 @@ export class UserRepository {
         SELECT 
           id, 
           email, 
-          first_name as "firstName", 
-          last_name as "lastName", 
-          created_at as "createdAt", 
-          updated_at as "updatedAt"
+          first_name, 
+          last_name, 
+          created_at, 
+          updated_at
         FROM users 
         WHERE id = $1
       `;
 
       const result = await this.db.query(query, [id]);
-
-      if (result.rows.length === 0) {
+      const rawUser = result.rows[0];
+      if (!rawUser) {
         return null;
       }
 
-      return result.rows[0] as User;
+      return this.mapRowToUser(rawUser);
     } catch (error) {
       logger.error("Database error finding user by ID:", error);
       throw {
@@ -169,17 +171,19 @@ export class UserRepository {
 
       const query = `
         UPDATE users 
-        SET first_name = $1, last_name = $2, email = $3, updated_at = CURRENT_TIMESTAMP
+        SET first_name = $1, last_name = $2, email = $3
         WHERE id = $4
-        RETURNING id, email, first_name as "firstName", last_name as "lastName", created_at as "createdAt", updated_at as "updatedAt"
+        RETURNING id, email, first_name, last_name, created_at, updated_at
       `;
 
       const result = await this.db.query(query, [...updateValues, id]);
+      const rawUser = result.rows[0];
+      if (!rawUser) {
+        return null;
+      }
+      logger.info(`User updated successfully: ${rawUser.email} (${id})`);
 
-      const user = result.rows[0];
-      logger.info(`User updated successfully: ${user.email} (${id})`);
-
-      return user as User;
+      return this.mapRowToUser(rawUser);
     } catch (error: any) {
       // Handle unique constraint violation (duplicate email)
       if (error.code === "23505" && error.constraint === "users_email_key") {
@@ -260,7 +264,8 @@ export class UserRepository {
     try {
       const query = "SELECT 1 FROM users WHERE email = $1 LIMIT 1";
       const result = await this.db.query(query, [email]);
-      return result.rows.length > 0;
+      const rawUser = result.rows[0];
+      return !!rawUser;
     } catch (error) {
       logger.error("Database error checking email existence:", error);
       throw {
