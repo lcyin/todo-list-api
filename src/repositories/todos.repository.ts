@@ -2,6 +2,7 @@ import { Todo, CreateTodoRequest } from "../interfaces/todos.interface";
 import { pool } from "../config/database";
 import { ErrorCode } from "../middleware/enums/error-code.enum";
 import logger from "../config/logger";
+import { mapDBErrorToAppError } from "../utils/throw-custom-error.helper";
 
 export class TodoRepository {
   private mapRowToTodo(row: any): Todo {
@@ -47,7 +48,10 @@ export class TodoRepository {
     }
   }
 
-  public async getTodoById(id: string, userId?: string): Promise<Todo | undefined> {
+  public async getTodoById(
+    id: string,
+    userId?: string
+  ): Promise<Todo | undefined> {
     try {
       let query: string;
       let params: any[];
@@ -70,7 +74,7 @@ export class TodoRepository {
       }
 
       const result = await pool.query(query, params);
-      
+
       if (result.rows.length > 0) {
         return this.mapRowToTodo(result.rows[0]);
       }
@@ -81,7 +85,10 @@ export class TodoRepository {
     }
   }
 
-  public async createTodo(data: CreateTodoRequest, userId: string): Promise<Todo> {
+  public async createTodo(
+    data: CreateTodoRequest,
+    userId: string
+  ): Promise<Todo> {
     try {
       const query = `
         INSERT INTO todos (title, description, user_id)
@@ -143,13 +150,13 @@ export class TodoRepository {
 
       const updateQuery = `
         UPDATE todos
-        SET ${updateFields.join(', ')}, updated_at = CURRENT_TIMESTAMP
+        SET ${updateFields.join(", ")}, updated_at = CURRENT_TIMESTAMP
         WHERE id = $${parameterIndex++} AND user_id = $${parameterIndex}
         RETURNING id, title, description, completed, user_id, created_at, updated_at
       `;
 
       const updateResult = await pool.query(updateQuery, values);
-      
+
       if (updateResult.rows.length === 0) {
         return null;
       }
@@ -177,11 +184,4 @@ export class TodoRepository {
       throw mapDBErrorToAppError(error);
     }
   }
-}
-
-function mapDBErrorToAppError(error: any): Error {
-  const appError = new Error("Database operation failed");
-  (appError as any).type = ErrorCode.DATABASE_ERROR;
-  (appError as any).originalError = error;
-  return appError;
 }
