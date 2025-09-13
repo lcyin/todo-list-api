@@ -2,8 +2,7 @@ import { Pool } from "pg";
 import { UserWithPassword, User, DeletedUser } from "../schemas/auth.schema";
 
 import logger from "../config/logger";
-import { ErrorCode } from "../middleware/enums/error-code.enum";
-import { mapDBErrorToAppError } from "@/utils/throw-custom-error.helper";
+import { mapDBErrorToAppError } from "../utils/throw-custom-error.helper";
 
 export interface CreateUserData {
   email: string;
