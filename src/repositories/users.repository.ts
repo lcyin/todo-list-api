@@ -3,6 +3,7 @@ import { UserWithPassword, User, DeletedUser } from "../schemas/auth.schema";
 
 import logger from "../config/logger";
 import { ErrorCode } from "../middleware/enums/error-code.enum";
+import { mapDBErrorToAppError } from "@/utils/throw-custom-error.helper";
 
 export interface CreateUserData {
   email: string;
@@ -75,10 +76,7 @@ export class UserRepository {
       // Handle unique constraint violation (duplicate email)
       if (error.code === "23505" && error.constraint === "users_email_key") {
         logger.warn(`Attempt to create user with existing email: ${email}`);
-        throw {
-          type: ErrorCode.DATABASE_ERROR,
-          message: "Email already exists",
-        };
+        throw mapDBErrorToAppError(error, "Email already exists");
       }
 
       // Handle other database errors
@@ -87,10 +85,7 @@ export class UserRepository {
       }
 
       logger.error("Database error creating user:", error);
-      throw {
-        type: ErrorCode.DATABASE_ERROR,
-        message: "Failed to create user",
-      };
+      throw mapDBErrorToAppError(error, "Failed to create user");
     }
   }
 
@@ -120,10 +115,7 @@ export class UserRepository {
       return this.mapRowToUserWithPassword(rawUser);
     } catch (error) {
       logger.error("Database error finding user by email:", error);
-      throw {
-        type: ErrorCode.DATABASE_ERROR,
-        message: "Failed to find user",
-      };
+      throw mapDBErrorToAppError(error, "Failed to find user");
     }
   }
 
@@ -153,10 +145,7 @@ export class UserRepository {
       return this.mapRowToUser(rawUser);
     } catch (error) {
       logger.error("Database error finding user by ID:", error);
-      throw {
-        type: ErrorCode.DATABASE_ERROR,
-        message: "Failed to find user",
-      };
+      throw mapDBErrorToAppError(error, "Failed to find user");
     }
   }
 
@@ -190,10 +179,7 @@ export class UserRepository {
     } catch (error: any) {
       // Handle unique constraint violation (duplicate email)
       if (error.code === "23505" && error.constraint === "users_email_key") {
-        throw {
-          type: ErrorCode.USER_ALREADY_EXISTS,
-          message: "Email already exists",
-        };
+        throw mapDBErrorToAppError(error, "Email already exists");
       }
 
       // Handle other database errors
@@ -202,10 +188,7 @@ export class UserRepository {
       }
 
       logger.error("Database error updating user:", error);
-      throw {
-        type: ErrorCode.DATABASE_ERROR,
-        message: "Failed to update user",
-      };
+      throw mapDBErrorToAppError(error, "Failed to update user");
     }
   }
 
@@ -222,10 +205,7 @@ export class UserRepository {
       logger.info(`User password changed successfully: ${id}`);
     } catch (error) {
       logger.error("Database error changing user password:", error);
-      throw {
-        type: ErrorCode.DATABASE_ERROR,
-        message: "Failed to change user password",
-      };
+      throw mapDBErrorToAppError(error, "Failed to change user password");
     }
   }
 
@@ -252,10 +232,7 @@ export class UserRepository {
       return this.mapRowToDeletedUser(deleted);
     } catch (error) {
       logger.error("Database error deleting user:", error);
-      throw {
-        type: ErrorCode.DATABASE_ERROR,
-        message: "Failed to soft delete user",
-      };
+      throw mapDBErrorToAppError(error, "Failed to soft delete user");
     }
   }
 
@@ -270,10 +247,7 @@ export class UserRepository {
       return !!rawUser;
     } catch (error) {
       logger.error("Database error checking email existence:", error);
-      throw {
-        type: ErrorCode.DATABASE_ERROR,
-        message: "Failed to check email existence",
-      };
+      throw mapDBErrorToAppError(error, "Failed to check email existence");
     }
   }
 }
