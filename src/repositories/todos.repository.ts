@@ -1,6 +1,5 @@
 import { Todo, CreateTodoRequest } from "../interfaces/todos.interface";
 import { pool } from "../config/database";
-import { ErrorCode } from "../middleware/enums/error-code.enum";
 import logger from "../config/logger";
 import { mapDBErrorToAppError } from "../utils/throw-custom-error.helper";
 
@@ -31,7 +30,7 @@ export class TodoRepository {
       return result.rows.map(this.mapRowToTodo);
     } catch (error) {
       logger.error("Error fetching todos", { error, userId });
-      throw mapDBErrorToAppError(error);
+      throw mapDBErrorToAppError(error, "Failed to fetch todos");
     }
   }
 
@@ -54,7 +53,7 @@ export class TodoRepository {
       return undefined;
     } catch (error) {
       logger.error("Error fetching todo by ID", { error, id, userId });
-      throw mapDBErrorToAppError(error);
+      throw mapDBErrorToAppError(error, "Failed to fetch todo by ID");
     }
   }
 
@@ -74,7 +73,7 @@ export class TodoRepository {
       return this.mapRowToTodo(result.rows[0]);
     } catch (error) {
       logger.error("Error creating new todo", { error, userId });
-      throw mapDBErrorToAppError(error);
+      throw mapDBErrorToAppError(error, "Failed to create todo");
     }
   }
 
@@ -110,10 +109,7 @@ export class TodoRepository {
       return this.mapRowToTodo(rawUpdatedTodo);
     } catch (error) {
       logger.error("Error updating todo", { error, id, userId });
-      const dbError = new Error("Failed to update todo");
-      (dbError as any).type = ErrorCode.DATABASE_ERROR;
-      (dbError as any).originalError = error;
-      throw dbError;
+      throw mapDBErrorToAppError(error, "Failed to update todo");
     }
   }
 
@@ -127,7 +123,7 @@ export class TodoRepository {
       return result.rowCount !== null && result.rowCount > 0;
     } catch (error) {
       logger.error("Error deleting todo", { error, id, userId });
-      throw mapDBErrorToAppError(error);
+      throw mapDBErrorToAppError(error, "Failed to delete todo");
     }
   }
 }
