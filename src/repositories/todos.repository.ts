@@ -81,60 +81,33 @@ export class TodoRepository {
   public async updateTodo(
     id: string,
     data: {
-      title?: string;
+      title: string;
       description?: string;
-      completed?: boolean;
+      completed: boolean;
     },
     userId: string
   ): Promise<Todo | null> {
     try {
-      // First check if todo exists and belongs to user
-      const existingTodo = await this.getTodoById(id, userId);
-      if (!existingTodo) {
-        return null;
-      }
-
-      // Build dynamic update query
-      const updateFields: string[] = [];
-      const values: any[] = [];
-      let parameterIndex = 1;
-
-      if (data.title !== undefined) {
-        updateFields.push(`title = $${parameterIndex++}`);
-        values.push(data.title);
-      }
-
-      if (data.description !== undefined) {
-        updateFields.push(`description = $${parameterIndex++}`);
-        values.push(data.description);
-      }
-
-      if (data.completed !== undefined) {
-        updateFields.push(`completed = $${parameterIndex++}`);
-        values.push(data.completed);
-      }
-
-      if (updateFields.length === 0) {
-        return existingTodo; // No updates needed
-      }
-
-      // Add WHERE clause parameters
-      values.push(id, userId);
-
       const updateQuery = `
         UPDATE todos
-        SET ${updateFields.join(", ")}, updated_at = CURRENT_TIMESTAMP
-        WHERE id = $${parameterIndex++} AND user_id = $${parameterIndex}
+        SET title = $1, description = $2, completed = $3
+        WHERE id = $4 AND user_id = $5
         RETURNING id, title, description, completed, user_id, created_at, updated_at
       `;
 
-      const updateResult = await pool.query(updateQuery, values);
+      const updateResult = await pool.query(updateQuery, [
+        data.title,
+        data.description,
+        data.completed,
+        id,
+        userId,
+      ]);
 
-      if (updateResult.rows.length === 0) {
+      const rawUpdatedTodo = updateResult.rows[0];
+      if (!rawUpdatedTodo) {
         return null;
       }
-
-      return this.mapRowToTodo(updateResult.rows[0]);
+      return this.mapRowToTodo(rawUpdatedTodo);
     } catch (error) {
       logger.error("Error updating todo", { error, id, userId });
       const dbError = new Error("Failed to update todo");

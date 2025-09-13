@@ -42,11 +42,11 @@ export class TodoService {
       return `Cannot update a completed todo`;
     }
 
-    const updatedData: any = {};
-    if (data.title !== undefined) updatedData.title = data.title;
-    if (data.description !== undefined)
-      updatedData.description = data.description;
-    if (data.completed !== undefined) updatedData.completed = data.completed;
+    const updatedData = {
+      title: data.title ?? foundTodo.title,
+      description: data.description ?? foundTodo.description,
+      completed: data.completed ?? foundTodo.completed,
+    };
 
     const updatedTodo = await this.todoRepository.updateTodo(
       id,
@@ -54,7 +54,7 @@ export class TodoService {
       userId
     );
     if (!updatedTodo) {
-      return `Todo not found, id: ${id}`;
+      return `Cannot update todo, id: ${id}`;
     }
 
     return updatedTodo;
