@@ -25,20 +25,21 @@ export interface EnvironmentConfig {
 export const loadEnvironmentConfig = (): EnvironmentConfig => {
   const nodeEnv = process.env.NODE_ENV || "development";
 
-  // Load base .env file
-  dotenv.config();
-
-  // Load environment-specific .env file
-  const envFile = `.env.${nodeEnv}`;
+  const envFile =
+    process.env.NODE_ENV === "development" ? ".env" : `.env.${nodeEnv}`;
   const envPath = path.resolve(process.cwd(), envFile);
 
-  try {
-    dotenv.config({ path: envPath, override: true });
-    console.log(`✅ Loaded ${envFile}`);
-  } catch (error) {
-    console.log(`ℹ️  Using base .env file only`);
-  }
+  // Load environment-specific .env file
+  dotenv.config({ path: envPath });
 
+  // Ensure the environment file exists before loading
+  if (!require("fs").existsSync(envPath)) {
+    throw new Error(
+      `Environment file ${envFile} not found at path: ${envPath}`
+    );
+  }
+  dotenv.config({ path: envPath });
+  console.log(`✅ Loaded ${envFile}`);
   const isTest = nodeEnv === "test";
   const isProduction = nodeEnv === "production";
 
