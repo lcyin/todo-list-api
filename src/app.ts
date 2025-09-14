@@ -10,9 +10,17 @@ import { requestLogger, addRequestId } from "./middleware/requestLogger";
 import logger from "./config/logger";
 import { generateOpenAPIDocument } from "./config/openapi";
 import { transports } from "winston";
+import { loadEnvironmentConfig } from "./config/environment";
 
+// Load environment variables
+const envConfig = loadEnvironmentConfig();
+console.log("Environment Configuration:", envConfig);
+const {
+  port,
+  logging: { level, silent },
+  nodeEnv,
+} = envConfig;
 const app: Application = express();
-const PORT = process.env.PORT || 3000;
 
 // Middleware
 app.use(helmet()); // Security headers
@@ -97,17 +105,17 @@ app.use((req: Request, res: Response) => {
 // Global error handler
 app.use(errorHandler);
 
-if (process.env.NODE_ENV !== "test") {
+if (nodeEnv !== "test") {
   // Start server
-  app.listen(PORT, () => {
-    logger.info(`🚀 Server running on port ${PORT}`, {
-      port: PORT,
-      environment: process.env.NODE_ENV || "development",
+  app.listen(port, () => {
+    logger.info(`🚀 Server running on port ${port}`, {
+      port,
+      environment: nodeEnv || "development",
       timestamp: new Date().toISOString(),
     });
-    logger.info(`📚 API Documentation: http://localhost:${PORT}/api-docs`);
-    logger.info(`📖 OpenAPI JSON: http://localhost:${PORT}/api-docs.json`);
-    logger.info(`🏥 Health Check: http://localhost:${PORT}/health`);
+    logger.info(`📚 API Documentation: http://localhost:${port}/api-docs`);
+    logger.info(`📖 OpenAPI JSON: http://localhost:${port}/api-docs.json`);
+    logger.info(`🏥 Health Check: http://localhost:${port}/health`);
   });
 }
 
