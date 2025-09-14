@@ -1,8 +1,8 @@
 import jwt from "jsonwebtoken";
 import { JwtPayload } from "../interfaces/auth.interface";
-import { config } from "../config/config";
+import { envConfig } from "../config/config";
 import logger from "../config/logger";
-
+const { jwt: config } = envConfig;
 function mapJWTConfig() {
   const secret = config.jwtSecret;
   const expiresIn = config.jwtExpiresIn || "24h";

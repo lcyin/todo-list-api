@@ -9,11 +9,8 @@ import { errorHandler } from "./middleware/errorHandler";
 import { requestLogger, addRequestId } from "./middleware/requestLogger";
 import logger from "./config/logger";
 import { generateOpenAPIDocument } from "./config/openapi";
-import { transports } from "winston";
-import { loadEnvironmentConfig } from "./config/environment";
+import { envConfig } from "./config/config";
 
-// Load environment variables
-const envConfig = loadEnvironmentConfig();
 console.log("Environment Configuration:", envConfig);
 const {
   port,

@@ -1,9 +1,6 @@
 import winston from "winston";
 import DailyRotateFile from "winston-daily-rotate-file";
-import { loadEnvironmentConfig } from "./environment";
-
-// Load environment configuration
-const env = loadEnvironmentConfig();
+import { envConfig } from "./config";
 
 // Define log levels
 const logLevels = {
@@ -26,11 +23,11 @@ const logColors = {
 winston.addColors(logColors);
 
 // Environment-specific configuration
-const isProduction = env.nodeEnv === "production";
-const isTest = env.nodeEnv === "test";
-const isDevelopment =
-  env.nodeEnv === "development" || !env.nodeEnv;
-console.log("Logger initialized in", env.nodeEnv, "mode", {
+const { nodeEnv } = envConfig;
+const isDevelopment = nodeEnv === "development";
+const isProduction = nodeEnv === "production";
+const isTest = nodeEnv === "test";
+console.log("Logger initialized in", nodeEnv, "mode", {
   isDevelopment,
   isProduction,
   isTest,
@@ -45,7 +42,7 @@ const errorFormat = winston.format((info) => {
       stack: info.stack,
     };
   }
-  
+
   // Handle error objects in metadata
   if (info.error) {
     if (info.error instanceof Error) {
@@ -58,7 +55,7 @@ const errorFormat = winston.format((info) => {
       };
     }
   }
-  
+
   return info;
 });
 
@@ -96,12 +93,12 @@ const getTransports = () => {
           winston.format.printf((info) => {
             const { timestamp, level, message, ...meta } = info;
             let output = `${timestamp} ${level}: ${message}`;
-            
+
             // Show detailed metadata including errors
             if (Object.keys(meta).length > 0) {
               output += "\n" + JSON.stringify(meta, null, 2);
             }
-            
+
             return output;
           })
         ),

@@ -1,6 +1,6 @@
 import { Pool, PoolConfig } from "pg";
 import logger from "./logger";
-import { config as envConfig } from "./environment";
+import { envConfig } from "./config";
 
 interface DatabaseConfig {
   host: string;
