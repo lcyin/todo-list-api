@@ -39,7 +39,7 @@ describe("AuthController", () => {
     const query = `DELETE FROM users;`;
     return pool.query(query);
   });
-  describe("register", () => {
+  describe("POST /auth/register", () => {
     it("should register a new user successfully", async () => {
       const path = "/auth/register";
       const payload = {
@@ -119,7 +119,7 @@ describe("AuthController", () => {
     });
   });
 
-  describe("login", () => {
+  describe("POST /auth/login", () => {
     it("should login user successfully", async () => {
       await setupUser("test@example.com", "Password@123", "John", "Doe");
       const path = "/auth/login";
@@ -151,7 +151,7 @@ describe("AuthController", () => {
     });
   });
 
-  describe("getProfile", () => {
+  describe("GET /auth/profile", () => {
     it("should get user profile successfully", async () => {
       // Arrange
       const existingUser = await setupUser(
@@ -184,7 +184,7 @@ describe("AuthController", () => {
     });
   });
 
-  describe("updateProfile", () => {
+  describe("PUT /auth/profile", () => {
     it("should update user profile successfully", async () => {
       const existingUser = await setupUser(
         "test@example.com",
@@ -319,7 +319,7 @@ describe("AuthController", () => {
   //     });
   //   });
 
-  describe("deleteAccount", () => {
+  describe("DELETE /auth/account", () => {
     it("should delete account successfully", async () => {
       const existingUser = await setupUser(
         "delete-account-test@example.com",
