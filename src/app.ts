@@ -59,8 +59,8 @@ app.get("/api-docs.json", (req: Request, res: Response) => {
 });
 
 // Routes
-app.use("/api/auth", authRoutes);
-app.use("/api/todos", todoRoutes);
+app.use("/auth", authRoutes);
+app.use("/todos", todoRoutes);
 
 // Health check endpoint
 app.get("/health", (req: Request, res: Response) => {
