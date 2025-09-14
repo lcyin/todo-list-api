@@ -44,23 +44,17 @@ export const loadEnvironmentConfig = (): EnvironmentConfig => {
 
   return {
     nodeEnv,
-    port: parseInt(process.env.PORT || (isTest ? "3001" : "3000")),
+    port: parseInt(process.env.PORT || "3000"),
     database: {
       host: process.env.DB_HOST || "localhost",
       port: parseInt(process.env.DB_PORT || "5432"),
-      name:
-        process.env.DB_NAME ||
-        (isTest
-          ? "todo_list_test"
-          : isProduction
-          ? "todo_list_prod"
-          : "todo_list"),
+      name: process.env.DB_NAME || "todo_list-test",
       user: process.env.DB_USER || "postgres",
       password: process.env.DB_PASSWORD || "",
-      ssl: process.env.DB_SSL === "true" || isProduction,
+      ssl: process.env.DB_SSL === "true" || false,
     },
     logging: {
-      level: process.env.LOG_LEVEL || (isTest ? "error" : "debug"),
+      level: process.env.LOG_LEVEL || "error",
       silent: isTest && process.env.JEST_VERBOSE !== "true",
     },
     test: {
