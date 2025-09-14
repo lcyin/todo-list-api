@@ -33,11 +33,11 @@ describe("TodoController API Response Shape Tests", () => {
     return pool.query(query);
   });
 
-  describe("GET /api/todos", () => {
+  describe("GET /todos", () => {
     it("should return correct response shape for getAllTodos", async () => {
       const { user } = await setupTodos(pool);
       const { body, status } = await request(appInstance)
-        .get("/api/todos")
+        .get("/todos")
         .set({
           Authorization: `Bearer ${user.id}`,
         });
@@ -95,13 +95,13 @@ describe("TodoController API Response Shape Tests", () => {
     });
   });
 
-  describe("GET /api/todos/:id", () => {
+  describe("GET /todos/:id", () => {
     it("should return correct response shape for getTodoById", async () => {
       const {
         todos: [todo1],
         user,
       } = await setupTodos(pool);
-      const path = "/api/todos/:id".replace(":id", todo1.id);
+      const path = "/todos/:id".replace(":id", todo1.id);
       const { body, status } = await request(appInstance)
         .get(path)
         .set({
@@ -130,7 +130,7 @@ describe("TodoController API Response Shape Tests", () => {
     });
   });
 
-  describe("POST /api/todos", () => {
+  describe("POST /todos", () => {
     it("should return correct response shape for createTodo", async () => {
       const user = await setupUser(
         `test-${uuidv4()}@example.com`,
@@ -145,7 +145,7 @@ describe("TodoController API Response Shape Tests", () => {
       };
 
       const { body, status } = await request(appInstance)
-        .post("/api/todos")
+        .post("/todos")
         .set({
           Authorization: `Bearer ${user.id}`,
         })
@@ -173,7 +173,7 @@ describe("TodoController API Response Shape Tests", () => {
     });
   });
 
-  describe("PUT /api/todos/:id", () => {
+  describe("PUT /todos/:id", () => {
     it("should return correct response shape for updateTodo", async () => {
       const {
         todos: [todo1],
@@ -184,7 +184,7 @@ describe("TodoController API Response Shape Tests", () => {
         description: "This todo has been updated",
         completed: true,
       };
-      const path = "/api/todos/:id".replace(":id", todo1.id);
+      const path = "/todos/:id".replace(":id", todo1.id);
       const response = await request(appInstance)
         .put(path)
         .set({
@@ -208,13 +208,13 @@ describe("TodoController API Response Shape Tests", () => {
     });
   });
 
-  describe("DELETE /api/todos/:id", () => {
+  describe("DELETE /todos/:id", () => {
     it("should return correct response shape for deleteTodo", async () => {
       const {
         todos: [todo1],
         user,
       } = await setupTodos(pool);
-      const path = "/api/todos/:id".replace(":id", todo1.id);
+      const path = "/todos/:id".replace(":id", todo1.id);
       const response = await request(appInstance)
         .delete(path)
         .set({

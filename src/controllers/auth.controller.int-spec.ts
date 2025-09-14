@@ -41,7 +41,7 @@ describe("AuthController", () => {
   });
   describe("register", () => {
     it("should register a new user successfully", async () => {
-      const path = "/api/auth/register";
+      const path = "/auth/register";
       const payload = {
         email: "test@example.com",
         password: "Password@123",
@@ -75,7 +75,7 @@ describe("AuthController", () => {
       describe("when email is already in use", () => {
         it("should return 400 if email is already in use", async () => {
           await setupUser("test@example.com", "Password@123", "John", "Doe");
-          const path = "/api/auth/register";
+          const path = "/auth/register";
           const payload = {
             email: "test@example.com",
             password: "Password@123",
@@ -96,7 +96,7 @@ describe("AuthController", () => {
       });
       describe("invalid password", () => {
         it("should return 400 if password is too short", async () => {
-          const path = "/api/auth/register";
+          const path = "/auth/register";
           const payload = {
             email: "test@example.com",
             password: "short",
@@ -122,7 +122,7 @@ describe("AuthController", () => {
   describe("login", () => {
     it("should login user successfully", async () => {
       await setupUser("test@example.com", "Password@123", "John", "Doe");
-      const path = "/api/auth/login";
+      const path = "/auth/login";
       const payload = {
         email: "test@example.com",
         password: "Password@123",
@@ -160,7 +160,7 @@ describe("AuthController", () => {
         "John",
         "Doe"
       );
-      const path = "/api/auth/profile";
+      const path = "/auth/profile";
       const { body, status } = await request(appInstance)
         .get(path)
         .set("Authorization", `Bearer ${existingUser.id}`) // Mock auth token with user ID
@@ -199,7 +199,7 @@ describe("AuthController", () => {
         email: "jane@example.com",
       };
 
-      const path = "/api/auth/profile";
+      const path = "/auth/profile";
       const { body, status } = await request(appInstance)
         .put(path)
         .set("Authorization", `Bearer ${existingUser.id}`) // Mock auth token with user ID
@@ -327,7 +327,7 @@ describe("AuthController", () => {
         "Delete",
         "Me"
       );
-      const path = "/api/auth/account";
+      const path = "/auth/account";
       const { body, status } = await request(appInstance)
         .delete(path)
         .set("Authorization", `Bearer ${existingUser.id}`) // Mock auth token with user ID
