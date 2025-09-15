@@ -1,5 +1,6 @@
 import dotenv from "dotenv";
 import path from "path";
+import { th } from "zod/v4/locales";
 
 export interface EnvironmentConfig {
   nodeEnv: string;
@@ -30,19 +31,16 @@ export interface EnvironmentConfig {
 // Load environment-specific .env files
 const loadEnvironmentConfig = () => {
   const nodeEnv = process.env.NODE_ENV || "development";
-
-  // Load base .env file first
-  dotenv.config();
-
-  // Load environment-specific .env file if it exists
-  const envFile = `.env.${nodeEnv}`;
+  const envFile = nodeEnv === "test" ? ".env.test" : ".env";
   const envPath = path.resolve(process.cwd(), envFile);
 
   try {
     dotenv.config({ path: envPath });
     console.log(`✅ Loaded environment config from ${envFile}`);
   } catch (error) {
-    console.log(`ℹ️  No ${envFile} file found, using base .env and defaults`);
+    throw new Error(
+      `❌ Failed to load ${envFile} file: ${(error as Error).message}`
+    );
   }
 
   // Application configuration
