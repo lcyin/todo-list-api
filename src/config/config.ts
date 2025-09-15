@@ -30,8 +30,17 @@ export interface EnvironmentConfig {
 
 // Load environment-specific .env files
 const loadEnvironmentConfig = () => {
-  const nodeEnv = process.env.NODE_ENV || "development";
-  const envFile = nodeEnv === "test" ? ".env.test" : ".env";
+  const nodeEnv = process.env.NODE_ENV || "local";
+  let envFile = ".env";
+
+  if (nodeEnv === "test") {
+    envFile = ".env.test";
+  }
+
+  if (["development", "production"].includes(nodeEnv)) {
+    envFile = `.env.deploy`;
+  }
+
   const envPath = path.resolve(process.cwd(), envFile);
 
   try {
