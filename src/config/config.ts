@@ -1,6 +1,5 @@
 import dotenv from "dotenv";
 import path from "path";
-import { th } from "zod/v4/locales";
 
 export interface EnvironmentConfig {
   nodeEnv: string;
