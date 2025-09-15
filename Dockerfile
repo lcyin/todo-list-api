@@ -17,6 +17,7 @@ COPY . .
 
 # Build the TypeScript application, remove dev dependencies, and change ownership
 RUN npm run build && \
+    npx tsc src/scripts/migrate.ts --outDir dist/scripts --moduleResolution node --esModuleInterop --target es2020 && \
     npm prune --production && \
     chown -R nodejs:nodejs /app
 

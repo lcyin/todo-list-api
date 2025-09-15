@@ -13,7 +13,7 @@
         "test:verbose": "NODE_ENV=test JEST_VERBOSE=true jest --verbose",
         "migrate": "ts-node src/scripts/migrate.ts",
         "migrate:test": "NODE_ENV=test ts-node src/scripts/migrate.ts",
-        "migrate:prod": "ts-node src/scripts/migrate.ts",
+        "migrate:prod": "node dist/scripts/migrate.js",
         "migrate:status": "ts-node src/scripts/migrate.ts status",
         "test:db": "NODE_ENV=test ts-node src/test/setup/test-db-connection.ts",
         "openapi:generate": "ts-node src/scripts/generate-openapi.ts",
