@@ -29,18 +29,23 @@ export interface EnvironmentConfig {
 
 // Load environment-specific .env files
 const loadEnvironmentConfig = () => {
-  const nodeEnv = process.env.NODE_ENV || "local";
+  // const nodeEnv = process.env.NODE_ENV || "local";
   let envFile = ".env";
-
-  if (nodeEnv === "test") {
-    envFile = ".env.test";
+  switch (process.env.NODE_ENV) {
+    case "development":
+    case "production":
+      envFile = `.env.deploy`;
+      break;
+    case "test":
+      envFile = ".env.test";
+      break;
+    default:
+      throw new Error(
+        `❌ Invalid NODE_ENV value: ${process.env.NODE_ENV}. Must be one of "development", "production", or "test".`
+      );
   }
 
-  if (["development", "production"].includes(nodeEnv)) {
-    envFile = `.env.deploy`;
-  }
-
-  const envPath = path.resolve(process.cwd(), envFile);
+  const envPath = path.resolve(process.cwd(), ".env");
 
   try {
     dotenv.config({ path: envPath });
