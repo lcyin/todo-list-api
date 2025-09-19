@@ -1,22 +1,33 @@
 version: "3.8"
 
 services:
+  app:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_NAME=todo_list
+      - DB_USER=postgres
+      - DB_PASSWORD=password
+      - JWT_SECRET=your-super-secret-jwt-key
+    depends_on:
+      - postgres
+    volumes:
+      - .:/app
+      - /app/node_modules
+
   postgres:
     image: postgres:15-alpine
-    container_name: todo-list-postgres
     environment:
-      POSTGRES_DB: todolist_test
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: password
+      - POSTGRES_DB=todo_list
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=password
     ports:
-      - "25434:5432"
+      - "25433:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d todolist"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
 
 volumes:
   postgres_data:

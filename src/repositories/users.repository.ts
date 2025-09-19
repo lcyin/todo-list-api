@@ -1,0 +1,252 @@
+import { Pool } from "pg";
+import { UserWithPassword, User, DeletedUser } from "../schemas/auth.schema";
+
+import logger from "../config/logger";
+import { mapDBErrorToAppError } from "../utils/throw-custom-error.helper";
+
+export interface CreateUserData {
+  email: string;
+  password: string;
+  firstName: string;
+  lastName: string;
+}
+
+export class UserRepository {
+  private mapRowToUser(row: any): User {
+    return {
+      id: row.id,
+      email: row.email,
+      firstName: row.first_name,
+      lastName: row.last_name,
+      createdAt: row.created_at,
+      updatedAt: row.updated_at,
+    };
+  }
+
+  private mapRowToUserWithPassword(row: any): UserWithPassword {
+    return {
+      id: row.id,
+      email: row.email,
+      password: row.password,
+      firstName: row.first_name,
+      lastName: row.last_name,
+      createdAt: row.created_at,
+      updatedAt: row.updated_at,
+    };
+  }
+
+  private mapRowToDeletedUser(row: any): DeletedUser {
+    return {
+      id: row.id,
+      deletedAt: row.deleted_at,
+    };
+  }
+
+  constructor(private readonly db: Pool) {}
+
+  /**
+   * Create a new user with hashed password
+   */
+  async createUser(userData: CreateUserData) {
+    const { email, password, firstName, lastName } = userData;
+
+    try {
+      const query = `
+        INSERT INTO users (email, password, first_name, last_name)
+        VALUES ($1, $2, $3, $4)
+        RETURNING id, email, first_name, last_name, created_at, updated_at
+      `;
+
+      const result = await this.db.query(query, [
+        email,
+        password,
+        firstName,
+        lastName,
+      ]);
+
+      const user = result.rows[0];
+      if (!user) {
+        return null;
+      }
+      logger.info(`User created successfully: ${email} (${user.id})`);
+
+      return this.mapRowToUser(user);
+    } catch (error: any) {
+      // Handle unique constraint violation (duplicate email)
+      if (error.code === "23505" && error.constraint === "users_email_key") {
+        logger.warn(`Attempt to create user with existing email: ${email}`);
+        throw mapDBErrorToAppError(error, "Email already exists");
+      }
+
+      // Handle other database errors
+      if (error.type) {
+        throw error; // Re-throw custom errors
+      }
+
+      logger.error("Database error creating user:", error);
+      throw mapDBErrorToAppError(error, "Failed to create user");
+    }
+  }
+
+  /**
+   * Find user by email (including password for authentication)
+   */
+  async findByEmail(email: string) {
+    try {
+      const query = `
+        SELECT 
+          id, 
+          email,
+          password,
+          first_name, 
+          last_name, 
+          created_at, 
+          updated_at
+        FROM users 
+        WHERE email = $1
+      `;
+
+      const result = await this.db.query(query, [email]);
+      const rawUser = result.rows[0];
+      if (!rawUser) {
+        return null;
+      }
+      return this.mapRowToUserWithPassword(rawUser);
+    } catch (error) {
+      logger.error("Database error finding user by email:", error);
+      throw mapDBErrorToAppError(error, "Failed to find user");
+    }
+  }
+
+  /**
+   * Find user by ID (without password)
+   */
+  async findById(id: string) {
+    try {
+      const query = `
+        SELECT 
+          id, 
+          email, 
+          first_name, 
+          last_name, 
+          created_at, 
+          updated_at
+        FROM users 
+        WHERE id = $1
+      `;
+
+      const result = await this.db.query(query, [id]);
+      const rawUser = result.rows[0];
+      if (!rawUser) {
+        return null;
+      }
+
+      return this.mapRowToUser(rawUser);
+    } catch (error) {
+      logger.error("Database error finding user by ID:", error);
+      throw mapDBErrorToAppError(error, "Failed to find user");
+    }
+  }
+
+  /**
+   * Update user information
+   */
+  async updateUser(
+    id: string,
+    updates: Pick<CreateUserData, "email" | "firstName" | "lastName">
+  ) {
+    try {
+      const { email, firstName, lastName } = updates;
+
+      const updateValues = [firstName, lastName, email];
+
+      const query = `
+        UPDATE users 
+        SET first_name = $1, last_name = $2, email = $3
+        WHERE id = $4
+        RETURNING id, email, first_name, last_name, created_at, updated_at
+      `;
+
+      const result = await this.db.query(query, [...updateValues, id]);
+      const rawUser = result.rows[0];
+      if (!rawUser) {
+        return null;
+      }
+      logger.info(`User updated successfully: ${rawUser.email} (${id})`);
+
+      return this.mapRowToUser(rawUser);
+    } catch (error: any) {
+      // Handle unique constraint violation (duplicate email)
+      if (error.code === "23505" && error.constraint === "users_email_key") {
+        throw mapDBErrorToAppError(error, "Email already exists");
+      }
+
+      // Handle other database errors
+      if (error.type) {
+        throw error; // Re-throw custom errors
+      }
+
+      logger.error("Database error updating user:", error);
+      throw mapDBErrorToAppError(error, "Failed to update user");
+    }
+  }
+
+  async changePassword(id: string, newHashedPassword: string) {
+    try {
+      const query = `
+        UPDATE users 
+        SET password = $1, updated_at = CURRENT_TIMESTAMP
+        WHERE id = $2
+      `;
+
+      await this.db.query(query, [newHashedPassword, id]);
+
+      logger.info(`User password changed successfully: ${id}`);
+    } catch (error) {
+      logger.error("Database error changing user password:", error);
+      throw mapDBErrorToAppError(error, "Failed to change user password");
+    }
+  }
+
+  /**
+   * Delete user by ID
+   */
+  async softDeleteUser(id: string) {
+    try {
+      const softDeleteQuery = `
+        UPDATE users 
+        SET deleted_at = CURRENT_TIMESTAMP 
+        WHERE id = $1
+        RETURNING id, deleted_at;
+      `;
+
+      const result = await this.db.query(softDeleteQuery, [id]);
+
+      const deleted = result.rows[0];
+      if (!deleted) {
+        return null;
+      }
+      logger.info(`User soft deleted successfully: ${id}`);
+
+      return this.mapRowToDeletedUser(deleted);
+    } catch (error) {
+      logger.error("Database error deleting user:", error);
+      throw mapDBErrorToAppError(error, "Failed to soft delete user");
+    }
+  }
+
+  /**
+   * Check if email exists
+   */
+  async emailExists(email: string) {
+    try {
+      const query = "SELECT 1 FROM users WHERE email = $1 LIMIT 1";
+      const result = await this.db.query(query, [email]);
+      const rawUser = result.rows[0];
+      return !!rawUser;
+    } catch (error) {
+      logger.error("Database error checking email existence:", error);
+      throw mapDBErrorToAppError(error, "Failed to check email existence");
+    }
+  }
+}
