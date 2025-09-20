@@ -38,6 +38,7 @@ For detailed documentation, see the `docs/` directory:
 - Logging: `docs/logging.md`
 - Docker Strategy: `docs/docker-strategy.md`
 - Testing: `docs/testing.md`
+- Zod OpenAPI Guide: `docs/zod-openapi-guide.md`
 - Development Guidelines: `docs/development-guidelines.md`
 - Input Validation: `docs/input-validation.md`
 - Project Structure: `docs/project-structure.md`
