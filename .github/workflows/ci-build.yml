@@ -1,13 +1,7 @@
-name: Check Build
+name: CI Check Build
 
 on:
-  push:
-    branches:
-      - main
-      - "dev*"
-  pull_request:
-    branches:
-      - main
+  workflow_dispatch: # Allow manual or external triggering
 
 jobs:
   build:

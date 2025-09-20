@@ -1,13 +1,8 @@
-name: CI Tests
+name: CI Check Tests
 
 # Trigger the workflow on every pushes of every branch prefix with dev and pull requests to the main branch
 on:
-  push:
-    branches:
-      - 'dev*'
-  pull_request:
-    branches:
-      - main
+  workflow_dispatch: # Allow manual or external triggering
 
 jobs:
   test:
@@ -38,7 +33,7 @@ jobs:
       - name: Use Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: "18"
       - run: npm ci
       - run: npm run build
       - name: Wait for Postgres

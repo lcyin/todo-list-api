@@ -1,0 +1,16 @@
+name: Check PR
+
+on:
+  push:
+    branches:
+      - "dev*"
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  check-build:
+    uses: ./.github/workflows/ci-build.yml
+
+  check-tests:
+    uses: ./.github/workflows/ci-tests.yml
