@@ -195,7 +195,7 @@ app.get('/api-docs.json', (req, res) => {
 npm run docs:generate
 ```
 
-This creates `docs/openapi.json` with your complete API specification.
+This creates `openapi.json` with your complete API specification.
 
 ### 2. View Documentation
 
@@ -297,7 +297,7 @@ Add these scripts to your `package.json`:
   "scripts": {
     "docs:generate": "ts-node src/scripts/generate-openapi.ts",
     "docs:serve": "npm start",
-    "docs:validate": "swagger-codegen validate -i docs/openapi.json"
+    "docs:validate": "swagger-codegen validate -i openapi.json"
   }
 }
 ```

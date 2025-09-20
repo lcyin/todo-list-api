@@ -13,7 +13,7 @@ function generateOpenAPISpec() {
     console.log("🔄 Generating OpenAPI specification...");
 
     const openApiDocument = generateOpenAPIDocument();
-    const outputPath = join(__dirname, "../../docs/openapi.json");
+    const outputPath = join(__dirname, "../../openapi.json");
 
     writeFileSync(outputPath, JSON.stringify(openApiDocument, null, 2));
 
