@@ -2,6 +2,7 @@ name: CI Check Build
 
 on:
   workflow_dispatch: # Allow manual or external triggering
+  workflow_call: # Allow this workflow to be reused by other workflows
 
 jobs:
   build:

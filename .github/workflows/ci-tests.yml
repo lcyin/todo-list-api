@@ -3,6 +3,7 @@ name: CI Check Tests
 # Trigger the workflow on every pushes of every branch prefix with dev and pull requests to the main branch
 on:
   workflow_dispatch: # Allow manual or external triggering
+  workflow_call: # Allow this workflow to be reused by other workflows
 
 jobs:
   test:
