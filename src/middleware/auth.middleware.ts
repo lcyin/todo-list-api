@@ -1,7 +1,7 @@
-import { Request, Response, NextFunction } from 'express';
-import { JwtService } from '../services/jwt.service';
-import { ErrorCode } from './enums/error-code.enum';
-import logger from '../config/logger';
+import { Request, Response, NextFunction } from "express";
+import { JwtService } from "../services/jwt.service";
+import { ErrorCode } from "./enums/error-code.enum";
+import logger from "../loggers/logger";
 
 export interface AuthenticatedRequest extends Request {
   user?: {
@@ -26,22 +26,22 @@ export const authenticateToken = async (
 ): Promise<void> => {
   try {
     const authHeader = req.headers.authorization;
-    
+
     // Check if Authorization header exists
     if (!authHeader) {
       next({
         type: ErrorCode.AUTHENTICATION_ERROR,
-        message: 'Authorization header is required',
+        message: "Authorization header is required",
         statusCode: 401,
       });
       return;
     }
 
     // Check if it follows Bearer token format
-    if (!authHeader.startsWith('Bearer ')) {
+    if (!authHeader.startsWith("Bearer ")) {
       next({
         type: ErrorCode.AUTHENTICATION_ERROR,
-        message: 'Authorization header must be in Bearer token format',
+        message: "Authorization header must be in Bearer token format",
         statusCode: 401,
       });
       return;
@@ -49,11 +49,11 @@ export const authenticateToken = async (
 
     // Extract token from "Bearer <token>"
     const token = authHeader.substring(7);
-    
+
     if (!token) {
       next({
         type: ErrorCode.AUTHENTICATION_ERROR,
-        message: 'Token is required',
+        message: "Token is required",
         statusCode: 401,
       });
       return;
@@ -64,7 +64,8 @@ export const authenticateToken = async (
     try {
       decodedToken = JwtService.verifyToken(token);
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Token verification failed';
+      const errorMessage =
+        error instanceof Error ? error.message : "Token verification failed";
       next({
         type: ErrorCode.AUTHENTICATION_ERROR,
         message: errorMessage,
@@ -78,19 +79,21 @@ export const authenticateToken = async (
     req.user = {
       id: decodedToken.userId,
       email: decodedToken.email,
-      firstName: '', // These would be fetched from database in a complete implementation
-      lastName: '',
+      firstName: "", // These would be fetched from database in a complete implementation
+      lastName: "",
       createdAt: new Date(),
       updatedAt: new Date(),
     };
 
-    logger.debug(`User authenticated: ${decodedToken.email} (${decodedToken.userId})`);
+    logger.debug(
+      `User authenticated: ${decodedToken.email} (${decodedToken.userId})`
+    );
     next();
   } catch (error) {
-    logger.error('Authentication middleware error:', error);
+    logger.error("Authentication middleware error:", error);
     next({
       type: ErrorCode.INTERNAL_SERVER_ERROR,
-      message: 'Authentication failed',
+      message: "Authentication failed",
       statusCode: 500,
     });
   }
@@ -108,15 +111,15 @@ export const optionalAuth = async (
 ): Promise<void> => {
   try {
     const authHeader = req.headers.authorization;
-    
+
     // If no auth header, continue without authentication
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
       next();
       return;
     }
 
     const token = authHeader.substring(7);
-    
+
     if (!token) {
       next();
       return;
@@ -128,19 +131,21 @@ export const optionalAuth = async (
       req.user = {
         id: decodedToken.userId,
         email: decodedToken.email,
-        firstName: '',
-        lastName: '',
+        firstName: "",
+        lastName: "",
         createdAt: new Date(),
         updatedAt: new Date(),
       };
       logger.debug(`Optional auth - User authenticated: ${decodedToken.email}`);
     } catch (error) {
-      logger.debug('Optional auth - Invalid token provided, continuing without authentication');
+      logger.debug(
+        "Optional auth - Invalid token provided, continuing without authentication"
+      );
     }
 
     next();
   } catch (error) {
-    logger.error('Optional authentication middleware error:', error);
+    logger.error("Optional authentication middleware error:", error);
     next();
   }
 };

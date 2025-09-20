@@ -1,4 +1,4 @@
-import logger from "../config/logger";
+import logger from "../loggers/logger";
 import bcrypt from "bcryptjs";
 
 /**

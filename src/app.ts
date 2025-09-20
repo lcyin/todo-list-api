@@ -7,7 +7,7 @@ import todoRoutes from "./routes/todos.route";
 import { authRoutes } from "./routes/auth.route";
 import { errorHandler } from "./middleware/errorHandler";
 import { requestLogger, addRequestId } from "./middleware/requestLogger";
-import logger from "./config/logger";
+import logger from "./loggers/logger";
 import { generateOpenAPIDocument } from "./config/openapi";
 import { envConfig } from "./config/config";
 

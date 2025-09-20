@@ -1,7 +1,7 @@
 import jwt from "jsonwebtoken";
 import { JwtPayload } from "../interfaces/auth.interface";
 import { envConfig } from "../config/config";
-import logger from "../config/logger";
+import logger from "../loggers/logger";
 const { jwt: config } = envConfig;
 function mapJWTConfig() {
   const secret = config.jwtSecret;

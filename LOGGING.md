@@ -147,7 +147,7 @@ jq '.method == "POST"' logs/app-2025-09-08.log
 
 ### Logger Configuration
 ```typescript
-// src/config/logger.ts
+// src/loggers/logger.ts
 
 // Console transport (runtime logs)
 const consoleTransport = new winston.transports.Console({

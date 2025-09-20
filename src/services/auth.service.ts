@@ -5,7 +5,7 @@ import {
 import { JwtService } from "./jwt.service";
 import { User, UserWithPassword } from "../schemas/auth.schema";
 import { ErrorCode } from "../middleware/enums/error-code.enum";
-import logger from "../config/logger";
+import logger from "../loggers/logger";
 import { hashPassword, verifyPassword } from "../components/users.component";
 
 export interface RegisterData {

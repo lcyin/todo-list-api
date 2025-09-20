@@ -1,6 +1,6 @@
 import { Todo, CreateTodoRequest } from "../interfaces/todos.interface";
 import { pool } from "../config/database";
-import logger from "../config/logger";
+import logger from "../loggers/logger";
 import { mapDBErrorToAppError } from "../utils/throw-custom-error.helper";
 
 export class TodoRepository {
