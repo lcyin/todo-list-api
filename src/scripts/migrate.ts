@@ -1,7 +1,7 @@
 import { pool } from "../config/database";
 import * as fs from "fs";
 import * as path from "path";
-import logger from "../config/logger";
+import logger from "../loggers/logger";
 import dotenv from "dotenv";
 
 // Load environment variables from .env file

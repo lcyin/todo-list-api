@@ -7,7 +7,7 @@ import {
   UserResponseSchema,
   UserSchema,
 } from "../schemas/auth.schema";
-import logger from "../config/logger";
+import logger from "../loggers/logger";
 
 export class AuthController {
   constructor(private readonly authService: AuthService) {}

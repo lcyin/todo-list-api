@@ -1,7 +1,7 @@
 import { Pool } from "pg";
 import { UserWithPassword, User, DeletedUser } from "../schemas/auth.schema";
 
-import logger from "../config/logger";
+import logger from "../loggers/logger";
 import { mapDBErrorToAppError } from "../utils/throw-custom-error.helper";
 
 export interface CreateUserData {
