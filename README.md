@@ -2,6 +2,29 @@
 
 A comprehensive RESTful API for managing todos and user authentication built with Express.js and TypeScript following clean architecture principles.
 
+## Quick Start
+
+1. Clone the repository:
+
+   ```bash
+   git clone <repo-url>
+   cd todo-list-api
+   ```
+
+2. Install dependencies:
+
+   ```bash
+   npm install
+   ```
+
+3. Start the development server:
+
+   ```bash
+   npm run dev
+   ```
+
+The server will run on `http://localhost:3000`
+
 ## Getting Started
 
 ### Prerequisites
@@ -13,6 +36,7 @@ A comprehensive RESTful API for managing todos and user authentication built wit
 
 1. Clone the repository
 2. Install dependencies:
+
    ```bash
    npm install
    ```
@@ -20,6 +44,7 @@ A comprehensive RESTful API for managing todos and user authentication built wit
 ### Development
 
 Start the development server:
+
 ```bash
 npm run dev
 ```
@@ -29,6 +54,7 @@ The server will run on `http://localhost:3000`
 ### Production
 
 Build and start the production server:
+
 ```bash
 npm run build
 npm start
