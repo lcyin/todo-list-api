@@ -2,14 +2,21 @@
 
 A comprehensive RESTful API for managing todos and user authentication built with Express.js and TypeScript following clean architecture principles.
 
-## Quick Start
+## Local Setup
 
-1. Clone the repository:
+### Prerequisites
 
-   ```bash
-   git clone <repo-url>
-   cd todo-list-api
-   ```
+- Node.js and npm installed
+- PostgreSQL installed and running
+
+### Steps
+
+1. Create a PostgreSQL database instance (default config):
+   - Database: `todo_list`
+   - User: `postgres`
+   - Password: `password`
+   - Host: `localhost`
+   - Port: `5432`
 
 2. Install dependencies:
 
@@ -17,61 +24,31 @@ A comprehensive RESTful API for managing todos and user authentication built wit
    npm install
    ```
 
-3. Start the development server:
+3. Run database migrations:
+
+   ```bash
+   npm run migrate
+   ```
+
+4. Start the application:
 
    ```bash
    npm run dev
    ```
 
-The server will run on `http://localhost:3000`
+5. The API will be available at [http://localhost:3000](http://localhost:3000)
 
-## Getting Started
+## Getting Started with Docker Compose
 
-### Prerequisites
+1. Ensure Docker is installed on your system.
 
-- Node.js (v16 or higher)
-- npm or yarn
-- Docker & Docker Compose
-
-### Database Setup
-
-You can quickly set up the PostgreSQL database using Docker Compose:
-
-```bash
-docker-compose up db
-```
-
-This will start the database container defined in `docker-compose.yml`.
-
-For manual setup or more details, see [Postgres Setup](docs/postgres-setup.md) and [Postgres Migration](docs/postgres-migration.md).
-
-### Installation
-
-1. Clone the repository
-2. Install dependencies:
+2. Build and start the application:
 
    ```bash
-   npm install
+   docker-compose up --build
    ```
 
-### Development
-
-Start the development server:
-
-```bash
-npm run dev
-```
-
-The server will run on `http://localhost:3000`
-
-### Production
-
-Build and start the production server:
-
-```bash
-npm run build
-npm start
-```
+3. The API will be available at [http://localhost:3000](http://localhost:3000)
 
 ## References
 
