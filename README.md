@@ -59,3 +59,17 @@ Build and start the production server:
 npm run build
 npm start
 ```
+
+## References
+
+- [API Endpoints](docs/api-endpoints.md)
+- [Authentication Strategy](docs/authentication-strategy.md)
+- [Environment Variables](docs/environment-variables.md)
+- [Error Handling Strategy](docs/error-handling-strategy.md)
+- [Features](docs/features.md)
+- [Input Validation](docs/input-validation.md)
+- [Postgres Migration](docs/postgres-migration.md)
+- [Postgres Setup](docs/postgres-setup.md)
+- [Project Structures](docs/project-structures.md)
+- [Testing Strategy](docs/testing-strategy.md)
+- [Zod OpenAPI Guide](docs/zod-openapi-guide.md)
