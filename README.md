@@ -31,6 +31,19 @@ The server will run on `http://localhost:3000`
 
 - Node.js (v16 or higher)
 - npm or yarn
+- Docker & Docker Compose
+
+### Database Setup
+
+You can quickly set up the PostgreSQL database using Docker Compose:
+
+```bash
+docker-compose up db
+```
+
+This will start the database container defined in `docker-compose.yml`.
+
+For manual setup or more details, see [Postgres Setup](docs/postgres-setup.md) and [Postgres Migration](docs/postgres-migration.md).
 
 ### Installation
 
